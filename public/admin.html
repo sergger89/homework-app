@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Панель администратора</title>
+<link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="topbar">
+    <h1>🛠️ Панель администратора</h1>
+    <div style="display:flex; gap:8px">
+      <button onclick="window.location.href='/parent.html'">Просмотр прогресса</button>
+      <button onclick="logout()">Выйти</button>
+    </div>
+  </div>
+  <div class="container">
+    <div class="tabs">
+      <button id="tabUsers" class="active">Пользователи</button>
+      <button id="tabCreate">Создать аккаунт</button>
+      <button id="tabAccess">Доступ родителей к детям</button>
+    </div>
+
+    <div id="viewUsers"></div>
+
+    <div id="viewCreate" style="display:none">
+      <h3>Создать новый аккаунт</h3>
+      <form id="createUserForm" style="display:flex; flex-direction:column; gap:10px; max-width:360px">
+        <label class="muted">Роль
+          <select id="newRole" style="width:100%; padding:8px; border-radius:8px; border:1px solid #dfe3ec">
+            <option value="parent">Родитель</option>
+            <option value="child">Ребёнок</option>
+            <option value="admin">Администратор</option>
+          </select>
+        </label>
+        <label class="muted">Имя (отображается в интерфейсе)
+          <input type="text" id="newDisplayName" required style="width:100%; padding:8px; border-radius:8px; border:1px solid #dfe3ec" />
+        </label>
+        <label class="muted">Логин
+          <input type="text" id="newUsername" required style="width:100%; padding:8px; border-radius:8px; border:1px solid #dfe3ec" />
+        </label>
+        <label class="muted">Пароль
+          <input type="text" id="newPassword" required style="width:100%; padding:8px; border-radius:8px; border:1px solid #dfe3ec" />
+        </label>
+        <label class="muted" id="parentPickerWrap" style="display:none">
+          Сразу привязать к родителю (необязательно)
+          <select id="parentPicker" style="width:100%; padding:8px; border-radius:8px; border:1px solid #dfe3ec">
+            <option value="">— не привязывать —</option>
+          </select>
+        </label>
+        <button type="submit" class="submit-btn">Создать</button>
+      </form>
+      <p id="createResult" class="muted"></p>
+    </div>
+
+    <div id="viewAccess" style="display:none">
+      <h3>Кто из родителей видит какого ребёнка</h3>
+      <p class="muted">Отметьте галочками, каким родителям открыт доступ к прогрессу каждого ребёнка.
+        Родитель, создавший аккаунт ребёнка, получает доступ автоматически.</p>
+      <div id="accessMatrix"></div>
+    </div>
+  </div>
+<script src="/js/common.js"></script>
+<script>
+requireRole('admin');
+let allUsers = [];
+let allLinks = [];
+
+function switchTab(tab) {
+  document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+  document.getElementById('viewUsers').style.display = 'none';
+  document.getElementById('viewCreate').style.display = 'none';
+  document.getElementById('viewAccess').style.display = 'none';
+  if (tab === 'users') { document.getElementById('tabUsers').classList.add('active'); document.getElementById('viewUsers').style.display = 'block'; renderUsers(); }
+  if (tab === 'create') { document.getElementById('tabCreate').classList.add('active'); document.getElementById('viewCreate').style.display = 'block'; fillParentPicker(); }
+  if (tab === 'access') { document.getElementById('tabAccess').classList.add('active'); document.getElementById('viewAccess').style.display = 'block'; renderAccessMatrix(); }
+}
+document.getElementById('tabUsers').onclick = () => switchTab('users');
+document.getElementById('tabCreate').onclick = () => switchTab('create');
+document.getElementById('tabAccess').onclick = () => switchTab('access');
+
+const ROLE_LABELS = { admin: 'Администратор', parent: 'Родитель', child: 'Ребёнок' };
+
+async function loadAll() {
+  const { users, links } = await api('/api/admin/users');
+  allUsers = users;
+  allLinks = links;
+}
+
+function renderUsers() {
+  const view = document.getElementById('viewUsers');
+  const rows = allUsers.map(u => {
+    const childLinks = u.role === 'child' ? allLinks.filter(l => l.child_id === u.id).map(l => l.parent_name) : [];
+    const extra = u.role === 'child'
+      ? `<div class="muted">Родители: ${childLinks.length ? escapeHtml(childLinks.join(', ')) : '— никто —'}</div>`
+      : '';
+    return `
+      <tr>
+        <td>${escapeHtml(u.display_name)}</td>
+        <td>${ROLE_LABELS[u.role] || u.role}</td>
+        <td>${escapeHtml(u.username)}</td>
+        <td>${extra}</td>
+        <td><button onclick="deleteUser(${u.id}, '${escapeHtml(u.display_name)}')">Удалить</button></td>
+      </tr>`;
+  }).join('');
+  view.innerHTML = `
+    <table class="progress-table">
+      <tr><th>Имя</th><th>Роль</th><th>Логин</th><th>Связи</th><th></th></tr>
+      ${rows}
+    </table>
+  `;
+}
+
+async function deleteUser(id, name) {
+  if (!confirm(`Удалить аккаунт «${name}»? Это действие необратимо.`)) return;
+  try {
+    await api(`/api/admin/users/${id}`, { method: 'DELETE' });
+    await loadAll();
+    renderUsers();
+  } catch (e) {
+    alert('Не удалось удалить (возможно, это ваш собственный аккаунт).');
+  }
+}
+
+function fillParentPicker() {
+  const roleSel = document.getElementById('newRole');
+  const wrap = document.getElementById('parentPickerWrap');
+  const picker = document.getElementById('parentPicker');
+  const parents = allUsers.filter(u => u.role === 'parent');
+  picker.innerHTML = '<option value="">— не привязывать —</option>' +
+    parents.map(p => `<option value="${p.id}">${escapeHtml(p.display_name)}</option>`).join('');
+  function updateVisibility() {
+    wrap.style.display = roleSel.value === 'child' ? 'block' : 'none';
+  }
+  roleSel.onchange = updateVisibility;
+  updateVisibility();
+}
+
+document.getElementById('createUserForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const role = document.getElementById('newRole').value;
+  const displayName = document.getElementById('newDisplayName').value.trim();
+  const username = document.getElementById('newUsername').value.trim();
+  const password = document.getElementById('newPassword').value;
+  const parentId = document.getElementById('parentPicker').value || null;
+  const resultEl = document.getElementById('createResult');
+  try {
+    await api('/api/admin/users', {
+      method: 'POST',
+      body: JSON.stringify({ role, displayName, username, password, parentId: parentId ? Number(parentId) : null }),
+    });
+    resultEl.textContent = `Аккаунт «${displayName}» (${ROLE_LABELS[role]}) создан.`;
+    resultEl.style.color = 'var(--correct)';
+    document.getElementById('createUserForm').reset();
+    await loadAll();
+  } catch (e) {
+    resultEl.textContent = e.data?.error === 'username_taken' ? 'Такой логин уже занят.' : 'Не удалось создать аккаунт.';
+    resultEl.style.color = 'var(--wrong)';
+  }
+});
+
+function renderAccessMatrix() {
+  const parents = allUsers.filter(u => u.role === 'parent');
+  const kids = allUsers.filter(u => u.role === 'child');
+  const el = document.getElementById('accessMatrix');
+  if (parents.length === 0 || kids.length === 0) {
+    el.innerHTML = '<p class="muted">Нужен хотя бы один родитель и один ребёнок.</p>';
+    return;
+  }
+  const linkSet = new Set(allLinks.map(l => `${l.parent_id}:${l.child_id}`));
+  let html = '<table class="progress-table"><tr><th>Ребёнок \\ Родитель</th>' +
+    parents.map(p => `<th>${escapeHtml(p.display_name)}</th>`).join('') + '</tr>';
+  for (const k of kids) {
+    html += `<tr><td>${escapeHtml(k.display_name)}</td>`;
+    for (const p of parents) {
+      const checked = linkSet.has(`${p.id}:${k.id}`) ? 'checked' : '';
+      html += `<td style="text-align:center"><input type="checkbox" ${checked} onchange="toggleAccess(${p.id},${k.id},this.checked)" /></td>`;
+    }
+    html += '</tr>';
+  }
+  html += '</table>';
+  el.innerHTML = html;
+}
+
+async function toggleAccess(parentId, childId, granted) {
+  try {
+    if (granted) {
+      await api('/api/admin/links', { method: 'POST', body: JSON.stringify({ parentId, childId }) });
+    } else {
+      await api('/api/admin/links', { method: 'DELETE', body: JSON.stringify({ parentId, childId }) });
+    }
+    await loadAll();
+  } catch (e) {
+    alert('Не удалось изменить доступ.');
+    await loadAll();
+    renderAccessMatrix();
+  }
+}
+
+(async () => {
+  await loadAll();
+  switchTab('users');
+})();
+</script>
+</body>
+</html>

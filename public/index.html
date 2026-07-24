@@ -38,11 +38,8 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
       errorEl.textContent = 'Неверный логин или пароль';
       return;
     }
-    if (data.user.role === 'parent') {
-      window.location.href = '/parent.html';
-    } else {
-      window.location.href = '/child.html';
-    }
+    const role = data.user.role;
+    window.location.href = role === 'admin' ? '/admin.html' : role === 'parent' ? '/parent.html' : '/child.html';
   } catch (err) {
     errorEl.textContent = 'Ошибка соединения с сервером';
   }
@@ -50,7 +47,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 
 // если уже залогинен - сразу перенаправить
 fetch('/api/me').then(r => r.json()).then(({user}) => {
-  if (user) window.location.href = user.role === 'parent' ? '/parent.html' : '/child.html';
+  if (user) window.location.href = user.role === 'admin' ? '/admin.html' : user.role === 'parent' ? '/parent.html' : '/child.html';
 });
 </script>
 </body>

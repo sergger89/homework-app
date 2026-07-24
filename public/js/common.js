@@ -16,15 +16,22 @@ async function api(url, opts) {
   return data;
 }
 
-async function requireRole(role) {
+async function requireRole(roles) {
+  const allowed = Array.isArray(roles) ? roles : [roles];
   const { user } = await api('/api/me');
   if (!user) {
     window.location.href = '/index.html';
     return;
   }
-  if (user.role !== role) {
-    window.location.href = user.role === 'parent' ? '/parent.html' : '/child.html';
+  if (!allowed.includes(user.role)) {
+    window.location.href = roleHome(user.role);
   }
+}
+
+function roleHome(role) {
+  if (role === 'admin') return '/admin.html';
+  if (role === 'parent') return '/parent.html';
+  return '/child.html';
 }
 
 function logout() {

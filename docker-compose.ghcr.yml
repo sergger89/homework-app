@@ -14,10 +14,9 @@ services:
       - "3000:3000"
     environment:
       SESSION_SECRET: "${SESSION_SECRET:-change-me-to-something-random}"
-      PARENT_USERNAME: "${PARENT_USERNAME:-parent}"
-      PARENT_PASSWORD: "${PARENT_PASSWORD:-changeme}"
-      PARENT_NAME: "${PARENT_NAME:-Родитель}"
-      CHILDREN: '${CHILDREN:-[{"username":"child","password":"changeme","name":"Ребёнок"}]}'
+      ADMIN_USERNAME: "${ADMIN_USERNAME:-admin}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD:-changeme}"
+      ADMIN_NAME: "${ADMIN_NAME:-Администратор}"
     volumes:
       - homework-data:/app/data
 

@@ -9,7 +9,10 @@
 <body>
   <div class="topbar">
     <h1>👨‍👩‍👧 Панель родителя</h1>
-    <button onclick="logout()">Выйти</button>
+    <div style="display:flex; gap:8px">
+      <button id="adminLink" style="display:none" onclick="window.location.href='/admin.html'">Панель администратора</button>
+      <button onclick="logout()">Выйти</button>
+    </div>
   </div>
   <div class="container">
     <select id="childSelect" class="child-select"></select>
@@ -18,6 +21,7 @@
       <button id="tabProgress" class="active">Прогресс</button>
       <button id="tabAssignments">Задания</button>
       <button id="tabImport">Добавить задание</button>
+      <button id="tabChildren">Мои дети</button>
     </div>
 
     <div id="viewProgress"></div>
@@ -27,43 +31,83 @@
         Вставьте сюда JSON с заданиями (его формирует модель по промпту из файла <code>PARSING_PROMPT.md</code>) и нажмите «Импортировать».
       </p>
       <textarea id="importJson" placeholder='{"subject":"math","title":"...","tasks":[...]}'></textarea>
+      <p style="margin-top:10px"><strong>Кому назначить это задание:</strong></p>
+      <div id="importChildrenCheckboxes" class="muted">Загрузка списка детей...</div>
       <div style="margin-top:10px">
         <button class="submit-btn" onclick="importAssignment()">Импортировать</button>
       </div>
       <p id="importResult" class="muted"></p>
     </div>
+    <div id="viewChildren" style="display:none">
+      <h3>Мои дети</h3>
+      <div id="childrenList" class="assignment-list"></div>
+      <h3 style="margin-top:24px">Добавить ребёнка</h3>
+      <form id="addChildForm" style="display:flex; flex-direction:column; gap:10px; max-width:340px">
+        <label class="muted">Имя ребёнка
+          <input type="text" id="newChildName" required style="width:100%; padding:8px; border-radius:8px; border:1px solid #dfe3ec" />
+        </label>
+        <label class="muted">Логин
+          <input type="text" id="newChildUsername" required style="width:100%; padding:8px; border-radius:8px; border:1px solid #dfe3ec" />
+        </label>
+        <label class="muted">Пароль
+          <input type="text" id="newChildPassword" required style="width:100%; padding:8px; border-radius:8px; border:1px solid #dfe3ec" />
+        </label>
+        <button type="submit" class="submit-btn">Создать аккаунт ребёнка</button>
+      </form>
+      <p id="addChildResult" class="muted"></p>
+    </div>
   </div>
 <script src="/js/common.js"></script>
 <script>
-requireRole('parent');
+requireRole(['admin','parent']);
 let children = [];
 let currentChildId = null;
+let myRole = null;
 
 function switchTab(tab) {
   document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
   document.getElementById('viewProgress').style.display = 'none';
   document.getElementById('viewAssignments').style.display = 'none';
   document.getElementById('viewImport').style.display = 'none';
+  document.getElementById('viewChildren').style.display = 'none';
   if (tab === 'progress') { document.getElementById('tabProgress').classList.add('active'); document.getElementById('viewProgress').style.display = 'block'; loadProgress(); }
   if (tab === 'assignments') { document.getElementById('tabAssignments').classList.add('active'); document.getElementById('viewAssignments').style.display = 'block'; loadAssignments(); }
-  if (tab === 'import') { document.getElementById('tabImport').classList.add('active'); document.getElementById('viewImport').style.display = 'block'; }
+  if (tab === 'import') { document.getElementById('tabImport').classList.add('active'); document.getElementById('viewImport').style.display = 'block'; renderImportCheckboxes(); }
+  if (tab === 'children') { document.getElementById('tabChildren').classList.add('active'); document.getElementById('viewChildren').style.display = 'block'; renderChildrenList(); }
 }
 document.getElementById('tabProgress').onclick = () => switchTab('progress');
 document.getElementById('tabAssignments').onclick = () => switchTab('assignments');
 document.getElementById('tabImport').onclick = () => switchTab('import');
+document.getElementById('tabChildren').onclick = () => switchTab('children');
 
 async function init() {
-  const { children: c } = await api('/api/children');
-  children = c;
-  const sel = document.getElementById('childSelect');
-  sel.innerHTML = children.map(ch => `<option value="${ch.id}">${escapeHtml(ch.display_name)}</option>`).join('');
-  currentChildId = children[0]?.id;
-  sel.onchange = () => { currentChildId = Number(sel.value); switchTab('progress'); };
+  const me = await api('/api/me');
+  myRole = me.user.role;
+  if (myRole === 'admin') document.getElementById('adminLink').style.display = 'inline-block';
+
+  await reloadChildren();
   switchTab('progress');
 }
 
+async function reloadChildren() {
+  const { children: c } = await api('/api/children');
+  children = c;
+  const sel = document.getElementById('childSelect');
+  if (children.length === 0) {
+    sel.innerHTML = '<option value="">Пока нет ни одного ребёнка</option>';
+    currentChildId = null;
+    return;
+  }
+  sel.innerHTML = children.map(ch => `<option value="${ch.id}">${escapeHtml(ch.display_name)}</option>`).join('');
+  currentChildId = children[0].id;
+  sel.onchange = () => { currentChildId = Number(sel.value); switchTab('progress'); };
+}
+
 async function loadProgress() {
-  if (!currentChildId) return;
+  if (!currentChildId) {
+    document.getElementById('viewProgress').innerHTML = '<p class="muted">Сначала добавьте ребёнка во вкладке «Мои дети».</p>';
+    return;
+  }
   const { bySubject, recent } = await api(`/api/progress?childId=${currentChildId}`);
   const view = document.getElementById('viewProgress');
   const rows = bySubject.map(s => `
@@ -96,6 +140,10 @@ async function loadProgress() {
 }
 
 async function loadAssignments() {
+  if (!currentChildId) {
+    document.getElementById('viewAssignments').innerHTML = '<p class="muted">Сначала добавьте ребёнка во вкладке «Мои дети».</p>';
+    return;
+  }
   const { assignments } = await api(`/api/assignments?childId=${currentChildId}`);
   const view = document.getElementById('viewAssignments');
   view.innerHTML = assignments.map(a => `
@@ -112,13 +160,36 @@ async function loadAssignments() {
 
 async function deleteAssignment(id) {
   if (!confirm('Удалить это задание вместе с ответами ребёнка?')) return;
-  await api(`/api/assignments/${id}`, { method: 'DELETE' });
-  loadAssignments();
+  try {
+    await api(`/api/assignments/${id}`, { method: 'DELETE' });
+    loadAssignments();
+  } catch (e) {
+    alert('Не удалось удалить: возможно, это задание добавили не вы.');
+  }
+}
+
+function renderImportCheckboxes() {
+  const el = document.getElementById('importChildrenCheckboxes');
+  if (children.length === 0) {
+    el.innerHTML = 'Сначала добавьте хотя бы одного ребёнка во вкладке «Мои дети».';
+    return;
+  }
+  el.innerHTML = children.map(ch => `
+    <label style="display:inline-flex; align-items:center; gap:6px; margin-right:16px">
+      <input type="checkbox" class="import-child-cb" value="${ch.id}" checked /> ${escapeHtml(ch.display_name)}
+    </label>
+  `).join('');
 }
 
 async function importAssignment() {
   const raw = document.getElementById('importJson').value;
   const resultEl = document.getElementById('importResult');
+  const childIds = [...document.querySelectorAll('.import-child-cb:checked')].map(cb => Number(cb.value));
+  if (childIds.length === 0) {
+    resultEl.textContent = 'Выберите хотя бы одного ребёнка.';
+    resultEl.style.color = 'var(--wrong)';
+    return;
+  }
   let parsed;
   try {
     parsed = JSON.parse(raw);
@@ -127,6 +198,7 @@ async function importAssignment() {
     resultEl.style.color = 'var(--wrong)';
     return;
   }
+  parsed.childIds = childIds;
   try {
     await api('/api/assignments/import', { method: 'POST', body: JSON.stringify(parsed) });
     resultEl.textContent = 'Готово! Задание добавлено.';
@@ -137,6 +209,34 @@ async function importAssignment() {
     resultEl.style.color = 'var(--wrong)';
   }
 }
+
+function renderChildrenList() {
+  const el = document.getElementById('childrenList');
+  el.innerHTML = children.map(ch => `
+    <div class="assignment-card" style="cursor:default">
+      <div><strong>${escapeHtml(ch.display_name)}</strong> <span class="muted">(логин: ${escapeHtml(ch.username)})</span></div>
+    </div>
+  `).join('') || '<p class="muted">Пока нет ни одного ребёнка.</p>';
+}
+
+document.getElementById('addChildForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const name = document.getElementById('newChildName').value.trim();
+  const username = document.getElementById('newChildUsername').value.trim();
+  const password = document.getElementById('newChildPassword').value;
+  const resultEl = document.getElementById('addChildResult');
+  try {
+    await api('/api/children', { method: 'POST', body: JSON.stringify({ username, password, displayName: name }) });
+    resultEl.textContent = `Аккаунт для ${name} создан!`;
+    resultEl.style.color = 'var(--correct)';
+    document.getElementById('addChildForm').reset();
+    await reloadChildren();
+    renderChildrenList();
+  } catch (e) {
+    resultEl.textContent = e.data?.error === 'username_taken' ? 'Такой логин уже занят.' : 'Не удалось создать аккаунт.';
+    resultEl.style.color = 'var(--wrong)';
+  }
+});
 
 init();
 </script>

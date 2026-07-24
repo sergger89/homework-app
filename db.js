@@ -8,21 +8,41 @@ if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
 const db = new Database(path.join(DATA_DIR, 'app.db'));
 db.pragma('journal_mode = WAL');
+db.pragma('foreign_keys = ON');
 
 db.exec(`
 CREATE TABLE IF NOT EXISTS users (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   username TEXT UNIQUE NOT NULL,
   password_hash TEXT NOT NULL,
-  role TEXT NOT NULL CHECK(role IN ('parent','child')),
-  display_name TEXT NOT NULL
+  role TEXT NOT NULL CHECK(role IN ('admin','parent','child')),
+  display_name TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- Кто из родителей видит какого ребёнка. Одного ребёнка может видеть несколько
+-- родителей (например, родитель-создатель + доступ, выданный админом вручную).
+CREATE TABLE IF NOT EXISTS parent_child (
+  parent_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  child_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  granted_by TEXT NOT NULL DEFAULT 'admin' CHECK(granted_by IN ('creator','admin')),
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (parent_id, child_id)
 );
 
 CREATE TABLE IF NOT EXISTS assignments (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   subject TEXT NOT NULL,
   title TEXT NOT NULL,
+  created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- Каждое задание явно назначается конкретным детям (выбирает тот, кто его добавил).
+CREATE TABLE IF NOT EXISTS assignment_children (
+  assignment_id INTEGER NOT NULL REFERENCES assignments(id) ON DELETE CASCADE,
+  child_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  PRIMARY KEY (assignment_id, child_id)
 );
 
 CREATE TABLE IF NOT EXISTS tasks (
@@ -44,41 +64,22 @@ CREATE TABLE IF NOT EXISTS submissions (
 );
 `);
 
-function seedUsers() {
+function seedAdmin() {
   const count = db.prepare('SELECT COUNT(*) c FROM users').get().c;
   if (count > 0) return;
 
-  const parentUser = process.env.PARENT_USERNAME || 'parent';
-  const parentPass = process.env.PARENT_PASSWORD || 'changeme';
-  const parentName = process.env.PARENT_NAME || 'Родитель';
+  const username = process.env.ADMIN_USERNAME || 'admin';
+  const password = process.env.ADMIN_PASSWORD || 'changeme';
+  const name = process.env.ADMIN_NAME || 'Администратор';
 
-  const insert = db.prepare(
+  db.prepare(
     'INSERT INTO users (username, password_hash, role, display_name) VALUES (?,?,?,?)'
-  );
-  insert.run(parentUser, bcrypt.hashSync(parentPass, 10), 'parent', parentName);
+  ).run(username, bcrypt.hashSync(password, 10), 'admin', name);
 
-  // CHILDREN='[{"username":"vasya","password":"1234","name":"Вася"}]'
-  let children = [];
-  try {
-    children = JSON.parse(process.env.CHILDREN || '[]');
-  } catch (e) {
-    console.error('Не удалось разобрать CHILDREN из .env, использую значение по умолчанию', e);
-  }
-  if (children.length === 0) {
-    children = [
-      {
-        username: process.env.CHILD_USERNAME || 'child',
-        password: process.env.CHILD_PASSWORD || 'changeme',
-        name: process.env.CHILD_NAME || 'Ребёнок',
-      },
-    ];
-  }
-  for (const c of children) {
-    insert.run(c.username, bcrypt.hashSync(c.password, 10), 'child', c.name);
-  }
-  console.log(`Создан родитель "${parentUser}" и ${children.length} ребёнок/детей.`);
+  console.log(`Создан администратор "${username}". Войдите под этой учёткой и создайте` +
+    ' аккаунты родителей и детей в панели администратора.');
 }
 
-seedUsers();
+seedAdmin();
 
 module.exports = db;
