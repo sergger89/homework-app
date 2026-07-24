@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Мои задания</title>
+<link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="topbar">
+    <h1 id="greeting">📚 Мои задания</h1>
+    <button onclick="logout()">Выйти</button>
+  </div>
+  <div class="container">
+    <div id="list" class="assignment-list"></div>
+  </div>
+<script src="/js/common.js"></script>
+<script>
+requireRole('child');
+
+async function load() {
+  const me = await api('/api/me');
+  document.getElementById('greeting').textContent = `📚 Привет, ${me.user.name}!`;
+
+  const { assignments } = await api('/api/assignments');
+  const list = document.getElementById('list');
+  list.innerHTML = '';
+  if (assignments.length === 0) {
+    list.innerHTML = '<p class="muted">Пока нет заданий. Загляни позже 🙂</p>';
+    return;
+  }
+  assignments.forEach(a => {
+    const pct = a.totalTasks ? Math.round(100 * a.doneTasks / a.totalTasks) : 0;
+    const done = a.totalTasks > 0 && a.doneTasks === a.totalTasks;
+    const div = document.createElement('div');
+    div.className = 'assignment-card';
+    div.onclick = () => window.location.href = `/assignment.html?id=${a.id}`;
+    div.innerHTML = `
+      <div style="flex:1">
+        <span class="subject-badge">${subjectLabel(a.subject)}</span>
+        <div><strong>${escapeHtml(a.title)}</strong></div>
+        <div class="progress-bar"><div style="width:${pct}%"></div></div>
+        <div class="muted">${a.doneTasks} из ${a.totalTasks} выполнено${done ? ' ✅' : ''}</div>
+      </div>
+    `;
+    list.appendChild(div);
+  });
+}
+load();
+</script>
+</body>
+</html>

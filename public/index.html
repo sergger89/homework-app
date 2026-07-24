@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Домашние задания — вход</title>
+<link rel="stylesheet" href="/css/style.css" />
+</head>
+<body class="login-body">
+  <div class="login-card">
+    <h1>📚 Домашние задания</h1>
+    <form id="loginForm">
+      <label>Логин
+        <input type="text" id="username" autocomplete="username" required />
+      </label>
+      <label>Пароль
+        <input type="password" id="password" autocomplete="current-password" required />
+      </label>
+      <button type="submit">Войти</button>
+      <p class="error" id="error"></p>
+    </form>
+  </div>
+<script>
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
+  const errorEl = document.getElementById('error');
+  errorEl.textContent = '';
+  try {
+    const r = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    });
+    const data = await r.json();
+    if (!r.ok) {
+      errorEl.textContent = 'Неверный логин или пароль';
+      return;
+    }
+    if (data.user.role === 'parent') {
+      window.location.href = '/parent.html';
+    } else {
+      window.location.href = '/child.html';
+    }
+  } catch (err) {
+    errorEl.textContent = 'Ошибка соединения с сервером';
+  }
+});
+
+// если уже залогинен - сразу перенаправить
+fetch('/api/me').then(r => r.json()).then(({user}) => {
+  if (user) window.location.href = user.role === 'parent' ? '/parent.html' : '/child.html';
+});
+</script>
+</body>
+</html>

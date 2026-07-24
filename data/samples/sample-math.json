@@ -1,0 +1,28 @@
+{
+  "subject": "math",
+  "title": "Пример: сложение и вычитание",
+  "tasks": [
+    {
+      "type": "open_number",
+      "prompt": "Реши пример: 7 + 5",
+      "correctValue": 12,
+      "tolerance": 0,
+      "explanation": "7 + 5 = 12"
+    },
+    {
+      "type": "choice_single",
+      "prompt": "Сколько будет 9 - 4?",
+      "options": ["3", "4", "5", "6"],
+      "correctIndex": 2,
+      "explanation": "9 - 4 = 5"
+    },
+    {
+      "type": "matching",
+      "prompt": "Сопоставь пример и ответ",
+      "left": ["2 + 2", "10 - 3", "3 + 3"],
+      "right": ["6", "7", "4"],
+      "correctPairs": [[0, 2], [1, 1], [2, 0]],
+      "explanation": null
+    }
+  ]
+}

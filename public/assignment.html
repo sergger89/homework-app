@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Задание</title>
+<link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="topbar">
+    <h1 id="title">Задание</h1>
+    <button onclick="window.location.href='/child.html'">← К списку</button>
+  </div>
+  <div class="container" id="tasks"></div>
+<script src="/js/common.js"></script>
+<script>
+requireRole('child');
+const params = new URLSearchParams(window.location.search);
+const assignmentId = params.get('id');
+
+function render() {
+  api(`/api/assignments/${assignmentId}`).then(({ assignment, tasks }) => {
+    document.getElementById('title').textContent = `${subjectLabel(assignment.subject)} — ${assignment.title}`;
+    const container = document.getElementById('tasks');
+    container.innerHTML = '';
+    tasks.forEach((t, idx) => container.appendChild(renderTask(t, idx)));
+  });
+}
+
+function renderTask(t, idx) {
+  const card = document.createElement('div');
+  card.className = 'task-card';
+  const answered = !!t.submission;
+
+  const promptText = t.type === 'cloze' ? '' : t.prompt;
+  card.innerHTML = `<div class="task-prompt">${idx + 1}. ${escapeHtml(promptText)}</div>`;
+
+  const body = document.createElement('div');
+  card.appendChild(body);
+
+  let getAnswer = () => null;
+
+  if (t.type === 'choice_single') {
+    let selected = answered ? t.submission.answer : null;
+    body.innerHTML = `<div class="options">${t.options.map((o, i) =>
+      `<button type="button" class="option-btn" data-i="${i}">${escapeHtml(o)}</button>`).join('')}</div>`;
+    const btns = [...body.querySelectorAll('.option-btn')];
+    btns.forEach(b => b.onclick = () => {
+      if (answered) return;
+      btns.forEach(x => x.classList.remove('selected'));
+      b.classList.add('selected');
+      selected = Number(b.dataset.i);
+    });
+    getAnswer = () => selected;
+    if (answered) paintChoiceSingle(btns, t);
+  }
+
+  else if (t.type === 'choice_multiple') {
+    let selected = new Set(answered ? t.submission.answer : []);
+    body.innerHTML = `<div class="options">${t.options.map((o, i) =>
+      `<button type="button" class="option-btn" data-i="${i}">${escapeHtml(o)}</button>`).join('')}</div>`;
+    const btns = [...body.querySelectorAll('.option-btn')];
+    btns.forEach(b => {
+      if (selected.has(Number(b.dataset.i))) b.classList.add('selected');
+      b.onclick = () => {
+        if (answered) return;
+        const i = Number(b.dataset.i);
+        if (selected.has(i)) { selected.delete(i); b.classList.remove('selected'); }
+        else { selected.add(i); b.classList.add('selected'); }
+      };
+    });
+    getAnswer = () => [...selected];
+    if (answered) paintChoiceMultiple(btns, t);
+  }
+
+  else if (t.type === 'open_text') {
+    body.innerHTML = `<input type="text" class="answer-input" placeholder="Введи ответ..." value="${answered ? escapeHtml(t.submission.answer) : ''}" ${answered ? 'disabled' : ''}/>`;
+    const input = body.querySelector('input');
+    getAnswer = () => input.value;
+  }
+
+  else if (t.type === 'open_number') {
+    body.innerHTML = `<input type="number" class="answer-input" placeholder="Введи число..." value="${answered ? escapeHtml(t.submission.answer) : ''}" ${answered ? 'disabled' : ''}/>`;
+    const input = body.querySelector('input');
+    getAnswer = () => Number(input.value);
+  }
+
+  else if (t.type === 'matching') {
+    const rightOptions = t.right.map((r, i) => `<option value="${i}">${escapeHtml(r)}</option>`).join('');
+    body.innerHTML = t.left.map((l, i) => `
+      <div class="matching-row">
+        <div style="min-width:160px">${escapeHtml(l)}</div>
+        <span>→</span>
+        <select data-left="${i}" ${answered ? 'disabled' : ''}>
+          <option value="">— выбери —</option>
+          ${rightOptions}
+        </select>
+      </div>
+    `).join('');
+    if (answered) {
+      const ansMap = Object.fromEntries(t.submission.answer);
+      body.querySelectorAll('select').forEach(sel => {
+        sel.value = ansMap[sel.dataset.left] ?? '';
+      });
+    }
+    getAnswer = () => [...body.querySelectorAll('select')].map(sel =>
+      [Number(sel.dataset.left), Number(sel.value)]
+    );
+  }
+
+  else if (t.type === 'cloze') {
+    let i = 0;
+    const html = t.promptTemplate.replace(/___/g, () => {
+      const bi = i++;
+      const val = answered ? (t.submission.answer[bi] ?? '') : '';
+      return `<input type="text" data-b="${bi}" value="${escapeHtml(val)}" ${answered ? 'disabled' : ''}/>`;
+    });
+    body.innerHTML = `<div class="cloze-text">${html}</div>`;
+    getAnswer = () => [...body.querySelectorAll('input')].map(inp => inp.value);
+  }
+
+  if (!answered) {
+    const btn = document.createElement('button');
+    btn.className = 'submit-btn';
+    btn.textContent = 'Проверить';
+    btn.onclick = async () => {
+      btn.disabled = true;
+      try {
+        const res = await api(`/api/tasks/${t.id}/submit`, {
+          method: 'POST',
+          body: JSON.stringify({ answer: getAnswer() }),
+        });
+        showResult(card, res);
+        setTimeout(render, 600);
+      } catch (e) {
+        btn.disabled = false;
+      }
+    };
+    card.appendChild(btn);
+  } else {
+    showResult(card, { isCorrect: t.submission.isCorrect, explanation: t.explanation });
+  }
+
+  return card;
+}
+
+function paintChoiceSingle(btns, t) {
+  btns.forEach(b => {
+    const i = Number(b.dataset.i);
+    if (i === t.correctIndex) b.classList.add('correct');
+    else if (i === t.submission.answer) b.classList.add('wrong');
+  });
+}
+function paintChoiceMultiple(btns, t) {
+  const correctSet = new Set(t.correctIndices);
+  const givenSet = new Set(t.submission.answer);
+  btns.forEach(b => {
+    const i = Number(b.dataset.i);
+    if (correctSet.has(i)) b.classList.add('correct');
+    else if (givenSet.has(i)) b.classList.add('wrong');
+  });
+}
+
+function showResult(card, res) {
+  const badge = document.createElement('div');
+  if (res.isCorrect === null) {
+    badge.className = 'result-badge';
+    badge.style.color = 'var(--muted)';
+    badge.textContent = '📝 Ответ сохранён, ждёт проверки родителем';
+  } else {
+    badge.className = 'result-badge ' + (res.isCorrect ? 'correct' : 'wrong');
+    badge.textContent = res.isCorrect ? '✅ Верно!' : '❌ Неверно';
+  }
+  card.appendChild(badge);
+  if (res.explanation) {
+    const ex = document.createElement('div');
+    ex.className = 'explanation';
+    ex.textContent = res.explanation;
+    card.appendChild(ex);
+  }
+}
+
+render();
+</script>
+</body>
+</html>

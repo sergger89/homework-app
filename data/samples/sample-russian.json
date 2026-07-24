@@ -1,0 +1,29 @@
+{
+  "subject": "russian",
+  "title": "Пример: пропущенные буквы и слова",
+  "tasks": [
+    {
+      "type": "cloze",
+      "promptTemplate": "Ко___ка сидела на окне и смотрела на со___нце.",
+      "blanks": [
+        { "acceptedAnswers": ["ш"] },
+        { "acceptedAnswers": ["л"] }
+      ],
+      "explanation": "Кошка, солнце"
+    },
+    {
+      "type": "open_text",
+      "prompt": "Напиши слово, противоположное по значению слову «большой»",
+      "acceptedAnswers": ["маленький", "малый"],
+      "caseSensitive": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "Напиши небольшой рассказ (3-4 предложения) о своём выходном дне",
+      "needsManualReview": true,
+      "acceptedAnswers": [],
+      "explanation": null
+    }
+  ]
+}

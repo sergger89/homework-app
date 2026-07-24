@@ -1,0 +1,681 @@
+{
+  "subject": "english",
+  "title": "English — Test 2 (Lessons 9-15), Воронова, тесты к учебнику Верещагиной",
+  "tasks": [
+    {
+      "type": "cloze",
+      "promptTemplate": "1. I am clever and you are clever ___.",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "too"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "2. What ___ at seven o'clock every day?",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "do you do"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "3. Why ___ looking at me?",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "are you"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "4. Nick's father usually reads books ___ evening.",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "in the"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "5. My grandmother's ___ is very funny.",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "giraffe"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "6. Ann, let's play ___!",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "tag"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "7. My books are in my ___.",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "bag"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№1. Составь предложение из слов: her little sister, is, going to the swimming pool?",
+      "acceptedAnswers": [
+        "Is her little sister going to the swimming pool?",
+        "Is her little sister going to the swimming pool?.",
+        "Is her little sister going to the swimming pool?"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№2. Составь предложение из слов: Ann, hockey, isn't, playing, now.",
+      "acceptedAnswers": [
+        "Ann isn't playing hockey now.",
+        "Ann isn't playing hockey now.",
+        "Ann isn't playing hockey now"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№3. Составь предложение из слов: he, not, is, running, to school.",
+      "acceptedAnswers": [
+        "He is not running to school.",
+        "He is not running to school.",
+        "He is not running to school"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№4. Составь предложение из слов: my teacher, where, running, is, now?",
+      "acceptedAnswers": [
+        "Where is my teacher running now?",
+        "Where is my teacher running now?.",
+        "Where is my teacher running now?"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№5. Составь предложение из слов: what, are, you, playing?",
+      "acceptedAnswers": [
+        "What are you playing?",
+        "What are you playing?.",
+        "What are you playing?"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№6. Составь предложение из слов: I, now, am, your ball, taking.",
+      "acceptedAnswers": [
+        "I am taking your ball now.",
+        "I am taking your ball now.",
+        "I am taking your ball now"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№7. Составь предложение из слов: he, now, is, snowballs, playing.",
+      "acceptedAnswers": [
+        "He is playing snowballs now.",
+        "He is playing snowballs now.",
+        "He is playing snowballs now"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "matching",
+      "prompt": "Match the questions with the answers.",
+      "left": [
+        "Where are you going?",
+        "Is your sister playing with your friend?",
+        "What is he doing?",
+        "What are your friends doing?",
+        "Are you playing hockey?",
+        "Is Tom jumping?",
+        "Are your friends playing football?"
+      ],
+      "right": [
+        "I'm going to the Zoo.",
+        "No, she is not. They are not friends.",
+        "He is taking your bag!",
+        "They are skipping.",
+        "No, I am not.",
+        "No, he is skipping.",
+        "No, they are not. They are playing basketball."
+      ],
+      "correctPairs": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          3,
+          3
+        ],
+        [
+          4,
+          4
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          6,
+          6
+        ]
+      ],
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№1. ___ your mother got a friend?",
+      "options": [
+        "Does",
+        "Has",
+        "Are"
+      ],
+      "correctIndex": 1,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№2. This is ___. It is black and white.",
+      "options": [
+        "Bob's kitten",
+        "Bob of the kitten",
+        "kitten's Bob"
+      ],
+      "correctIndex": 0,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№3. My sisters' names ___ Russian.",
+      "options": [
+        "is",
+        "are not",
+        "do not"
+      ],
+      "correctIndex": 1,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№4. My cousin has got four ___.",
+      "options": [
+        "childs",
+        "children",
+        "child"
+      ],
+      "correctIndex": 1,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№5. I haven't got ___.",
+      "options": [
+        "a aunt",
+        "brother",
+        "an uncle"
+      ],
+      "correctIndex": 2,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№6. ___ you see those black horses?",
+      "options": [
+        "Are",
+        "Does",
+        "Can"
+      ],
+      "correctIndex": 2,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№7. ___ lunch at one o'clock?",
+      "options": [
+        "Have you got",
+        "Do you have",
+        "Have you"
+      ],
+      "correctIndex": 1,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№1. Where ___ you put your toys?",
+      "options": [
+        "do",
+        "does"
+      ],
+      "correctIndex": 0,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№2. What ___ she want to have?",
+      "options": [
+        "do",
+        "does"
+      ],
+      "correctIndex": 1,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№3. ___ you run and jump in the Zoo?",
+      "options": [
+        "Do",
+        "Does"
+      ],
+      "correctIndex": 0,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№4. ___ your father give you toys?",
+      "options": [
+        "Do",
+        "Does"
+      ],
+      "correctIndex": 1,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№5. ___ your mother like big funny bears?",
+      "options": [
+        "Do",
+        "Does"
+      ],
+      "correctIndex": 1,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№6. ___ we play with many toys?",
+      "options": [
+        "Do",
+        "Does"
+      ],
+      "correctIndex": 0,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№7. What ___ your dog want?",
+      "options": [
+        "do",
+        "does"
+      ],
+      "correctIndex": 1,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№1. Complete the sentence: Mike ___ to have a crocodile.",
+      "options": [
+        "don't want",
+        "doesn't want"
+      ],
+      "correctIndex": 1,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№2. Complete the sentence: Where ___ your friends like to run?",
+      "options": [
+        "do",
+        "does"
+      ],
+      "correctIndex": 0,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№3. Complete the sentence: Does your family ___ you?",
+      "options": [
+        "love",
+        "loves"
+      ],
+      "correctIndex": 0,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№4. Complete the sentence: My little dog ___ cats.",
+      "options": [
+        "doesn't like",
+        "don't like"
+      ],
+      "correctIndex": 0,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№5. Complete the sentence: I ___ want to play snowballs with you.",
+      "options": [
+        "don't",
+        "doesn't"
+      ],
+      "correctIndex": 0,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№6. Complete the sentence: What sport games ___ you want to play?",
+      "options": [
+        "do",
+        "does"
+      ],
+      "correctIndex": 0,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№7. Complete the sentence: My sister Helen ___ go to school.",
+      "options": [
+        "don't",
+        "doesn't"
+      ],
+      "correctIndex": 1,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "Прочитай текст:\n\nThe Fox and the Fish\n\nThe fox says to the fish: \"You can't swim very well!\" \"Oh, yes, I can!\" \"Let's run up to that tree! You, in the water, and I, on the ground.\" \"OK!\" The fish doesn't want to swim very quickly. He is lazy but clever. He has got a big fish family. The fox runs and runs. Then he stops: \"Fish, where are you?\" And one of the fish family looks out of the water: \"Hello!\" The fox runs up to the tree and falls on the ground. He can't stand, he can't talk. One of the fish family looks out of the water: \"I can swim very well, silly Fox!\" Then the fish swims away to his big fish family.\n\nЭто просто текст для чтения — ответь на вопросы ниже.",
+      "acceptedAnswers": [],
+      "needsManualReview": true,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№1. Answer the question: Who can run?",
+      "acceptedAnswers": [
+        "The fox can.",
+        "The fox can"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№2. Answer the question: Who can swim quickly?",
+      "acceptedAnswers": [
+        "The fish can.",
+        "The fish can"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№3. Answer the question: Is the fish lazy?",
+      "acceptedAnswers": [
+        "Yes, he is.",
+        "Yes, he is"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№4. Answer the question: Is the fox clever?",
+      "acceptedAnswers": [
+        "No, he isn't.",
+        "No, he isn't"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№5. Answer the question: Has the fish got a big family?",
+      "acceptedAnswers": [
+        "Yes, he has.",
+        "Yes, he has"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№6. Answer the question: Where does the fox run?",
+      "acceptedAnswers": [
+        "The fox runs to the tree.",
+        "The fox runs to the tree"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№7. Answer the question: Who is silly?",
+      "acceptedAnswers": [
+        "The fox is.",
+        "The fox is"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "matching",
+      "prompt": "Group the words (distribute each word into Sport / Colours / Family).",
+      "left": [
+        "ski",
+        "sister",
+        "uncle",
+        "blue",
+        "hockey",
+        "basketball",
+        "black",
+        "father",
+        "aunt",
+        "white",
+        "badminton",
+        "green",
+        "brown",
+        "skate",
+        "football",
+        "yellow",
+        "brother",
+        "daughter"
+      ],
+      "right": [
+        "Sport",
+        "Colours",
+        "Family"
+      ],
+      "correctPairs": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          3,
+          1
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          5,
+          0
+        ],
+        [
+          6,
+          1
+        ],
+        [
+          7,
+          2
+        ],
+        [
+          8,
+          2
+        ],
+        [
+          9,
+          1
+        ],
+        [
+          10,
+          0
+        ],
+        [
+          11,
+          1
+        ],
+        [
+          12,
+          1
+        ],
+        [
+          13,
+          0
+        ],
+        [
+          14,
+          0
+        ],
+        [
+          15,
+          1
+        ],
+        [
+          16,
+          2
+        ],
+        [
+          17,
+          2
+        ]
+      ],
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№1. Spell the word: [ɑːnt] —",
+      "acceptedAnswers": [
+        "aunt"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№2. Spell the word: [θriː] —",
+      "acceptedAnswers": [
+        "three"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№3. Spell the word: [sʌn] —",
+      "acceptedAnswers": [
+        "son"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№4. Spell the word: [ˈræbɪt] —",
+      "acceptedAnswers": [
+        "rabbit"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№5. Spell the word: [skeɪt] —",
+      "acceptedAnswers": [
+        "skate"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№6. Spell the word: [naɪn] —",
+      "acceptedAnswers": [
+        "nine"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№7. Spell the word: [greɪ] —",
+      "acceptedAnswers": [
+        "grey"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    }
+  ]
+}

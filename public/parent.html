@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Панель родителя</title>
+<link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="topbar">
+    <h1>👨‍👩‍👧 Панель родителя</h1>
+    <button onclick="logout()">Выйти</button>
+  </div>
+  <div class="container">
+    <select id="childSelect" class="child-select"></select>
+
+    <div class="tabs">
+      <button id="tabProgress" class="active">Прогресс</button>
+      <button id="tabAssignments">Задания</button>
+      <button id="tabImport">Добавить задание</button>
+    </div>
+
+    <div id="viewProgress"></div>
+    <div id="viewAssignments" style="display:none"></div>
+    <div id="viewImport" style="display:none">
+      <p class="muted">
+        Вставьте сюда JSON с заданиями (его формирует модель по промпту из файла <code>PARSING_PROMPT.md</code>) и нажмите «Импортировать».
+      </p>
+      <textarea id="importJson" placeholder='{"subject":"math","title":"...","tasks":[...]}'></textarea>
+      <div style="margin-top:10px">
+        <button class="submit-btn" onclick="importAssignment()">Импортировать</button>
+      </div>
+      <p id="importResult" class="muted"></p>
+    </div>
+  </div>
+<script src="/js/common.js"></script>
+<script>
+requireRole('parent');
+let children = [];
+let currentChildId = null;
+
+function switchTab(tab) {
+  document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+  document.getElementById('viewProgress').style.display = 'none';
+  document.getElementById('viewAssignments').style.display = 'none';
+  document.getElementById('viewImport').style.display = 'none';
+  if (tab === 'progress') { document.getElementById('tabProgress').classList.add('active'); document.getElementById('viewProgress').style.display = 'block'; loadProgress(); }
+  if (tab === 'assignments') { document.getElementById('tabAssignments').classList.add('active'); document.getElementById('viewAssignments').style.display = 'block'; loadAssignments(); }
+  if (tab === 'import') { document.getElementById('tabImport').classList.add('active'); document.getElementById('viewImport').style.display = 'block'; }
+}
+document.getElementById('tabProgress').onclick = () => switchTab('progress');
+document.getElementById('tabAssignments').onclick = () => switchTab('assignments');
+document.getElementById('tabImport').onclick = () => switchTab('import');
+
+async function init() {
+  const { children: c } = await api('/api/children');
+  children = c;
+  const sel = document.getElementById('childSelect');
+  sel.innerHTML = children.map(ch => `<option value="${ch.id}">${escapeHtml(ch.display_name)}</option>`).join('');
+  currentChildId = children[0]?.id;
+  sel.onchange = () => { currentChildId = Number(sel.value); switchTab('progress'); };
+  switchTab('progress');
+}
+
+async function loadProgress() {
+  if (!currentChildId) return;
+  const { bySubject, recent } = await api(`/api/progress?childId=${currentChildId}`);
+  const view = document.getElementById('viewProgress');
+  const rows = bySubject.map(s => `
+    <tr>
+      <td>${subjectLabel(s.subject)}</td>
+      <td>${s.doneTasks} / ${s.totalTasks}</td>
+      <td>${s.doneTasks ? Math.round(100 * (s.correctTasks || 0) / s.doneTasks) + '%' : '—'}</td>
+    </tr>`).join('');
+
+  const recentRows = recent.map(r => `
+    <tr>
+      <td>${new Date(r.submitted_at + 'Z').toLocaleString('ru-RU')}</td>
+      <td>${subjectLabel(r.subject)}</td>
+      <td>${escapeHtml(r.title)}</td>
+      <td>${r.is_correct === null ? '📝 на проверке' : (r.is_correct ? '✅' : '❌')}</td>
+    </tr>`).join('');
+
+  view.innerHTML = `
+    <h3>По предметам</h3>
+    <table class="progress-table">
+      <tr><th>Предмет</th><th>Выполнено</th><th>Точность</th></tr>
+      ${rows || '<tr><td colspan=3 class="muted">Пока нет данных</td></tr>'}
+    </table>
+    <h3 style="margin-top:24px">Последние ответы</h3>
+    <table class="progress-table">
+      <tr><th>Когда</th><th>Предмет</th><th>Задание</th><th>Результат</th></tr>
+      ${recentRows || '<tr><td colspan=4 class="muted">Пока нет данных</td></tr>'}
+    </table>
+  `;
+}
+
+async function loadAssignments() {
+  const { assignments } = await api(`/api/assignments?childId=${currentChildId}`);
+  const view = document.getElementById('viewAssignments');
+  view.innerHTML = assignments.map(a => `
+    <div class="assignment-card" style="cursor:default">
+      <div style="flex:1">
+        <span class="subject-badge">${subjectLabel(a.subject)}</span>
+        <div><strong>${escapeHtml(a.title)}</strong></div>
+        <div class="muted">${a.doneTasks} / ${a.totalTasks} выполнено</div>
+      </div>
+      <button onclick="deleteAssignment(${a.id})">Удалить</button>
+    </div>
+  `).join('') || '<p class="muted">Заданий пока нет — добавьте во вкладке «Добавить задание».</p>';
+}
+
+async function deleteAssignment(id) {
+  if (!confirm('Удалить это задание вместе с ответами ребёнка?')) return;
+  await api(`/api/assignments/${id}`, { method: 'DELETE' });
+  loadAssignments();
+}
+
+async function importAssignment() {
+  const raw = document.getElementById('importJson').value;
+  const resultEl = document.getElementById('importResult');
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (e) {
+    resultEl.textContent = 'Ошибка: это не корректный JSON';
+    resultEl.style.color = 'var(--wrong)';
+    return;
+  }
+  try {
+    await api('/api/assignments/import', { method: 'POST', body: JSON.stringify(parsed) });
+    resultEl.textContent = 'Готово! Задание добавлено.';
+    resultEl.style.color = 'var(--correct)';
+    document.getElementById('importJson').value = '';
+  } catch (e) {
+    resultEl.textContent = 'Ошибка: ' + JSON.stringify(e.data?.errors || e.message);
+    resultEl.style.color = 'var(--wrong)';
+  }
+}
+
+init();
+</script>
+</body>
+</html>
