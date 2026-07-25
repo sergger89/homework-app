@@ -167,6 +167,10 @@ input[type=text].answer-input, input[type=number].answer-input {
 .result-badge.correct { color: var(--correct); }
 .result-badge.wrong { color: var(--wrong); }
 .explanation { margin-top: 6px; color: var(--muted); font-size: 14px; }
+.persistent-explanation {
+  margin-top: 10px; padding: 10px 12px; border-radius: 8px;
+  background: #fff8e6; border: 1px solid #f0dfa0; color: #6b5b1e; font-size: 14px;
+}
 
 .matching-row { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
 .matching-row select { padding: 8px; border-radius: 8px; border: 1px solid #dfe3ec; font-size: 15px; }

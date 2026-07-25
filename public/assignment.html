@@ -198,6 +198,15 @@ function buildTaskCard(t, idx) {
     card.appendChild(info);
   }
 
+  // объяснение, раскрытое сервером (после 3-й ошибки или при блокировке) — показываем ПОСТОЯННО,
+  // а не только сразу после отправки, иначе оно пропадает при следующей перезагрузке страницы
+  if (t.explanation) {
+    const ex = document.createElement('div');
+    ex.className = 'explanation persistent-explanation';
+    ex.textContent = (attempts.length >= 3 && !locked ? '💡 Подсказка: ' : '') + t.explanation;
+    card.appendChild(ex);
+  }
+
   // кнопка черновика — есть у всех заданий, кроме тех где отвечать больше нельзя
   const scratchBtn = document.createElement('button');
   scratchBtn.type = 'button';
@@ -261,12 +270,8 @@ function showResult(card, res) {
     badge.textContent = res.isCorrect ? '✅ Верно!' : (res.locked ? '❌ Неверно. Попытки закончились.' : '❌ Неверно, попробуй ещё раз');
   }
   card.appendChild(badge);
-  if (res.explanation) {
-    const ex = document.createElement('div');
-    ex.className = 'explanation';
-    ex.textContent = res.explanation;
-    card.appendChild(ex);
-  }
+  // само объяснение теперь показывает постоянный блок в buildTaskCard (переживает перезагрузку) -
+  // здесь его не дублируем.
 }
 
 load();
