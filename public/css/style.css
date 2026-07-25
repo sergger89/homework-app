@@ -215,3 +215,112 @@ table.progress-table th, table.progress-table td {
 .child-select { margin-bottom: 16px; padding: 8px 12px; border-radius: 8px; border: 1px solid #dfe3ec; }
 
 .muted { color: var(--muted); font-size: 14px; }
+
+/* ---------- avatars / user chip ---------- */
+.user-chip { display: flex; align-items: center; gap: 10px; }
+.avatar-upload-wrap { display: flex; align-items: center; gap: 12px; }
+.avatar-upload-wrap label.upload-btn {
+  padding: 8px 14px; border-radius: 8px; background: #eef1f8; cursor: pointer; font-size: 14px;
+}
+.avatar-upload-wrap input[type=file] { display: none; }
+
+/* ---------- reward banner ---------- */
+.reward-banner {
+  background: linear-gradient(90deg, #fff3d6, #ffe9b8);
+  border: 1px solid #f3d78a;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin: 10px 0;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: space-between;
+}
+.reward-banner .given { color: var(--correct); font-weight: 600; }
+
+/* ---------- attempts / lock badges ---------- */
+.attempts-badge { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.locked-badge { font-size: 12px; color: var(--wrong); font-weight: 600; }
+
+/* ---------- task wizard (assignment.html) ---------- */
+.wizard-nav {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px;
+}
+.wizard-dots { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 10px 0 16px; }
+.wizard-dot {
+  width: 30px; height: 30px; border-radius: 8px; border: 2px solid #dfe3ec; background: white;
+  display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; font-weight: 600;
+}
+.wizard-dot.current { border-color: var(--primary); }
+.wizard-dot.answered-correct { background: #e7f8f0; border-color: var(--correct); color: var(--correct); }
+.wizard-dot.answered-wrong { background: #fdecea; border-color: var(--wrong); color: var(--wrong); }
+.wizard-dot.skipped { background: #fff8e6; border-color: #e8c35b; }
+.wizard-btn {
+  padding: 10px 16px; border-radius: 10px; border: none; background: #eef1f8; cursor: pointer; font-weight: 600;
+}
+.wizard-btn.primary { background: var(--primary); color: white; }
+.wizard-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ---------- library tab ---------- */
+.assigned-chip {
+  display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px;
+  background: #eef1f8; font-size: 12px; margin: 3px 4px 3px 0;
+}
+.assigned-chip.hidden-chip { opacity: 0.5; text-decoration: line-through; }
+.assigned-chip button { border: none; background: none; cursor: pointer; font-size: 13px; color: var(--muted); }
+
+/* ---------- generic form bits ---------- */
+.field-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+.field-row input, .field-row select {
+  padding: 9px 12px; border-radius: 8px; border: 1px solid #dfe3ec; font-size: 15px; width: 100%;
+}
+.file-drop {
+  border: 2px dashed #dfe3ec; border-radius: 10px; padding: 16px; text-align: center; color: var(--muted);
+  font-size: 14px; cursor: pointer;
+}
+
+/* =========================================================
+   МОБИЛЬНАЯ АДАПТАЦИЯ
+   ========================================================= */
+@media (max-width: 640px) {
+  .topbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 12px 14px;
+  }
+  .topbar h1 { font-size: 17px; text-align: center; }
+  .topbar > div { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; }
+  .container { padding: 14px 10px 50px; }
+
+  .tabs { flex-wrap: wrap; }
+  .tabs button { flex: 1 1 auto; font-size: 13px; padding: 8px 10px; }
+
+  .assignment-card { flex-direction: column; align-items: stretch; gap: 10px; }
+  .assignment-card > button { align-self: flex-end; }
+
+  table.progress-table { display: block; overflow-x: auto; white-space: nowrap; }
+
+  .task-card { padding: 16px; }
+  .task-prompt { font-size: 16px; }
+  .option-btn { font-size: 15px; padding: 11px 12px; }
+
+  .matching-row { flex-wrap: wrap; }
+  .matching-row select { flex: 1; min-width: 120px; }
+
+  .cloze-text { font-size: 16px; }
+  .cloze-text input { width: 90px; }
+
+  .login-card { width: 90%; max-width: 340px; padding: 28px 22px; }
+
+  .wizard-dots { gap: 5px; }
+  .wizard-dot { width: 26px; height: 26px; font-size: 11px; }
+
+  #accessMatrix table { display: block; overflow-x: auto; }
+}
+
+@media (max-width: 400px) {
+  .wizard-nav { flex-direction: column; }
+  .wizard-nav .wizard-btn { width: 100%; }
+}

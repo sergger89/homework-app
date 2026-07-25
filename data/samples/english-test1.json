@@ -1,0 +1,816 @@
+{
+  "subject": "english",
+  "title": "English — Test 1 (Lessons 1-8), Воронова",
+  "tasks": [
+    {
+      "type": "cloze",
+      "promptTemplate": "1. My name ___ Sally.",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "is"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "2. We ___ not little.",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "are"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "3. My friends ___ very funny.",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "are"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "4. My grandmother ___ 55.",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "is"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "5. What colour ___ your balls? — They ___ red.",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "are"
+          ]
+        },
+        {
+          "acceptedAnswers": [
+            "are"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "6. How old ___ you? — I ___ nine.",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "are"
+          ]
+        },
+        {
+          "acceptedAnswers": [
+            "am"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "7. Where ___ you? — I ___ under the chair.",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "are"
+          ]
+        },
+        {
+          "acceptedAnswers": [
+            "am"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№1. We ___ snow in Russia.",
+      "options": [
+        "have got",
+        "has got"
+      ],
+      "correctIndex": 0,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№2. Where ___ your mother from?",
+      "options": [
+        "are",
+        "is"
+      ],
+      "correctIndex": 1,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№3. Boys and girls in Russia ___ stadiums near their schools.",
+      "options": [
+        "have got",
+        "has got"
+      ],
+      "correctIndex": 0,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№4. I ___ not fine today.",
+      "options": [
+        "is",
+        "am"
+      ],
+      "correctIndex": 1,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№5. ___ you ___ a toy brown bear under the table?",
+      "options": [
+        "Have...got",
+        "Has...got"
+      ],
+      "correctIndex": 0,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№6. Where ___ your sons?",
+      "options": [
+        "is",
+        "are"
+      ],
+      "correctIndex": 1,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№7. My nice doll ___ very big.",
+      "options": [
+        "is",
+        "are"
+      ],
+      "correctIndex": 0,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№1. Answer the question: Are you a pupil?",
+      "acceptedAnswers": [
+        "Yes, I am.",
+        "Yes, I am"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№2. Answer the question: Must you go to school every day?",
+      "acceptedAnswers": [
+        "No, I mustn't.",
+        "No, I mustn't"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№3. Answer the question: Can you ride a bike?",
+      "acceptedAnswers": [
+        "No, I can't.",
+        "No, I can't"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№4. Answer the question: Has your mother got a cat?",
+      "acceptedAnswers": [
+        "No, she hasn't.",
+        "No, she hasn't"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№5. Answer the question: Does your father like his work?",
+      "acceptedAnswers": [
+        "Yes, he does.",
+        "Yes, he does"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№6. Answer the question: Are your friends pupils?",
+      "acceptedAnswers": [
+        "Yes, they are.",
+        "Yes, they are"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№1. Answer about yourself: What's your name?",
+      "acceptedAnswers": [],
+      "needsManualReview": true,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№2. Answer about yourself: Where are you from?",
+      "acceptedAnswers": [],
+      "needsManualReview": true,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№3. Answer about yourself: How old are you?",
+      "acceptedAnswers": [],
+      "needsManualReview": true,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№4. Answer about yourself: What is your mother?",
+      "acceptedAnswers": [],
+      "needsManualReview": true,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№5. Answer about yourself: Have you got a sister or a brother?",
+      "acceptedAnswers": [],
+      "needsManualReview": true,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№6. Answer about yourself: What do you want to be?",
+      "acceptedAnswers": [],
+      "needsManualReview": true,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№7. Answer about yourself: What games do you like to play?",
+      "acceptedAnswers": [],
+      "needsManualReview": true,
+      "explanation": null
+    },
+    {
+      "type": "matching",
+      "prompt": "Match the questions with the answers.",
+      "left": [
+        "Does your big black cat like me?",
+        "What does she want to have?",
+        "Does your father give you toys?",
+        "Does your mother like big funny bears?",
+        "Do we play with many toys?",
+        "What does your dog want?",
+        "Do your mother and father love your nice little brother?"
+      ],
+      "right": [
+        "Yes, it does.",
+        "She wants to have a white horse.",
+        "No, he doesn't.",
+        "Yes, she does.",
+        "No, we don't.",
+        "It wants to play with me.",
+        "Yes, they do."
+      ],
+      "correctPairs": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          3,
+          3
+        ],
+        [
+          4,
+          4
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          6,
+          6
+        ]
+      ],
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№1. My little dog doesn't like ___ puppies.",
+      "options": [
+        "its",
+        "it"
+      ],
+      "correctIndex": 0,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№2. I want to teach ___ a lesson.",
+      "options": [
+        "you",
+        "your"
+      ],
+      "correctIndex": 0,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№3. Do ___ like to play sport games?",
+      "options": [
+        "they",
+        "them",
+        "their"
+      ],
+      "correctIndex": 0,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№4. In Russia ___ don't like to play hockey.",
+      "options": [
+        "they",
+        "their",
+        "them"
+      ],
+      "correctIndex": 0,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№5. ___ friend is a nice little boy.",
+      "options": [
+        "He",
+        "His",
+        "Him"
+      ],
+      "correctIndex": 1,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№6. This is my dog. Look at ___ puppies!",
+      "options": [
+        "it",
+        "its"
+      ],
+      "correctIndex": 1,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№7. ___ father can play table tennis very well.",
+      "options": [
+        "She",
+        "He",
+        "His"
+      ],
+      "correctIndex": 2,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№1. Make the sentence negative/positive: Those boys play football at the school sports ground.",
+      "acceptedAnswers": [
+        "Those boys don't play football at the school sports ground.",
+        "Those boys don't play football at the school sports ground"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№2. Make the sentence negative/positive: My little bird likes my friend.",
+      "acceptedAnswers": [
+        "My little bird doesn't like my friend.",
+        "My little bird doesn't like my friend"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№3. Make the sentence negative/positive: My brother Tom can play tennis very well.",
+      "acceptedAnswers": [
+        "My brother Tom can't play tennis very well.",
+        "My brother Tom can't play tennis very well"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№4. Make the sentence negative/positive: Our friends from Africa can't play hockey.",
+      "acceptedAnswers": [
+        "Our friends from Africa can play hockey.",
+        "Our friends from Africa can play hockey"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№5. Make the sentence negative/positive: My father is a good sportsman.",
+      "acceptedAnswers": [
+        "My father isn't a good sportsman.",
+        "My father isn't a good sportsman"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№6. Make the sentence negative/positive: Bob doesn't like to play snowballs with me.",
+      "acceptedAnswers": [
+        "Bob likes to play snowballs with me.",
+        "Bob likes to play snowballs with me"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№7. Make the sentence negative/positive: I don't think about you.",
+      "acceptedAnswers": [
+        "I think about you.",
+        "I think about you"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "Прочитай текст:\n\nI Like Doctors\n\nMy name is Ted. I am nine. I am a pupil. I go to school. I like my school and my friends. I have got many friends. We like to play. We play many games. We play tag, football and ride our bikes. Boys like to play pilots and officers. Girls like to play teachers. They play with dolls too.\n\nBut my friends don't like to play doctors. They don't like to go to the hospital and they don't like doctors. They are not happy to see doctors. But I am always happy to see doctors. I like doctors because my granny is a doctor. My mother is a dentist. She helps children with toothache. She is very kind. And I love my mum and granny very much.\n\nЭто текст для чтения к следующим вопросам True/False.",
+      "acceptedAnswers": [],
+      "needsManualReview": true,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№1. True or false? Ted hasn't got many friends.",
+      "options": [
+        "True",
+        "False"
+      ],
+      "correctIndex": 1,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№2. True or false? Ted and his friends play computer games.",
+      "options": [
+        "True",
+        "False"
+      ],
+      "correctIndex": 1,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№3. True or false? Friends don't play doctors with Ted.",
+      "options": [
+        "True",
+        "False"
+      ],
+      "correctIndex": 0,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№4. True or false? Ted's mum is a dentist.",
+      "options": [
+        "True",
+        "False"
+      ],
+      "correctIndex": 0,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№5. True or false? Ted doesn't like doctors.",
+      "options": [
+        "True",
+        "False"
+      ],
+      "correctIndex": 1,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№6. True or false? Ted loves his granny and mum.",
+      "options": [
+        "True",
+        "False"
+      ],
+      "correctIndex": 0,
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "Dear Mary letter, sentence 1: How are (1)___?",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "you"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "Dear Mary letter, sentence 2: I am (2)___.",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "fine"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "Dear Mary letter, sentence 3: I have got (3)___ board games",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "many"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "Dear Mary letter, sentence 4: and I like to play (4)___ my friends.",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "with"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "Dear Mary letter, sentence 5: (5)___ you got board games?",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "Have"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "Dear Mary letter, sentence 6: I (6)___ to play with you.",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "would like"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "Dear Mary letter, sentence 7: What (7)___ do you like to play?",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "games"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№1. Hi! My name is Jack. — ___, Jack.",
+      "options": [
+        "I am fine, thank you",
+        "OK",
+        "I am glad to meet you"
+      ],
+      "correctIndex": 2,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№2. What are you, Ann? — I am a ___.",
+      "options": [
+        "hospital",
+        "plant",
+        "pupil"
+      ],
+      "correctIndex": 2,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№3. Do you want to be a pilot, Pete? — ___, I do.",
+      "options": [
+        "Thank you",
+        "Of course",
+        "Please"
+      ],
+      "correctIndex": 1,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№4. How do you do, Meg? — ___, Meg?",
+      "options": [
+        "How do you do",
+        "I am fine",
+        "Thank you"
+      ],
+      "correctIndex": 0,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№5. Let's go to the park, Alice. — ___",
+      "options": [
+        "Please",
+        "Then",
+        "OK"
+      ],
+      "correctIndex": 2,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№7. I like to play doctors. — I like to play doctors, too. Let's play ___ (a) of course  b) then  c) OK)",
+      "acceptedAnswers": [],
+      "needsManualReview": true,
+      "explanation": null
+    },
+    {
+      "type": "matching",
+      "prompt": "Match the words to make phrases.",
+      "left": [
+        "to play",
+        "to have",
+        "to go",
+        "to like",
+        "to be",
+        "to be",
+        "to play",
+        "to hide"
+      ],
+      "right": [
+        "basketball",
+        "a lot of fun",
+        "to the swimming pool",
+        "to skip",
+        "from London",
+        "a driver",
+        "with toys",
+        "under the table"
+      ],
+      "correctPairs": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          3,
+          3
+        ],
+        [
+          4,
+          4
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          6,
+          6
+        ],
+        [
+          7,
+          7
+        ]
+      ],
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№1. Spell the word from its transcription (see textbook page).",
+      "acceptedAnswers": [
+        "uncle"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№2. Spell the word from its transcription (see textbook page).",
+      "acceptedAnswers": [
+        "monkey"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№3. Spell the word from its transcription (see textbook page).",
+      "acceptedAnswers": [
+        "teacher"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№4. Spell the word from its transcription (see textbook page).",
+      "acceptedAnswers": [
+        "eight"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№5. Spell the word from its transcription (see textbook page).",
+      "acceptedAnswers": [
+        "snowball"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№6. Spell the word from its transcription (see textbook page).",
+      "acceptedAnswers": [
+        "hockey"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№7. Spell the word from its transcription (see textbook page).",
+      "acceptedAnswers": [
+        "daughter"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    }
+  ]
+}

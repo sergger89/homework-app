@@ -17,6 +17,7 @@ services:
       ADMIN_USERNAME: "${ADMIN_USERNAME:-admin}"
       ADMIN_PASSWORD: "${ADMIN_PASSWORD:-changeme}"
       ADMIN_NAME: "${ADMIN_NAME:-Администратор}"
+      RESET_ADMIN_PASSWORD: "${RESET_ADMIN_PASSWORD:-false}"
     volumes:
       - homework-data:/app/data
 

@@ -11,26 +11,92 @@
     <h1 id="title">Задание</h1>
     <button onclick="window.location.href='/child.html'">← К списку</button>
   </div>
-  <div class="container" id="tasks"></div>
+  <div class="container">
+    <div id="rewardBanner"></div>
+    <div id="wizardDots" class="wizard-dots"></div>
+    <div id="taskHolder"></div>
+    <div class="wizard-nav">
+      <button class="wizard-btn" id="prevBtn">← Назад</button>
+      <button class="wizard-btn" id="skipBtn">Пропустить →</button>
+      <button class="wizard-btn primary" id="nextBtn">Дальше →</button>
+    </div>
+  </div>
 <script src="/js/common.js"></script>
 <script>
 requireRole('child');
 const params = new URLSearchParams(window.location.search);
 const assignmentId = params.get('id');
+let tasks = [];
+let assignmentInfo = null;
+let currentIndex = 0;
 
-function render() {
-  api(`/api/assignments/${assignmentId}`).then(({ assignment, tasks }) => {
-    document.getElementById('title').textContent = `${subjectLabel(assignment.subject)} — ${assignment.title}`;
-    const container = document.getElementById('tasks');
-    container.innerHTML = '';
-    tasks.forEach((t, idx) => container.appendChild(renderTask(t, idx)));
-  });
+async function load(keepIndex) {
+  const { assignment, tasks: t } = await api(`/api/assignments/${assignmentId}`);
+  assignmentInfo = assignment;
+  tasks = t;
+  document.getElementById('title').textContent = `${subjectLabel(assignment.subject)} — ${assignment.title}`;
+  renderReward();
+  if (!keepIndex) {
+    // открываем первое ещё не отвеченное/не заблокированное задание, если есть
+    const firstOpen = tasks.findIndex(t => !t.locked);
+    currentIndex = firstOpen === -1 ? 0 : firstOpen;
+  }
+  renderDots();
+  renderTask();
 }
 
-function renderTask(t, idx) {
+function renderReward() {
+  const el = document.getElementById('rewardBanner');
+  if (!assignmentInfo.reward) { el.innerHTML = ''; return; }
+  el.innerHTML = `<div class="reward-banner">🎁 <span>Награда за это задание: <strong>${escapeHtml(assignmentInfo.reward)}</strong></span></div>`;
+}
+
+function renderDots() {
+  const el = document.getElementById('wizardDots');
+  el.innerHTML = tasks.map((t, i) => {
+    let cls = 'wizard-dot';
+    if (i === currentIndex) cls += ' current';
+    const last = t.attempts && t.attempts.length ? t.attempts[t.attempts.length - 1] : null;
+    if (last && last.isCorrect === true) cls += ' answered-correct';
+    else if (t.locked) cls += ' answered-wrong';
+    else if (last) cls += ' skipped'; // отвечал, но ещё не заблокировано и не верно - считаем "в процессе"
+    return `<div class="${cls}" onclick="goTo(${i})">${i + 1}</div>`;
+  }).join('');
+}
+
+function goTo(i) {
+  currentIndex = i;
+  renderDots();
+  renderTask();
+}
+
+document.getElementById('prevBtn').onclick = () => { if (currentIndex > 0) goTo(currentIndex - 1); };
+document.getElementById('skipBtn').onclick = () => { if (currentIndex < tasks.length - 1) goTo(currentIndex + 1); };
+document.getElementById('nextBtn').onclick = () => { if (currentIndex < tasks.length - 1) goTo(currentIndex + 1); };
+
+function updateNavButtons() {
+  document.getElementById('prevBtn').disabled = currentIndex === 0;
+  const isLast = currentIndex === tasks.length - 1;
+  document.getElementById('nextBtn').style.display = isLast ? 'none' : 'inline-block';
+  document.getElementById('skipBtn').style.display = isLast ? 'none' : 'inline-block';
+}
+
+function renderTask() {
+  updateNavButtons();
+  const holder = document.getElementById('taskHolder');
+  holder.innerHTML = '';
+  holder.appendChild(buildTaskCard(tasks[currentIndex], currentIndex));
+}
+
+function buildTaskCard(t, idx) {
   const card = document.createElement('div');
   card.className = 'task-card';
-  const answered = !!t.submission;
+  const attempts = t.attempts || [];
+  const lastAttempt = attempts[attempts.length - 1] || null;
+  const locked = !!t.locked;
+  const canAnswer = !locked && (!lastAttempt || lastAttempt.isCorrect !== null || attempts.length === 0);
+  // для needsManualReview заданий (isCorrect null) после одной попытки блокируем ввод, но не "locked" с ответом
+  const awaitingManual = lastAttempt && lastAttempt.isCorrect === null;
 
   const promptText = t.type === 'cloze' ? '' : t.prompt;
   card.innerHTML = `<div class="task-prompt">${idx + 1}. ${escapeHtml(promptText)}</div>`;
@@ -39,48 +105,50 @@ function renderTask(t, idx) {
   card.appendChild(body);
 
   let getAnswer = () => null;
+  const disabled = locked || awaitingManual;
 
   if (t.type === 'choice_single') {
-    let selected = answered ? t.submission.answer : null;
+    let selected = lastAttempt ? lastAttempt.answer : null;
     body.innerHTML = `<div class="options">${t.options.map((o, i) =>
       `<button type="button" class="option-btn" data-i="${i}">${escapeHtml(o)}</button>`).join('')}</div>`;
     const btns = [...body.querySelectorAll('.option-btn')];
     btns.forEach(b => b.onclick = () => {
-      if (answered) return;
+      if (disabled) return;
       btns.forEach(x => x.classList.remove('selected'));
       b.classList.add('selected');
       selected = Number(b.dataset.i);
     });
+    if (selected !== null) btns[selected]?.classList.add('selected');
     getAnswer = () => selected;
-    if (answered) paintChoiceSingle(btns, t);
+    if (locked) paintChoiceSingle(btns, t);
   }
 
   else if (t.type === 'choice_multiple') {
-    let selected = new Set(answered ? t.submission.answer : []);
+    let selected = new Set(lastAttempt ? lastAttempt.answer : []);
     body.innerHTML = `<div class="options">${t.options.map((o, i) =>
       `<button type="button" class="option-btn" data-i="${i}">${escapeHtml(o)}</button>`).join('')}</div>`;
     const btns = [...body.querySelectorAll('.option-btn')];
     btns.forEach(b => {
       if (selected.has(Number(b.dataset.i))) b.classList.add('selected');
       b.onclick = () => {
-        if (answered) return;
+        if (disabled) return;
         const i = Number(b.dataset.i);
         if (selected.has(i)) { selected.delete(i); b.classList.remove('selected'); }
         else { selected.add(i); b.classList.add('selected'); }
       };
     });
     getAnswer = () => [...selected];
-    if (answered) paintChoiceMultiple(btns, t);
+    if (locked) paintChoiceMultiple(btns, t);
   }
 
   else if (t.type === 'open_text') {
-    body.innerHTML = `<input type="text" class="answer-input" placeholder="Введи ответ..." value="${answered ? escapeHtml(t.submission.answer) : ''}" ${answered ? 'disabled' : ''}/>`;
+    body.innerHTML = `<input type="text" class="answer-input" placeholder="Введи ответ..." value="${lastAttempt ? escapeHtml(lastAttempt.answer) : ''}" ${disabled ? 'disabled' : ''}/>`;
     const input = body.querySelector('input');
     getAnswer = () => input.value;
   }
 
   else if (t.type === 'open_number') {
-    body.innerHTML = `<input type="number" class="answer-input" placeholder="Введи число..." value="${answered ? escapeHtml(t.submission.answer) : ''}" ${answered ? 'disabled' : ''}/>`;
+    body.innerHTML = `<input type="number" class="answer-input" placeholder="Введи число..." value="${lastAttempt ? escapeHtml(lastAttempt.answer) : ''}" ${disabled ? 'disabled' : ''}/>`;
     const input = body.querySelector('input');
     getAnswer = () => Number(input.value);
   }
@@ -89,71 +157,78 @@ function renderTask(t, idx) {
     const rightOptions = t.right.map((r, i) => `<option value="${i}">${escapeHtml(r)}</option>`).join('');
     body.innerHTML = t.left.map((l, i) => `
       <div class="matching-row">
-        <div style="min-width:160px">${escapeHtml(l)}</div>
+        <div style="min-width:140px">${escapeHtml(l)}</div>
         <span>→</span>
-        <select data-left="${i}" ${answered ? 'disabled' : ''}>
+        <select data-left="${i}" ${disabled ? 'disabled' : ''}>
           <option value="">— выбери —</option>
           ${rightOptions}
         </select>
       </div>
     `).join('');
-    if (answered) {
-      const ansMap = Object.fromEntries(t.submission.answer);
-      body.querySelectorAll('select').forEach(sel => {
-        sel.value = ansMap[sel.dataset.left] ?? '';
-      });
+    if (lastAttempt) {
+      const ansMap = Object.fromEntries(lastAttempt.answer);
+      body.querySelectorAll('select').forEach(sel => { sel.value = ansMap[sel.dataset.left] ?? ''; });
     }
-    getAnswer = () => [...body.querySelectorAll('select')].map(sel =>
-      [Number(sel.dataset.left), Number(sel.value)]
-    );
+    getAnswer = () => [...body.querySelectorAll('select')].map(sel => [Number(sel.dataset.left), Number(sel.value)]);
   }
 
   else if (t.type === 'cloze') {
     let i = 0;
     const html = t.promptTemplate.replace(/___/g, () => {
       const bi = i++;
-      const val = answered ? (t.submission.answer[bi] ?? '') : '';
-      return `<input type="text" data-b="${bi}" value="${escapeHtml(val)}" ${answered ? 'disabled' : ''}/>`;
+      const val = lastAttempt ? (lastAttempt.answer[bi] ?? '') : '';
+      return `<input type="text" data-b="${bi}" value="${escapeHtml(val)}" ${disabled ? 'disabled' : ''}/>`;
     });
     body.innerHTML = `<div class="cloze-text">${html}</div>`;
     getAnswer = () => [...body.querySelectorAll('input')].map(inp => inp.value);
   }
 
-  if (!answered) {
+  // история попыток
+  if (attempts.length > 0) {
+    const info = document.createElement('div');
+    info.className = 'attempts-badge';
+    info.textContent = locked
+      ? `Попытки исчерпаны (${attempts.length} из 3)`
+      : awaitingManual
+        ? 'Ответ отправлен, ждёт проверки родителем'
+        : `Попытка ${attempts.length} из 3`;
+    card.appendChild(info);
+  }
+
+  if (!disabled) {
     const btn = document.createElement('button');
     btn.className = 'submit-btn';
-    btn.textContent = 'Проверить';
+    btn.textContent = attempts.length > 0 ? 'Попробовать ещё раз' : 'Проверить';
     btn.onclick = async () => {
       btn.disabled = true;
       try {
-        const res = await api(`/api/tasks/${t.id}/submit`, {
-          method: 'POST',
-          body: JSON.stringify({ answer: getAnswer() }),
-        });
+        const res = await api(`/api/tasks/${t.id}/submit`, { method: 'POST', body: JSON.stringify({ answer: getAnswer() }) });
         showResult(card, res);
-        setTimeout(render, 600);
+        setTimeout(() => load(true), 700);
       } catch (e) {
         btn.disabled = false;
       }
     };
     card.appendChild(btn);
-  } else {
-    showResult(card, { isCorrect: t.submission.isCorrect, explanation: t.explanation });
+  } else if (lastAttempt) {
+    showResult(card, { isCorrect: lastAttempt.isCorrect, explanation: t.explanation });
   }
 
   return card;
 }
 
 function paintChoiceSingle(btns, t) {
+  const lastAttempt = t.attempts[t.attempts.length - 1];
   btns.forEach(b => {
     const i = Number(b.dataset.i);
     if (i === t.correctIndex) b.classList.add('correct');
-    else if (i === t.submission.answer) b.classList.add('wrong');
+    else if (lastAttempt && i === lastAttempt.answer) b.classList.add('wrong');
   });
 }
 function paintChoiceMultiple(btns, t) {
+  const lastAttempt = t.attempts[t.attempts.length - 1];
   const correctSet = new Set(t.correctIndices);
-  const givenSet = new Set(t.submission.answer);
+  const givenSet = new Set(lastAttempt ? lastAttempt.answer : []);
   btns.forEach(b => {
     const i = Number(b.dataset.i);
     if (correctSet.has(i)) b.classList.add('correct');
@@ -169,7 +244,7 @@ function showResult(card, res) {
     badge.textContent = '📝 Ответ сохранён, ждёт проверки родителем';
   } else {
     badge.className = 'result-badge ' + (res.isCorrect ? 'correct' : 'wrong');
-    badge.textContent = res.isCorrect ? '✅ Верно!' : '❌ Неверно';
+    badge.textContent = res.isCorrect ? '✅ Верно!' : (res.locked ? '❌ Неверно. Попытки закончились.' : '❌ Неверно, попробуй ещё раз');
   }
   card.appendChild(badge);
   if (res.explanation) {
@@ -180,7 +255,7 @@ function showResult(card, res) {
   }
 }
 
-render();
+load();
 </script>
 </body>
 </html>

@@ -6,6 +6,9 @@ const Database = require('better-sqlite3');
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
+const UPLOADS_DIR = path.join(DATA_DIR, 'uploads');
+if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+
 const db = new Database(path.join(DATA_DIR, 'app.db'));
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
@@ -17,11 +20,17 @@ CREATE TABLE IF NOT EXISTS users (
   password_hash TEXT NOT NULL,
   role TEXT NOT NULL CHECK(role IN ('admin','parent','child')),
   display_name TEXT NOT NULL,
+  avatar_path TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
--- Кто из родителей видит какого ребёнка. Одного ребёнка может видеть несколько
--- родителей (например, родитель-создатель + доступ, выданный админом вручную).
+-- Глобальные настройки приложения (favicon и т.п.), простая таблица ключ-значение
+CREATE TABLE IF NOT EXISTS app_settings (
+  key TEXT PRIMARY KEY,
+  value TEXT
+);
+
+-- Кто из родителей видит какого ребёнка.
 CREATE TABLE IF NOT EXISTS parent_child (
   parent_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   child_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -30,18 +39,24 @@ CREATE TABLE IF NOT EXISTS parent_child (
   PRIMARY KEY (parent_id, child_id)
 );
 
+-- Задание существует независимо от того, кому оно назначено ("библиотека заданий").
 CREATE TABLE IF NOT EXISTS assignments (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   subject TEXT NOT NULL,
   title TEXT NOT NULL,
+  reward TEXT,
   created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
--- Каждое задание явно назначается конкретным детям (выбирает тот, кто его добавил).
+-- Назначение задания конкретному ребёнку: можно скрыть (без потери прогресса)
+-- и отметить, что награда выдана.
 CREATE TABLE IF NOT EXISTS assignment_children (
   assignment_id INTEGER NOT NULL REFERENCES assignments(id) ON DELETE CASCADE,
   child_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  hidden INTEGER NOT NULL DEFAULT 0,
+  reward_given INTEGER NOT NULL DEFAULT 0,
+  assigned_at TEXT NOT NULL DEFAULT (datetime('now')),
   PRIMARY KEY (assignment_id, child_id)
 );
 
@@ -53,33 +68,96 @@ CREATE TABLE IF NOT EXISTS tasks (
   data TEXT NOT NULL -- JSON, содержит правильные ответы, доступен только серверу/родителю
 );
 
+-- Каждая попытка ребёнка хранится отдельной строкой (до 3 попыток на задание).
 CREATE TABLE IF NOT EXISTS submissions (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   task_id INTEGER NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
   child_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  answer TEXT NOT NULL, -- JSON ответа ребёнка
+  attempt_number INTEGER NOT NULL,
+  answer TEXT NOT NULL,
   is_correct INTEGER, -- 0/1, или NULL если ждёт ручной проверки родителем
-  submitted_at TEXT NOT NULL DEFAULT (datetime('now')),
-  UNIQUE(task_id, child_id)
+  manually_graded INTEGER NOT NULL DEFAULT 0,
+  submitted_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+CREATE INDEX IF NOT EXISTS idx_submissions_task_child ON submissions(task_id, child_id);
 `);
+
+// ---------- миграция со старой схемы (submissions с UNIQUE(task_id,child_id)) ----------
+try {
+  const cols = db.prepare("PRAGMA table_info(submissions)").all();
+  const hasAttempt = cols.some((c) => c.name === 'attempt_number');
+  if (!hasAttempt) {
+    console.log('Миграция: обновляю таблицу submissions под множественные попытки...');
+    db.exec(`
+      ALTER TABLE submissions RENAME TO submissions_old;
+      CREATE TABLE submissions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        task_id INTEGER NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
+        child_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        attempt_number INTEGER NOT NULL,
+        answer TEXT NOT NULL,
+        is_correct INTEGER,
+        manually_graded INTEGER NOT NULL DEFAULT 0,
+        submitted_at TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+      INSERT INTO submissions (task_id, child_id, attempt_number, answer, is_correct, submitted_at)
+        SELECT task_id, child_id, 1, answer, is_correct, submitted_at FROM submissions_old;
+      DROP TABLE submissions_old;
+      CREATE INDEX IF NOT EXISTS idx_submissions_task_child ON submissions(task_id, child_id);
+    `);
+  }
+} catch (e) {
+  console.error('Ошибка миграции submissions (можно игнорировать на первом запуске):', e.message);
+}
+
+try {
+  const acCols = db.prepare("PRAGMA table_info(assignment_children)").all();
+  if (acCols.length && !acCols.some((c) => c.name === 'hidden')) {
+    db.exec(`ALTER TABLE assignment_children ADD COLUMN hidden INTEGER NOT NULL DEFAULT 0;`);
+    db.exec(`ALTER TABLE assignment_children ADD COLUMN reward_given INTEGER NOT NULL DEFAULT 0;`);
+  }
+  const aCols = db.prepare("PRAGMA table_info(assignments)").all();
+  if (aCols.length && !aCols.some((c) => c.name === 'reward')) {
+    db.exec(`ALTER TABLE assignments ADD COLUMN reward TEXT;`);
+  }
+  const uCols = db.prepare("PRAGMA table_info(users)").all();
+  if (uCols.length && !uCols.some((c) => c.name === 'avatar_path')) {
+    db.exec(`ALTER TABLE users ADD COLUMN avatar_path TEXT;`);
+  }
+} catch (e) {
+  console.error('Ошибка миграции столбцов (можно игнорировать на первом запуске):', e.message);
+}
 
 function seedAdmin() {
   const count = db.prepare('SELECT COUNT(*) c FROM users').get().c;
-  if (count > 0) return;
-
   const username = process.env.ADMIN_USERNAME || 'admin';
   const password = process.env.ADMIN_PASSWORD || 'changeme';
   const name = process.env.ADMIN_NAME || 'Администратор';
 
-  db.prepare(
-    'INSERT INTO users (username, password_hash, role, display_name) VALUES (?,?,?,?)'
-  ).run(username, bcrypt.hashSync(password, 10), 'admin', name);
+  if (count === 0) {
+    db.prepare(
+      'INSERT INTO users (username, password_hash, role, display_name) VALUES (?,?,?,?)'
+    ).run(username, bcrypt.hashSync(password, 10), 'admin', name);
+    console.log(`Создан администратор "${username}". Войдите под этой учёткой и создайте` +
+      ' аккаунты родителей и детей в панели администратора.');
+    return;
+  }
 
-  console.log(`Создан администратор "${username}". Войдите под этой учёткой и создайте` +
-    ' аккаунты родителей и детей в панели администратора.');
+  // Явный сброс пароля администратора из переменной окружения (например, если забыли пароль):
+  // поставьте RESET_ADMIN_PASSWORD=true в .env и перезапустите контейнер.
+  if (String(process.env.RESET_ADMIN_PASSWORD).toLowerCase() === 'true') {
+    const admin = db.prepare("SELECT * FROM users WHERE username=? AND role='admin'").get(username);
+    if (admin) {
+      db.prepare('UPDATE users SET password_hash=? WHERE id=?').run(bcrypt.hashSync(password, 10), admin.id);
+      console.log(`Пароль администратора "${username}" сброшен из переменной ADMIN_PASSWORD.` +
+        ' Не забудьте убрать RESET_ADMIN_PASSWORD из .env после этого.');
+    } else {
+      console.log(`RESET_ADMIN_PASSWORD=true, но пользователь "${username}" с ролью admin не найден — пропускаю.`);
+    }
+  }
 }
 
 seedAdmin();
 
 module.exports = db;
+module.exports.UPLOADS_DIR = UPLOADS_DIR;

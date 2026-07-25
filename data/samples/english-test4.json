@@ -1,0 +1,735 @@
+{
+  "subject": "english",
+  "title": "English — Test 4 (Lessons 23-27), Воронова",
+  "tasks": [
+    {
+      "type": "cloze",
+      "promptTemplate": "№1. My sister liked to play ___ her toys.",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "with"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "№2. You like to go ___ a walk with me.",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "for"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "№3. What do you usually eat ___ breakfast?",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "for"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "№4. We live ___ Russia.",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "in"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "№5. Yesterday I cleaned my teeth ___ the morning.",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "in"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "№6. I usually watch TV ___ night.",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "at"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "№7. Did you skate ___ the stadium yesterday?",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "at"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№1. What ___ in your hands?",
+      "options": [
+        "have you got",
+        "you have got"
+      ],
+      "correctIndex": 0,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№2. My teacher usually ___ 'Hi' when she sees me.",
+      "options": [
+        "say",
+        "says"
+      ],
+      "correctIndex": 1,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№3. I ___ very hungry yesterday.",
+      "options": [
+        "am",
+        "was"
+      ],
+      "correctIndex": 1,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№4. You ___ three hamburgers and two pizzas for lunch yesterday.",
+      "options": [
+        "eat",
+        "ate"
+      ],
+      "correctIndex": 1,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№5. My father ___ vegetable soup but he likes to grow vegetables.",
+      "options": [
+        "doesn't like",
+        "didn't like"
+      ],
+      "correctIndex": 0,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№6. They ___ hungry and didn't have supper in the evening.",
+      "options": [
+        "aren't",
+        "weren't"
+      ],
+      "correctIndex": 1,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№7. ___ you at school yesterday? — No, I wasn't.",
+      "options": [
+        "Was",
+        "Were"
+      ],
+      "correctIndex": 1,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№1. Make negative: He made soup without meat.",
+      "acceptedAnswers": [
+        "He didn't make soup without meat.",
+        "He didn't make soup without meat"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№2. Make negative: My mother ate salad with bread.",
+      "acceptedAnswers": [
+        "My mother didn't eat salad with bread.",
+        "My mother didn't eat salad with bread"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№3. Make negative: Jill bought sweet carrots yesterday.",
+      "acceptedAnswers": [
+        "Jill didn't buy sweet carrots yesterday.",
+        "Jill didn't buy sweet carrots yesterday"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№4. Make negative: My parents came home at eight.",
+      "acceptedAnswers": [
+        "My parents didn't come home at eight.",
+        "My parents didn't come home at eight"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№5. Make negative: You gave me your puppy.",
+      "acceptedAnswers": [
+        "You didn't give me your puppy.",
+        "You didn't give me your puppy"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№6. Make negative: They played leapfrog yesterday.",
+      "acceptedAnswers": [
+        "They didn't play leapfrog yesterday.",
+        "They didn't play leapfrog yesterday"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№7. Make negative: Mary drank apple juice yesterday.",
+      "acceptedAnswers": [
+        "Mary didn't drink apple juice yesterday.",
+        "Mary didn't drink apple juice yesterday"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№1. Translate into English (Past Simple): Маленький мальчик купил мороженое.",
+      "acceptedAnswers": [
+        "A little boy bought ice cream.",
+        "A little boy bought ice cream."
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№2. Translate into English (Past Simple): Маленький мальчик купил мороженое?",
+      "acceptedAnswers": [
+        "Did a little boy buy ice cream?",
+        "Did a little boy buy ice cream?"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№3. Translate into English (Past Simple): Папа приготовил вкусный суп.",
+      "acceptedAnswers": [
+        "Father made tasty soup.",
+        "Father made tasty soup."
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№4. Translate into English (Past Simple): Папа приготовил вкусный суп?",
+      "acceptedAnswers": [
+        "Did Father make tasty soup?",
+        "Did Father make tasty soup?"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№5. Translate into English (Past Simple): Ты съел фруктовый салат вчера.",
+      "acceptedAnswers": [
+        "You ate fruit salad yesterday.",
+        "You ate fruit salad yesterday."
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№6. Translate into English (Past Simple): Ты съел фруктовый салат вчера?",
+      "acceptedAnswers": [
+        "Did you eat fruit salad yesterday?",
+        "Did you eat fruit salad yesterday?"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№7. Translate into English (Past Simple): Мама пила яблочный сок.",
+      "acceptedAnswers": [
+        "Mother drank apple juice.",
+        "Mother drank apple juice."
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№8. Translate into English (Past Simple): Мама пила яблочный сок?",
+      "acceptedAnswers": [
+        "Did Mother drink apple juice?",
+        "Did Mother drink apple juice?"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№1. Make up the question: my porridge, where, is?",
+      "acceptedAnswers": [
+        "Where is my porridge?",
+        "Where is my porridge"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№2. Make up the question: was, my hamster, cold in winter?",
+      "acceptedAnswers": [
+        "Was my hamster cold in winter?",
+        "Was my hamster cold in winter"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№3. Make up the question: red, orange, or, were, the flowers?",
+      "acceptedAnswers": [
+        "Were the flowers red or orange?",
+        "Were the flowers red or orange"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№4. Make up the question: how old, you, are?",
+      "acceptedAnswers": [
+        "How old are you?",
+        "How old are you"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№5. Make up the question: were, you, out, yesterday, why?",
+      "acceptedAnswers": [
+        "Why were you out yesterday?",
+        "Why were you out yesterday"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№6. Make up the question: why, you, always, for school, are, late?",
+      "acceptedAnswers": [
+        "Why are you always late for school?",
+        "Why are you always late for school"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№7. Make up the question: are, fruit, tomatoes?",
+      "acceptedAnswers": [
+        "Are tomatoes fruit?",
+        "Are tomatoes fruit"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "matching",
+      "prompt": "Match the questions with the answers.",
+      "left": [
+        "Where is he from?",
+        "How were you yesterday?",
+        "Were you a pupil last year?",
+        "Who are they?",
+        "What colour is your horse?",
+        "Where were you yesterday night?",
+        "What was that?",
+        "Where is your puppy?"
+      ],
+      "right": [
+        "He is from Great Britain.",
+        "I was not fine. I was very ill.",
+        "No, I wasn't. I was five.",
+        "They are my aunts.",
+        "It is black and white.",
+        "We were in.",
+        "It was my cat.",
+        "It is under the chair."
+      ],
+      "correctPairs": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          3,
+          3
+        ],
+        [
+          4,
+          4
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          6,
+          6
+        ],
+        [
+          7,
+          7
+        ]
+      ],
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "Прочитай текст:\n\nHow Can I Eat?\n\nStuart the mouse lives in an American family, the Littles.\nOne morning the family is at the breakfast table but Stuart is not. He looks very unhappy now.\n\"Let's call the doctor! Stuart is ill,\" Mrs. Little says.\n\"Look! The bananas are very nice and the apples are red,\" Mr. Little says.\n\"I think I can't eat now,\" Stuart says. \"I cleaned my teeth in the morning. And if I eat, they...\"\n\"You can clean your teeth after breakfast again,\" Mrs. Little says. \"We can clean our teeth every day and many times a day.\"\n\"Fine! Now I want to eat three apples and two bananas.\"\n\"Oh, yes! Here you are!\"\n\"But he is not a good mouse. He didn't clean his teeth in the evening!\" George the boy says.\n\"You didn't see it but I did!\" Stuart says.",
+      "acceptedAnswers": [],
+      "needsManualReview": true,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№1. True, false, or I don't know? The Littles live in a big house.",
+      "options": [
+        "True",
+        "False",
+        "I don't know"
+      ],
+      "correctIndex": 0,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№2. True, false, or I don't know? Stuart is not a boy, he is a mouse.",
+      "options": [
+        "True",
+        "False",
+        "I don't know"
+      ],
+      "correctIndex": 0,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№3. True, false, or I don't know? Stuart can't eat this morning. He is ill today.",
+      "options": [
+        "True",
+        "False",
+        "I don't know"
+      ],
+      "correctIndex": 1,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№4. True, false, or I don't know? Stuart didn't wash his hands in the morning.",
+      "options": [
+        "True",
+        "False",
+        "I don't know"
+      ],
+      "correctIndex": 2,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№5. True, false, or I don't know? Stuart wants to have his teeth clean.",
+      "options": [
+        "True",
+        "False",
+        "I don't know"
+      ],
+      "correctIndex": 0,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№6. True, false, or I don't know? Stuart washed his face in the evening.",
+      "options": [
+        "True",
+        "False",
+        "I don't know"
+      ],
+      "correctIndex": 2,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№7. True, false, or I don't know? Stuart is afraid to eat with clean teeth.",
+      "options": [
+        "True",
+        "False",
+        "I don't know"
+      ],
+      "correctIndex": 0,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№1. Are you a family of ___?",
+      "options": [
+        "America",
+        "Russian",
+        "five"
+      ],
+      "correctIndex": 2,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№2. Who did you play with? — I played with my ___.",
+      "options": [
+        "dog",
+        "grandfather",
+        "ball"
+      ],
+      "correctIndex": 1,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№3. Did you go to the ___ yesterday?",
+      "options": [
+        "volleyball",
+        "stadium",
+        "grandmother"
+      ],
+      "correctIndex": 1,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№4. Tomatoes are ___.",
+      "options": [
+        "animals",
+        "fruit",
+        "leaves"
+      ],
+      "correctIndex": 1,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№5. Do bananas ___ in Russia?",
+      "options": [
+        "buy",
+        "eat",
+        "grow"
+      ],
+      "correctIndex": 2,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№6. Do you want a glass of ___?",
+      "options": [
+        "soup",
+        "fruit",
+        "juice"
+      ],
+      "correctIndex": 2,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№7. You can't make fruit salad without ___.",
+      "options": [
+        "fruit",
+        "meat",
+        "salad"
+      ],
+      "correctIndex": 0,
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "Complete the dialogue, line 1: Good evening, dear! (1)___ today?",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "What's for dinner"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "Complete the dialogue, line 2: But I (2)___ fish, you know.",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "don't like"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "Complete the dialogue, line 3: Well, (3)___. Then you can have a glass of orange juice.",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "I am sorry"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "Complete the dialogue, line 4: And then you can eat (4)___.",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "some sweets"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "Complete the dialogue, line 5: Thank you very much, my dear. But I am (5)___.",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "very hungry"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "Complete the dialogue, line 6: Would you like meat and spaghetti, salad and pudding? — (6)___",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "I'd love to"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№1. Spell the word from its transcription (see textbook page).",
+      "acceptedAnswers": [
+        "animal"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№2. Spell the word from its transcription (see textbook page).",
+      "acceptedAnswers": [
+        "carrot"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№3. Spell the word from its transcription (see textbook page).",
+      "acceptedAnswers": [
+        "vegetable"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№4. Spell the word from its transcription (see textbook page).",
+      "acceptedAnswers": [
+        "hungry"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№5. Spell the word from its transcription (see textbook page).",
+      "acceptedAnswers": [
+        "make"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№6. Spell the word from its transcription (see textbook page).",
+      "acceptedAnswers": [
+        "thirsty"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№7. Spell the word from its transcription (see textbook page).",
+      "acceptedAnswers": [
+        "potato"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    }
+  ]
+}

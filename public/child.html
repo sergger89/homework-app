@@ -9,7 +9,10 @@
 <body>
   <div class="topbar">
     <h1 id="greeting">📚 Мои задания</h1>
-    <button onclick="logout()">Выйти</button>
+    <div style="display:flex; gap:8px; align-items:center">
+      <button onclick="window.location.href='/profile.html'">Профиль</button>
+      <button onclick="logout()">Выйти</button>
+    </div>
   </div>
   <div class="container">
     <div id="list" class="assignment-list"></div>
@@ -20,7 +23,10 @@ requireRole('child');
 
 async function load() {
   const me = await api('/api/me');
-  document.getElementById('greeting').textContent = `📚 Привет, ${me.user.name}!`;
+  document.getElementById('greeting').innerHTML =
+    avatarHtml(me.user.name, me.user.avatarPath, 32) + ` <span style="margin-left:8px">Привет, ${escapeHtml(me.user.name)}!</span>`;
+  document.getElementById('greeting').style.display = 'flex';
+  document.getElementById('greeting').style.alignItems = 'center';
 
   const { assignments } = await api('/api/assignments');
   const list = document.getElementById('list');
@@ -41,6 +47,7 @@ async function load() {
         <div><strong>${escapeHtml(a.title)}</strong></div>
         <div class="progress-bar"><div style="width:${pct}%"></div></div>
         <div class="muted">${a.doneTasks} из ${a.totalTasks} выполнено${done ? ' ✅' : ''}</div>
+        ${a.reward ? `<div class="reward-banner" style="margin-top:8px">🎁 ${escapeHtml(a.reward)}${a.rewardGiven ? ' <span class="given">(получено!)</span>' : ''}</div>` : ''}
       </div>
     `;
     list.appendChild(div);

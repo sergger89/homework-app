@@ -1,0 +1,882 @@
+{
+  "subject": "english",
+  "title": "English — Test 3 (Lessons 16-22), Воронова",
+  "tasks": [
+    {
+      "type": "cloze",
+      "promptTemplate": "№1. We clean our teeth at 8 every day. — Yesterday we ___ our teeth at 8 too.",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "cleaned"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "№2. I play with my toys every morning. — Yesterday I ___ with my toys too.",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "played"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "№3. She always skips with her friends. — Yesterday she ___ with her friends too.",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "skipped"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "№4. My mother drinks tea every morning. — Yesterday she ___ tea in the morning too.",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "drank"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "№5. We eat porridge every day. — Yesterday we ___ porridge too.",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "ate"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "№6. You get up at 7 every day. — Yesterday you ___ at 7 too.",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "got up"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "№7. They come home at 3 o'clock. — Yesterday they ___ home at 3 o'clock too.",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "came"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№1. Напиши форму глагола в Past Simple: иметь (have)",
+      "acceptedAnswers": [
+        "had"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№2. Напиши форму глагола в Past Simple: давать (give)",
+      "acceptedAnswers": [
+        "gave"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№3. Напиши форму глагола в Past Simple: идти (go)",
+      "acceptedAnswers": [
+        "went"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№4. Напиши форму глагола в Past Simple: видеть (see)",
+      "acceptedAnswers": [
+        "saw"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№5. Напиши форму глагола в Past Simple: сказать (say)",
+      "acceptedAnswers": [
+        "said"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№6. Напиши форму глагола в Past Simple: приходить (come)",
+      "acceptedAnswers": [
+        "came"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№7. Напиши форму глагола в Past Simple: взять (take)",
+      "acceptedAnswers": [
+        "took"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№8. Напиши форму глагола в Past Simple: положить (put)",
+      "acceptedAnswers": [
+        "put"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№9. Напиши форму глагола в Past Simple: пить (drink)",
+      "acceptedAnswers": [
+        "drank"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№10. Напиши форму глагола в Past Simple: есть, кушать (eat)",
+      "acceptedAnswers": [
+        "ate"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№1. Put a general question to: Mother gave us milk for breakfast yesterday.",
+      "acceptedAnswers": [
+        "Did Mother give us milk for breakfast yesterday?",
+        "Did Mother give us milk for breakfast yesterday"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№1. Put a special question to: Mother gave us milk for breakfast yesterday.",
+      "acceptedAnswers": [
+        "What did Mother give us for breakfast yesterday?",
+        "What did Mother give us for breakfast yesterday"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№2. Put a general question to: You got up at 6 yesterday morning.",
+      "acceptedAnswers": [
+        "Did you get up at 6 yesterday morning?",
+        "Did you get up at 6 yesterday morning"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№2. Put a special question to: You got up at 6 yesterday morning.",
+      "acceptedAnswers": [
+        "When did you get up yesterday morning?",
+        "When did you get up yesterday morning"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№3. Put a general question to: Helen played chess with you yesterday morning.",
+      "acceptedAnswers": [
+        "Did Helen play chess with you yesterday morning?",
+        "Did Helen play chess with you yesterday morning"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№3. Put a special question to: Helen played chess with you yesterday morning.",
+      "acceptedAnswers": [
+        "With whom did Helen play chess yesterday morning?",
+        "With whom did Helen play chess yesterday morning"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№4. Put a general question to: My friend's aunt lived in London.",
+      "acceptedAnswers": [
+        "Did my friend's aunt live in London?",
+        "Did my friend's aunt live in London"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№4. Put a special question to: My friend's aunt lived in London.",
+      "acceptedAnswers": [
+        "Where did my friend's aunt live?",
+        "Where did my friend's aunt live"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№5. Put a general question to: We saw our teacher in the Zoo yesterday.",
+      "acceptedAnswers": [
+        "Did we see our teacher in the Zoo yesterday?",
+        "Did we see our teacher in the Zoo yesterday"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№5. Put a special question to: We saw our teacher in the Zoo yesterday.",
+      "acceptedAnswers": [
+        "Whom did we see in the Zoo yesterday?",
+        "Whom did we see in the Zoo yesterday"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№1. He washed his hands and face but he didn't ___ a shower.",
+      "options": [
+        "take",
+        "takes",
+        "taking"
+      ],
+      "correctIndex": 0,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№2. We often ___ in winter.",
+      "options": [
+        "skate",
+        "skated",
+        "are skating"
+      ],
+      "correctIndex": 0,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№3. Mr Brown ___ chess with his friend yesterday.",
+      "options": [
+        "is playing",
+        "play",
+        "played"
+      ],
+      "correctIndex": 2,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№4. Did you ___ your teeth yesterday morning?",
+      "options": [
+        "cleaned",
+        "clean",
+        "cleans"
+      ],
+      "correctIndex": 1,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№5. ___ you like to have a glass of juice? — Yes, please.",
+      "options": [
+        "Do",
+        "Would",
+        "Are"
+      ],
+      "correctIndex": 1,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№6. Yesterday evening my uncle ___ watch TV.",
+      "options": [
+        "doesn't",
+        "don't",
+        "did not"
+      ],
+      "correctIndex": 2,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№7. We are going ___ walk now.",
+      "options": [
+        "on",
+        "on a",
+        "for a"
+      ],
+      "correctIndex": 2,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№1. Mike ___ to play football last year.",
+      "options": [
+        "likes",
+        "liked"
+      ],
+      "correctIndex": 1,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№2. She ___ to ride a bike every day.",
+      "options": [
+        "likes",
+        "liked"
+      ],
+      "correctIndex": 0,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№3. Did you ___ your hands in the morning? — No, I didn't.",
+      "options": [
+        "wash",
+        "washed"
+      ],
+      "correctIndex": 0,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№4. I didn't ___ to play chess.",
+      "options": [
+        "like",
+        "liked"
+      ],
+      "correctIndex": 0,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№5. Bill ___ want to go to skate yesterday afternoon.",
+      "options": [
+        "doesn't",
+        "didn't"
+      ],
+      "correctIndex": 1,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№6. Yesterday my friend ___ his mother about the house.",
+      "options": [
+        "help",
+        "helped"
+      ],
+      "correctIndex": 1,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№7. What ___ you read yesterday evening?",
+      "options": [
+        "do",
+        "did"
+      ],
+      "correctIndex": 1,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№1. Переведи на английский: Я помогаю маме по дому.",
+      "acceptedAnswers": [
+        "I help my mother about the house.",
+        "I help my mother about the house"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№2. Переведи на английский: Мои сёстры умывались вчера утром.",
+      "acceptedAnswers": [
+        "My sisters washed their hands and face yesterday morning.",
+        "My sisters washed their hands and face yesterday morning"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№3. Переведи на английский: Вчера ты помог мне сделать уроки.",
+      "acceptedAnswers": [
+        "You helped me to do my homework yesterday.",
+        "You helped me to do my homework yesterday"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№4. Переведи на английский: Ты любишь кататься на коньках.",
+      "acceptedAnswers": [
+        "You like to skate.",
+        "You like to skate"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№5. Переведи на английский: Мои сёстры любили смотреть телевизор.",
+      "acceptedAnswers": [
+        "My sisters liked to watch TV.",
+        "My sisters liked to watch TV"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№6. Переведи на английский: Я наблюдаю за животными в зоопарке.",
+      "acceptedAnswers": [
+        "I watch animals in the Zoo.",
+        "I watch animals in the Zoo"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№7. Переведи на английский: Ты смотрел вчера телевизор.",
+      "acceptedAnswers": [
+        "You watched TV yesterday.",
+        "You watched TV yesterday"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№8. Переведи на английский: Мой брат и я моем руки дома.",
+      "acceptedAnswers": [
+        "My brother and I wash our hands at home.",
+        "My brother and I wash our hands at home"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "Прочитай текст:\n\nStuart Little and Snowball\n\nStuart, the mouse, lives in an American family. Every morning he washes his hands and face, cleans his teeth. Then he dresses and goes for a walk about the house. He sees Snowball, the cat.\n\"Now I want to do my morning exercises,\" says Stuart to Snowball.\n\"No, I don't want it!\"\n\"Why not? Let's do exercises!\"\n\"No, I don't like it at all!\"\n\"Oh, what about your teeth?\" says Stuart.\n\"My teeth... They are OK. They are big and...\"\n\"But they are not white... Go and clean them!\"\nNow Snowball is angry. He is coming to Stuart and the mouse can see the cat's big teeth.\n\"Ha, ha! They look like big yellow bananas!\"\nStuart isn't afraid of Snowball.",
+      "acceptedAnswers": [],
+      "needsManualReview": true,
+      "explanation": null
+    },
+    {
+      "type": "matching",
+      "prompt": "Put the sentences in the right order (сопоставь предложение с номером его места в правильном порядке).",
+      "left": [
+        "Stuart tells Snowball to go and clean his teeth.",
+        "Snowball is angry with Stuart.",
+        "Stuart sees that Snowball's teeth are not white.",
+        "Stuart lives in an American family.",
+        "Stuart wants to do exercises but Snowball doesn't want it.",
+        "Every morning Stuart dresses and goes for a walk about the house.",
+        "Stuart sees Snowball."
+      ],
+      "right": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7"
+      ],
+      "correctPairs": [
+        [
+          0,
+          5
+        ],
+        [
+          1,
+          6
+        ],
+        [
+          2,
+          4
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          4,
+          3
+        ],
+        [
+          5,
+          1
+        ],
+        [
+          6,
+          2
+        ]
+      ],
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№1. Cross the odd one out: morning, yesterday, night, afternoon, evening",
+      "options": [
+        "morning",
+        "yesterday",
+        "night",
+        "afternoon",
+        "evening"
+      ],
+      "correctIndex": 1,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№2. Cross the odd one out: milk, tea, apple, coffee, juice",
+      "options": [
+        "milk",
+        "tea",
+        "apple",
+        "coffee",
+        "juice"
+      ],
+      "correctIndex": 2,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№3. Cross the odd one out: run, skip, walk, swim, sport",
+      "options": [
+        "run",
+        "skip",
+        "walk",
+        "swim",
+        "sport"
+      ],
+      "correctIndex": 4,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№4. Cross the odd one out: food, breakfast, dinner, lunch, supper",
+      "options": [
+        "food",
+        "breakfast",
+        "dinner",
+        "lunch",
+        "supper"
+      ],
+      "correctIndex": 0,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№5. Cross the odd one out: have, see, come, play, go",
+      "options": [
+        "have",
+        "see",
+        "come",
+        "play",
+        "go"
+      ],
+      "correctIndex": 3,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№6. Cross the odd one out: sweet, cup, cookie, egg, porridge",
+      "options": [
+        "sweet",
+        "cup",
+        "cookie",
+        "egg",
+        "porridge"
+      ],
+      "correctIndex": 1,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№7. Cross the odd one out: dentist, engineer, worker, baby, driver",
+      "options": [
+        "dentist",
+        "engineer",
+        "worker",
+        "baby",
+        "driver"
+      ],
+      "correctIndex": 3,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№1. They played chess ___.",
+      "options": [
+        "now",
+        "today",
+        "yesterday"
+      ],
+      "correctIndex": 2,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№2. My father and my mother ___ TV every day.",
+      "options": [
+        "watch",
+        "wash",
+        "see"
+      ],
+      "correctIndex": 0,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№3. Puppies and their mother live in the ___.",
+      "options": [
+        "sports ground",
+        "bag",
+        "doghouse"
+      ],
+      "correctIndex": 2,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№4. An apple a day keeps ___ away.",
+      "options": [
+        "a teacher",
+        "a dentist",
+        "a doctor"
+      ],
+      "correctIndex": 2,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№5. Boys and girls like to eat ___.",
+      "options": [
+        "cats and dogs",
+        "sweets and apples",
+        "frogs and dolphins"
+      ],
+      "correctIndex": 1,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№6. ___ are very good for our teeth.",
+      "options": [
+        "Apples",
+        "Sweets",
+        "English toys"
+      ],
+      "correctIndex": 0,
+      "explanation": null
+    },
+    {
+      "type": "choice_single",
+      "prompt": "№7. A friend in need is a ___ indeed.",
+      "options": [
+        "teacher",
+        "farmer",
+        "friend"
+      ],
+      "correctIndex": 2,
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "№1. Don't ___ this banana. Can't you see that it is green and very bad?",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "eat"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "№2. It is nine o'clock in the ___.",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "evening"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "№3. Do you like ___ with milk? — Yes, I like it very much.",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "tea"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "№4. I usually ___ a glass of orange juice in the morning.",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "drink"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "№5. My sister always has coffee with ___ for lunch.",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "milk"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "№6. My grandmother always has a ___ of apple juice at breakfast.",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "glass"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "cloze",
+      "promptTemplate": "№7. She doesn't have porridge for ___.",
+      "blanks": [
+        {
+          "acceptedAnswers": [
+            "dinner"
+          ]
+        }
+      ],
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№1. Spell the word from its transcription (see textbook page).",
+      "acceptedAnswers": [
+        "juice"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№2. Spell the word from its transcription (see textbook page).",
+      "acceptedAnswers": [
+        "tea"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№3. Spell the word from its transcription (see textbook page).",
+      "acceptedAnswers": [
+        "glass"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№4. Spell the word from its transcription (see textbook page).",
+      "acceptedAnswers": [
+        "apple"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№5. Spell the word from its transcription (see textbook page).",
+      "acceptedAnswers": [
+        "sweet"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№6. Spell the word from its transcription (see textbook page).",
+      "acceptedAnswers": [
+        "coffee"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    },
+    {
+      "type": "open_text",
+      "prompt": "№7. Spell the word from its transcription (see textbook page).",
+      "acceptedAnswers": [
+        "porridge"
+      ],
+      "needsManualReview": false,
+      "explanation": null
+    }
+  ]
+}

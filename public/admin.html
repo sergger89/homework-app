@@ -9,8 +9,9 @@
 <body>
   <div class="topbar">
     <h1>🛠️ Панель администратора</h1>
-    <div style="display:flex; gap:8px">
+    <div style="display:flex; gap:8px; flex-wrap:wrap">
       <button onclick="window.location.href='/parent.html'">Просмотр прогресса</button>
+      <button onclick="window.location.href='/profile.html'">Профиль</button>
       <button onclick="logout()">Выйти</button>
     </div>
   </div>
@@ -19,34 +20,27 @@
       <button id="tabUsers" class="active">Пользователи</button>
       <button id="tabCreate">Создать аккаунт</button>
       <button id="tabAccess">Доступ родителей к детям</button>
+      <button id="tabSettings">Настройки приложения</button>
     </div>
 
     <div id="viewUsers"></div>
 
     <div id="viewCreate" style="display:none">
       <h3>Создать новый аккаунт</h3>
-      <form id="createUserForm" style="display:flex; flex-direction:column; gap:10px; max-width:360px">
+      <form id="createUserForm" class="field-row" style="max-width:360px">
         <label class="muted">Роль
-          <select id="newRole" style="width:100%; padding:8px; border-radius:8px; border:1px solid #dfe3ec">
+          <select id="newRole">
             <option value="parent">Родитель</option>
             <option value="child">Ребёнок</option>
             <option value="admin">Администратор</option>
           </select>
         </label>
-        <label class="muted">Имя (отображается в интерфейсе)
-          <input type="text" id="newDisplayName" required style="width:100%; padding:8px; border-radius:8px; border:1px solid #dfe3ec" />
-        </label>
-        <label class="muted">Логин
-          <input type="text" id="newUsername" required style="width:100%; padding:8px; border-radius:8px; border:1px solid #dfe3ec" />
-        </label>
-        <label class="muted">Пароль
-          <input type="text" id="newPassword" required style="width:100%; padding:8px; border-radius:8px; border:1px solid #dfe3ec" />
-        </label>
+        <label class="muted">Имя (отображается в интерфейсе)<input type="text" id="newDisplayName" required /></label>
+        <label class="muted">Логин<input type="text" id="newUsername" required /></label>
+        <label class="muted">Пароль<input type="text" id="newPassword" required /></label>
         <label class="muted" id="parentPickerWrap" style="display:none">
           Сразу привязать к родителю (необязательно)
-          <select id="parentPicker" style="width:100%; padding:8px; border-radius:8px; border:1px solid #dfe3ec">
-            <option value="">— не привязывать —</option>
-          </select>
+          <select id="parentPicker"><option value="">— не привязывать —</option></select>
         </label>
         <button type="submit" class="submit-btn">Создать</button>
       </form>
@@ -55,9 +49,19 @@
 
     <div id="viewAccess" style="display:none">
       <h3>Кто из родителей видит какого ребёнка</h3>
-      <p class="muted">Отметьте галочками, каким родителям открыт доступ к прогрессу каждого ребёнка.
-        Родитель, создавший аккаунт ребёнка, получает доступ автоматически.</p>
+      <p class="muted">Родитель, создавший аккаунт ребёнка, получает доступ автоматически.</p>
       <div id="accessMatrix"></div>
+    </div>
+
+    <div id="viewSettings" style="display:none">
+      <h3>Favicon приложения</h3>
+      <div class="avatar-upload-wrap">
+        <div id="currentFavicon"></div>
+        <label class="upload-btn">Загрузить favicon
+          <input type="file" id="faviconInput" accept="image/*" />
+        </label>
+      </div>
+      <p id="faviconResult" class="muted"></p>
     </div>
   </div>
 <script src="/js/common.js"></script>
@@ -65,19 +69,23 @@
 requireRole('admin');
 let allUsers = [];
 let allLinks = [];
+let myId = null;
 
 function switchTab(tab) {
   document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
   document.getElementById('viewUsers').style.display = 'none';
   document.getElementById('viewCreate').style.display = 'none';
   document.getElementById('viewAccess').style.display = 'none';
+  document.getElementById('viewSettings').style.display = 'none';
   if (tab === 'users') { document.getElementById('tabUsers').classList.add('active'); document.getElementById('viewUsers').style.display = 'block'; renderUsers(); }
   if (tab === 'create') { document.getElementById('tabCreate').classList.add('active'); document.getElementById('viewCreate').style.display = 'block'; fillParentPicker(); }
   if (tab === 'access') { document.getElementById('tabAccess').classList.add('active'); document.getElementById('viewAccess').style.display = 'block'; renderAccessMatrix(); }
+  if (tab === 'settings') { document.getElementById('tabSettings').classList.add('active'); document.getElementById('viewSettings').style.display = 'block'; loadFavicon(); }
 }
 document.getElementById('tabUsers').onclick = () => switchTab('users');
 document.getElementById('tabCreate').onclick = () => switchTab('create');
 document.getElementById('tabAccess').onclick = () => switchTab('access');
+document.getElementById('tabSettings').onclick = () => switchTab('settings');
 
 const ROLE_LABELS = { admin: 'Администратор', parent: 'Родитель', child: 'Ребёнок' };
 
@@ -92,34 +100,58 @@ function renderUsers() {
   const rows = allUsers.map(u => {
     const childLinks = u.role === 'child' ? allLinks.filter(l => l.child_id === u.id).map(l => l.parent_name) : [];
     const extra = u.role === 'child'
-      ? `<div class="muted">Родители: ${childLinks.length ? escapeHtml(childLinks.join(', ')) : '— никто —'}</div>`
-      : '';
+      ? `<div class="muted">Родители: ${childLinks.length ? escapeHtml(childLinks.join(', ')) : '— никто —'}</div>` : '';
+    const roleSelect = `<select onchange="changeRole(${u.id}, this.value, '${escapeHtml(u.display_name)}')" ${u.id === myId ? 'disabled' : ''}>
+      ${['admin','parent','child'].map(r => `<option value="${r}" ${r===u.role?'selected':''}>${ROLE_LABELS[r]}</option>`).join('')}
+    </select>`;
     return `
       <tr>
+        <td>${avatarHtml(u.display_name, u.avatar_path, 28)}</td>
         <td>${escapeHtml(u.display_name)}</td>
-        <td>${ROLE_LABELS[u.role] || u.role}</td>
+        <td>${roleSelect}</td>
         <td>${escapeHtml(u.username)}</td>
         <td>${extra}</td>
-        <td><button onclick="deleteUser(${u.id}, '${escapeHtml(u.display_name)}')">Удалить</button></td>
+        <td>
+          <button onclick="resetPassword(${u.id}, '${escapeHtml(u.display_name)}')">Сбросить пароль</button>
+          <button onclick="deleteUser(${u.id}, '${escapeHtml(u.display_name)}')" ${u.id === myId ? 'disabled' : ''}>Удалить</button>
+        </td>
       </tr>`;
   }).join('');
   view.innerHTML = `
     <table class="progress-table">
-      <tr><th>Имя</th><th>Роль</th><th>Логин</th><th>Связи</th><th></th></tr>
+      <tr><th></th><th>Имя</th><th>Роль</th><th>Логин</th><th>Связи</th><th></th></tr>
       ${rows}
     </table>
   `;
 }
 
-async function deleteUser(id, name) {
-  if (!confirm(`Удалить аккаунт «${name}»? Это действие необратимо.`)) return;
+async function changeRole(id, role, name) {
+  if (!confirm(`Сменить роль пользователя «${name}» на «${ROLE_LABELS[role]}»?`)) { await loadAll(); renderUsers(); return; }
   try {
-    await api(`/api/admin/users/${id}`, { method: 'DELETE' });
+    await api(`/api/admin/users/${id}/role`, { method: 'PATCH', body: JSON.stringify({ role }) });
     await loadAll();
     renderUsers();
   } catch (e) {
-    alert('Не удалось удалить (возможно, это ваш собственный аккаунт).');
+    alert(e.data?.error === 'cannot_demote_last_admin' ? 'Нельзя разжаловать последнего администратора.' : 'Не удалось сменить роль.');
+    await loadAll(); renderUsers();
   }
+}
+
+async function resetPassword(id, name) {
+  const newPassword = prompt(`Новый пароль для «${name}»:`);
+  if (!newPassword) return;
+  try {
+    await api(`/api/admin/users/${id}/password`, { method: 'POST', body: JSON.stringify({ newPassword }) });
+    alert('Пароль изменён.');
+  } catch (e) {
+    alert('Не удалось сменить пароль (минимум 4 символа).');
+  }
+}
+
+async function deleteUser(id, name) {
+  if (!confirm(`Удалить аккаунт «${name}»? Это действие необратимо.`)) return;
+  try { await api(`/api/admin/users/${id}`, { method: 'DELETE' }); await loadAll(); renderUsers(); }
+  catch (e) { alert(e.data?.error === 'cannot_delete_last_admin' ? 'Нельзя удалить последнего администратора.' : 'Не удалось удалить.'); }
 }
 
 function fillParentPicker() {
@@ -127,13 +159,9 @@ function fillParentPicker() {
   const wrap = document.getElementById('parentPickerWrap');
   const picker = document.getElementById('parentPicker');
   const parents = allUsers.filter(u => u.role === 'parent');
-  picker.innerHTML = '<option value="">— не привязывать —</option>' +
-    parents.map(p => `<option value="${p.id}">${escapeHtml(p.display_name)}</option>`).join('');
-  function updateVisibility() {
-    wrap.style.display = roleSel.value === 'child' ? 'block' : 'none';
-  }
-  roleSel.onchange = updateVisibility;
-  updateVisibility();
+  picker.innerHTML = '<option value="">— не привязывать —</option>' + parents.map(p => `<option value="${p.id}">${escapeHtml(p.display_name)}</option>`).join('');
+  const upd = () => wrap.style.display = roleSel.value === 'child' ? 'block' : 'none';
+  roleSel.onchange = upd; upd();
 }
 
 document.getElementById('createUserForm').addEventListener('submit', async (e) => {
@@ -145,10 +173,7 @@ document.getElementById('createUserForm').addEventListener('submit', async (e) =
   const parentId = document.getElementById('parentPicker').value || null;
   const resultEl = document.getElementById('createResult');
   try {
-    await api('/api/admin/users', {
-      method: 'POST',
-      body: JSON.stringify({ role, displayName, username, password, parentId: parentId ? Number(parentId) : null }),
-    });
+    await api('/api/admin/users', { method: 'POST', body: JSON.stringify({ role, displayName, username, password, parentId: parentId ? Number(parentId) : null }) });
     resultEl.textContent = `Аккаунт «${displayName}» (${ROLE_LABELS[role]}) создан.`;
     resultEl.style.color = 'var(--correct)';
     document.getElementById('createUserForm').reset();
@@ -163,13 +188,9 @@ function renderAccessMatrix() {
   const parents = allUsers.filter(u => u.role === 'parent');
   const kids = allUsers.filter(u => u.role === 'child');
   const el = document.getElementById('accessMatrix');
-  if (parents.length === 0 || kids.length === 0) {
-    el.innerHTML = '<p class="muted">Нужен хотя бы один родитель и один ребёнок.</p>';
-    return;
-  }
+  if (parents.length === 0 || kids.length === 0) { el.innerHTML = '<p class="muted">Нужен хотя бы один родитель и один ребёнок.</p>'; return; }
   const linkSet = new Set(allLinks.map(l => `${l.parent_id}:${l.child_id}`));
-  let html = '<table class="progress-table"><tr><th>Ребёнок \\ Родитель</th>' +
-    parents.map(p => `<th>${escapeHtml(p.display_name)}</th>`).join('') + '</tr>';
+  let html = '<table class="progress-table"><tr><th>Ребёнок \\ Родитель</th>' + parents.map(p => `<th>${escapeHtml(p.display_name)}</th>`).join('') + '</tr>';
   for (const k of kids) {
     html += `<tr><td>${escapeHtml(k.display_name)}</td>`;
     for (const p of parents) {
@@ -178,26 +199,44 @@ function renderAccessMatrix() {
     }
     html += '</tr>';
   }
-  html += '</table>';
-  el.innerHTML = html;
+  el.innerHTML = html + '</table>';
 }
 
 async function toggleAccess(parentId, childId, granted) {
   try {
-    if (granted) {
-      await api('/api/admin/links', { method: 'POST', body: JSON.stringify({ parentId, childId }) });
-    } else {
-      await api('/api/admin/links', { method: 'DELETE', body: JSON.stringify({ parentId, childId }) });
-    }
+    if (granted) await api('/api/admin/links', { method: 'POST', body: JSON.stringify({ parentId, childId }) });
+    else await api('/api/admin/links', { method: 'DELETE', body: JSON.stringify({ parentId, childId }) });
     await loadAll();
-  } catch (e) {
-    alert('Не удалось изменить доступ.');
-    await loadAll();
-    renderAccessMatrix();
-  }
+  } catch (e) { alert('Не удалось изменить доступ.'); await loadAll(); renderAccessMatrix(); }
 }
 
+async function loadFavicon() {
+  const { faviconUrl } = await api('/api/settings');
+  document.getElementById('currentFavicon').innerHTML = faviconUrl
+    ? `<img src="${faviconUrl}" style="width:48px;height:48px;object-fit:contain" />`
+    : '<span class="muted">Не загружен (используется стандартный)</span>';
+}
+document.getElementById('faviconInput').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const resultEl = document.getElementById('faviconResult');
+  const fd = new FormData();
+  fd.append('favicon', file);
+  try {
+    await apiForm('/api/admin/favicon', fd);
+    resultEl.textContent = 'Favicon обновлён!';
+    resultEl.style.color = 'var(--correct)';
+    loadFavicon();
+    applyFavicon();
+  } catch (err) {
+    resultEl.textContent = 'Не удалось загрузить.';
+    resultEl.style.color = 'var(--wrong)';
+  }
+});
+
 (async () => {
+  const me = await api('/api/me');
+  myId = me.user.id;
   await loadAll();
   switchTab('users');
 })();

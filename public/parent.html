@@ -9,8 +9,9 @@
 <body>
   <div class="topbar">
     <h1>👨‍👩‍👧 Панель родителя</h1>
-    <div style="display:flex; gap:8px">
-      <button id="adminLink" style="display:none" onclick="window.location.href='/admin.html'">Панель администратора</button>
+    <div style="display:flex; gap:8px; flex-wrap:wrap">
+      <button id="adminLink" style="display:none" onclick="window.location.href='/admin.html'">Администрирование</button>
+      <button onclick="window.location.href='/profile.html'">Профиль</button>
       <button onclick="logout()">Выйти</button>
     </div>
   </div>
@@ -19,39 +20,44 @@
 
     <div class="tabs">
       <button id="tabProgress" class="active">Прогресс</button>
-      <button id="tabAssignments">Задания</button>
-      <button id="tabImport">Добавить задание</button>
+      <button id="tabAssignments">Задания ребёнка</button>
+      <button id="tabLibrary">Библиотека заданий</button>
       <button id="tabChildren">Мои дети</button>
     </div>
 
     <div id="viewProgress"></div>
     <div id="viewAssignments" style="display:none"></div>
-    <div id="viewImport" style="display:none">
-      <p class="muted">
-        Вставьте сюда JSON с заданиями (его формирует модель по промпту из файла <code>PARSING_PROMPT.md</code>) и нажмите «Импортировать».
-      </p>
+
+    <div id="viewLibrary" style="display:none">
+      <h3>Добавить новое задание в библиотеку</h3>
+      <p class="muted">Вставьте JSON (см. <code>PARSING_PROMPT.md</code>) или загрузите .json файл.
+        Задание можно назначить детям сразу или позже, из списка ниже.</p>
       <textarea id="importJson" placeholder='{"subject":"math","title":"...","tasks":[...]}'></textarea>
-      <p style="margin-top:10px"><strong>Кому назначить это задание:</strong></p>
-      <div id="importChildrenCheckboxes" class="muted">Загрузка списка детей...</div>
+      <div class="file-drop" id="fileDropZone" style="margin-top:10px">
+        📎 Или выберите .json файл с диска
+        <input type="file" id="importFile" accept=".json,application/json" style="display:block; margin:10px auto 0" />
+      </div>
+      <p style="margin-top:10px"><strong>Награда за это задание (необязательно):</strong></p>
+      <input type="text" id="importReward" placeholder="Например: 30 минут игр на планшете" style="width:100%; padding:9px 12px; border-radius:8px; border:1px solid #dfe3ec" />
+      <p style="margin-top:10px"><strong>Назначить сразу (можно пропустить и назначить позже):</strong></p>
+      <div id="importChildrenCheckboxes" class="muted"></div>
       <div style="margin-top:10px">
-        <button class="submit-btn" onclick="importAssignment()">Импортировать</button>
+        <button class="submit-btn" onclick="importAssignment()">Добавить в библиотеку</button>
       </div>
       <p id="importResult" class="muted"></p>
+
+      <h3 style="margin-top:30px">Библиотека заданий</h3>
+      <div id="libraryList"></div>
     </div>
+
     <div id="viewChildren" style="display:none">
       <h3>Мои дети</h3>
       <div id="childrenList" class="assignment-list"></div>
       <h3 style="margin-top:24px">Добавить ребёнка</h3>
-      <form id="addChildForm" style="display:flex; flex-direction:column; gap:10px; max-width:340px">
-        <label class="muted">Имя ребёнка
-          <input type="text" id="newChildName" required style="width:100%; padding:8px; border-radius:8px; border:1px solid #dfe3ec" />
-        </label>
-        <label class="muted">Логин
-          <input type="text" id="newChildUsername" required style="width:100%; padding:8px; border-radius:8px; border:1px solid #dfe3ec" />
-        </label>
-        <label class="muted">Пароль
-          <input type="text" id="newChildPassword" required style="width:100%; padding:8px; border-radius:8px; border:1px solid #dfe3ec" />
-        </label>
+      <form id="addChildForm" class="field-row" style="max-width:340px">
+        <label class="muted">Имя ребёнка<input type="text" id="newChildName" required /></label>
+        <label class="muted">Логин<input type="text" id="newChildUsername" required /></label>
+        <label class="muted">Пароль<input type="text" id="newChildPassword" required /></label>
         <button type="submit" class="submit-btn">Создать аккаунт ребёнка</button>
       </form>
       <p id="addChildResult" class="muted"></p>
@@ -63,28 +69,29 @@ requireRole(['admin','parent']);
 let children = [];
 let currentChildId = null;
 let myRole = null;
+let myId = null;
 
 function switchTab(tab) {
   document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
   document.getElementById('viewProgress').style.display = 'none';
   document.getElementById('viewAssignments').style.display = 'none';
-  document.getElementById('viewImport').style.display = 'none';
+  document.getElementById('viewLibrary').style.display = 'none';
   document.getElementById('viewChildren').style.display = 'none';
   if (tab === 'progress') { document.getElementById('tabProgress').classList.add('active'); document.getElementById('viewProgress').style.display = 'block'; loadProgress(); }
   if (tab === 'assignments') { document.getElementById('tabAssignments').classList.add('active'); document.getElementById('viewAssignments').style.display = 'block'; loadAssignments(); }
-  if (tab === 'import') { document.getElementById('tabImport').classList.add('active'); document.getElementById('viewImport').style.display = 'block'; renderImportCheckboxes(); }
+  if (tab === 'library') { document.getElementById('tabLibrary').classList.add('active'); document.getElementById('viewLibrary').style.display = 'block'; renderImportCheckboxes(); loadLibrary(); }
   if (tab === 'children') { document.getElementById('tabChildren').classList.add('active'); document.getElementById('viewChildren').style.display = 'block'; renderChildrenList(); }
 }
 document.getElementById('tabProgress').onclick = () => switchTab('progress');
 document.getElementById('tabAssignments').onclick = () => switchTab('assignments');
-document.getElementById('tabImport').onclick = () => switchTab('import');
+document.getElementById('tabLibrary').onclick = () => switchTab('library');
 document.getElementById('tabChildren').onclick = () => switchTab('children');
 
 async function init() {
   const me = await api('/api/me');
   myRole = me.user.role;
+  myId = me.user.id;
   if (myRole === 'admin') document.getElementById('adminLink').style.display = 'inline-block';
-
   await reloadChildren();
   switchTab('progress');
 }
@@ -99,124 +106,233 @@ async function reloadChildren() {
     return;
   }
   sel.innerHTML = children.map(ch => `<option value="${ch.id}">${escapeHtml(ch.display_name)}</option>`).join('');
-  currentChildId = children[0].id;
-  sel.onchange = () => { currentChildId = Number(sel.value); switchTab('progress'); };
+  if (!currentChildId || !children.some(c => c.id === currentChildId)) currentChildId = children[0].id;
+  sel.value = currentChildId;
+  sel.onchange = () => { currentChildId = Number(sel.value); switchTab(document.querySelector('.tabs button.active').id.replace('tab','').toLowerCase()); };
 }
 
+// ---------------- PROGRESS ----------------
 async function loadProgress() {
-  if (!currentChildId) {
-    document.getElementById('viewProgress').innerHTML = '<p class="muted">Сначала добавьте ребёнка во вкладке «Мои дети».</p>';
-    return;
-  }
-  const { bySubject, recent } = await api(`/api/progress?childId=${currentChildId}`);
+  if (!currentChildId) { document.getElementById('viewProgress').innerHTML = '<p class="muted">Сначала добавьте ребёнка во вкладке «Мои дети».</p>'; return; }
+  const { bySubject, recent, attemptsByTask } = await api(`/api/progress?childId=${currentChildId}`);
   const view = document.getElementById('viewProgress');
   const rows = bySubject.map(s => `
-    <tr>
-      <td>${subjectLabel(s.subject)}</td>
-      <td>${s.doneTasks} / ${s.totalTasks}</td>
-      <td>${s.doneTasks ? Math.round(100 * (s.correctTasks || 0) / s.doneTasks) + '%' : '—'}</td>
-    </tr>`).join('');
+    <tr><td>${subjectLabel(s.subject)}</td><td>${s.doneTasks} / ${s.totalTasks}</td>
+    <td>${s.doneTasks ? Math.round(100 * (s.correctTasks || 0) / s.doneTasks) + '%' : '—'}</td></tr>`).join('');
 
   const recentRows = recent.map(r => `
-    <tr>
-      <td>${new Date(r.submitted_at + 'Z').toLocaleString('ru-RU')}</td>
-      <td>${subjectLabel(r.subject)}</td>
-      <td>${escapeHtml(r.title)}</td>
-      <td>${r.is_correct === null ? '📝 на проверке' : (r.is_correct ? '✅' : '❌')}</td>
-    </tr>`).join('');
+    <tr><td>${new Date(r.submitted_at + 'Z').toLocaleString('ru-RU')}</td><td>${subjectLabel(r.subject)}</td>
+    <td>${escapeHtml(r.title)}</td><td>попытка ${r.attempt_number}</td>
+    <td>${r.is_correct === null ? '📝 на проверке' : (r.is_correct ? '✅' : '❌')}</td></tr>`).join('');
+
+  const attemptRows = attemptsByTask.map(a => `
+    <tr><td>${escapeHtml(a.title)}</td><td>задание #${a.task_id}</td><td>${a.attempts} из 3</td>
+    <td>${a.solved ? '✅ решено' : (a.attempts >= 3 ? '❌ попытки исчерпаны' : '⏳ в процессе')}</td></tr>`).join('');
 
   view.innerHTML = `
     <h3>По предметам</h3>
-    <table class="progress-table">
-      <tr><th>Предмет</th><th>Выполнено</th><th>Точность</th></tr>
-      ${rows || '<tr><td colspan=3 class="muted">Пока нет данных</td></tr>'}
-    </table>
+    <table class="progress-table"><tr><th>Предмет</th><th>Выполнено</th><th>Точность</th></tr>
+      ${rows || '<tr><td colspan=3 class="muted">Пока нет данных</td></tr>'}</table>
+    <h3 style="margin-top:24px">Попытки по заданиям</h3>
+    <table class="progress-table"><tr><th>Задание</th><th>№</th><th>Попытки</th><th>Статус</th></tr>
+      ${attemptRows || '<tr><td colspan=4 class="muted">Пока нет данных</td></tr>'}</table>
     <h3 style="margin-top:24px">Последние ответы</h3>
-    <table class="progress-table">
-      <tr><th>Когда</th><th>Предмет</th><th>Задание</th><th>Результат</th></tr>
-      ${recentRows || '<tr><td colspan=4 class="muted">Пока нет данных</td></tr>'}
-    </table>
+    <table class="progress-table"><tr><th>Когда</th><th>Предмет</th><th>Задание</th><th>Попытка</th><th>Результат</th></tr>
+      ${recentRows || '<tr><td colspan=5 class="muted">Пока нет данных</td></tr>'}</table>
+    <p class="muted" style="margin-top:16px">Чтобы посмотреть сами вопросы и ответы ребёнка (и помочь / проверить руками) — откройте вкладку «Задания ребёнка».</p>
   `;
 }
 
+// ---------------- ASSIGNMENTS (per-child, с ревью ответов) ----------------
 async function loadAssignments() {
-  if (!currentChildId) {
-    document.getElementById('viewAssignments').innerHTML = '<p class="muted">Сначала добавьте ребёнка во вкладке «Мои дети».</p>';
-    return;
-  }
+  if (!currentChildId) { document.getElementById('viewAssignments').innerHTML = '<p class="muted">Сначала добавьте ребёнка во вкладке «Мои дети».</p>'; return; }
   const { assignments } = await api(`/api/assignments?childId=${currentChildId}`);
   const view = document.getElementById('viewAssignments');
-  view.innerHTML = assignments.map(a => `
-    <div class="assignment-card" style="cursor:default">
-      <div style="flex:1">
-        <span class="subject-badge">${subjectLabel(a.subject)}</span>
-        <div><strong>${escapeHtml(a.title)}</strong></div>
-        <div class="muted">${a.doneTasks} / ${a.totalTasks} выполнено</div>
-      </div>
-      <button onclick="deleteAssignment(${a.id})">Удалить</button>
-    </div>
-  `).join('') || '<p class="muted">Заданий пока нет — добавьте во вкладке «Добавить задание».</p>';
-}
-
-async function deleteAssignment(id) {
-  if (!confirm('Удалить это задание вместе с ответами ребёнка?')) return;
-  try {
-    await api(`/api/assignments/${id}`, { method: 'DELETE' });
-    loadAssignments();
-  } catch (e) {
-    alert('Не удалось удалить: возможно, это задание добавили не вы.');
-  }
-}
-
-function renderImportCheckboxes() {
-  const el = document.getElementById('importChildrenCheckboxes');
-  if (children.length === 0) {
-    el.innerHTML = 'Сначала добавьте хотя бы одного ребёнка во вкладке «Мои дети».';
+  if (assignments.length === 0) {
+    view.innerHTML = '<p class="muted">Ребёнку пока ничего не назначено — зайдите во вкладку «Библиотека заданий».</p>';
     return;
   }
+  view.innerHTML = assignments.map(a => `
+    <div class="assignment-card" style="cursor:default; flex-direction:column; align-items:stretch">
+      <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer" onclick="toggleReview(${a.id})">
+        <div style="flex:1">
+          <span class="subject-badge">${subjectLabel(a.subject)}</span> ${a.hidden ? '<span class="muted">(скрыто)</span>' : ''}
+          <div><strong>${escapeHtml(a.title)}</strong></div>
+          <div class="muted">${a.doneTasks} / ${a.totalTasks} выполнено</div>
+          ${a.reward ? `<div class="muted">🎁 ${escapeHtml(a.reward)} ${a.rewardGiven ? '<span class="given">(выдано)</span>' : ''}</div>` : ''}
+        </div>
+        <span>▾ Ответы</span>
+      </div>
+      <div id="review-${a.id}" style="display:none; margin-top:12px"></div>
+    </div>
+  `).join('');
+}
+
+async function toggleReview(assignmentId) {
+  const el = document.getElementById(`review-${assignmentId}`);
+  if (el.style.display === 'block') { el.style.display = 'none'; return; }
+  el.style.display = 'block';
+  el.innerHTML = '<p class="muted">Загрузка...</p>';
+  const { assignment, tasks } = await api(`/api/assignments/${assignmentId}?childId=${currentChildId}`);
+  el.innerHTML = tasks.map((t, i) => renderTaskReview(assignmentId, t, i)).join('');
+}
+
+function renderTaskReview(assignmentId, t, idx) {
+  const attempts = t.attempts || [];
+  const last = attempts[attempts.length - 1];
+  const correctStr = describeCorrect(t);
+  const attemptsHtml = attempts.map(a =>
+    `<div class="muted">Попытка ${a.attemptNumber}: <code>${escapeHtml(JSON.stringify(a.answer))}</code> — ${a.isCorrect === null ? '📝 ждёт проверки' : (a.isCorrect ? '✅ верно' : '❌ неверно')}${a.manuallyGraded ? ' (оценено вручную)' : ''}</div>`
+  ).join('');
+  const needsGrading = last && last.isCorrect === null;
+  return `
+    <div style="padding:10px 0; border-top:1px solid #eef1f8">
+      <div><strong>${idx + 1}. ${escapeHtml(t.prompt || t.promptTemplate || '')}</strong></div>
+      <div class="muted">Правильный ответ: ${escapeHtml(correctStr)}</div>
+      ${attemptsHtml || '<div class="muted">Ещё не отвечал(а)</div>'}
+      ${needsGrading ? `
+        <div style="margin-top:6px">
+          <button onclick="gradeTask(${t.id}, true, ${assignmentId})">✅ Отметить верным</button>
+          <button onclick="gradeTask(${t.id}, false, ${assignmentId})">❌ Отметить неверным</button>
+        </div>` : ''}
+    </div>
+  `;
+}
+
+function describeCorrect(t) {
+  switch (t.type) {
+    case 'choice_single': return t.options[t.correctIndex];
+    case 'choice_multiple': return t.correctIndices.map(i => t.options[i]).join(', ');
+    case 'open_text': return (t.acceptedAnswers || []).join(' / ') || '(ручная проверка)';
+    case 'open_number': return String(t.correctValue);
+    case 'matching': return t.correctPairs.map(([l,r]) => `${t.left[l]} → ${t.right[r]}`).join('; ');
+    case 'cloze': return t.blanks.map(b => b.acceptedAnswers[0]).join(', ');
+    default: return '';
+  }
+}
+
+async function gradeTask(taskId, isCorrect, assignmentId) {
+  await api(`/api/tasks/${taskId}/grade`, { method: 'POST', body: JSON.stringify({ childId: currentChildId, isCorrect }) });
+  toggleReview(assignmentId); toggleReview(assignmentId); // перерисовать
+}
+
+// ---------------- LIBRARY ----------------
+function renderImportCheckboxes() {
+  const el = document.getElementById('importChildrenCheckboxes');
+  if (children.length === 0) { el.innerHTML = 'Сначала добавьте ребёнка во вкладке «Мои дети» (можно пропустить и назначить позже).'; return; }
   el.innerHTML = children.map(ch => `
     <label style="display:inline-flex; align-items:center; gap:6px; margin-right:16px">
-      <input type="checkbox" class="import-child-cb" value="${ch.id}" checked /> ${escapeHtml(ch.display_name)}
-    </label>
-  `).join('');
+      <input type="checkbox" class="import-child-cb" value="${ch.id}" /> ${escapeHtml(ch.display_name)}
+    </label>`).join('');
 }
 
 async function importAssignment() {
   const raw = document.getElementById('importJson').value;
+  const file = document.getElementById('importFile').files[0];
+  const reward = document.getElementById('importReward').value.trim();
   const resultEl = document.getElementById('importResult');
   const childIds = [...document.querySelectorAll('.import-child-cb:checked')].map(cb => Number(cb.value));
-  if (childIds.length === 0) {
-    resultEl.textContent = 'Выберите хотя бы одного ребёнка.';
-    resultEl.style.color = 'var(--wrong)';
-    return;
-  }
-  let parsed;
+
   try {
-    parsed = JSON.parse(raw);
-  } catch (e) {
-    resultEl.textContent = 'Ошибка: это не корректный JSON';
-    resultEl.style.color = 'var(--wrong)';
-    return;
-  }
-  parsed.childIds = childIds;
-  try {
-    await api('/api/assignments/import', { method: 'POST', body: JSON.stringify(parsed) });
-    resultEl.textContent = 'Готово! Задание добавлено.';
+    if (file) {
+      const fd = new FormData();
+      fd.append('jsonfile', file);
+      fd.append('childIds', JSON.stringify(childIds));
+      await apiForm('/api/assignments/import-file', fd);
+    } else {
+      if (!raw.trim()) { resultEl.textContent = 'Вставьте JSON или выберите файл.'; resultEl.style.color = 'var(--wrong)'; return; }
+      let parsed;
+      try { parsed = JSON.parse(raw); } catch (e) { resultEl.textContent = 'Ошибка: некорректный JSON'; resultEl.style.color = 'var(--wrong)'; return; }
+      parsed.childIds = childIds;
+      if (reward) parsed.reward = reward;
+      await api('/api/assignments/import', { method: 'POST', body: JSON.stringify(parsed) });
+    }
+    resultEl.textContent = 'Готово! Задание добавлено в библиотеку' + (childIds.length ? ' и назначено.' : '.');
     resultEl.style.color = 'var(--correct)';
     document.getElementById('importJson').value = '';
+    document.getElementById('importFile').value = '';
+    document.getElementById('importReward').value = '';
+    loadLibrary();
   } catch (e) {
     resultEl.textContent = 'Ошибка: ' + JSON.stringify(e.data?.errors || e.message);
     resultEl.style.color = 'var(--wrong)';
   }
 }
 
+async function loadLibrary() {
+  const { assignments } = await api('/api/assignments/library');
+  const el = document.getElementById('libraryList');
+  if (assignments.length === 0) { el.innerHTML = '<p class="muted">Библиотека пуста.</p>'; return; }
+  el.innerHTML = assignments.map(a => {
+    const assignedIds = new Set(a.assignedTo.map(x => x.child_id));
+    const chips = a.assignedTo.map(x => `
+      <span class="assigned-chip ${x.hidden ? 'hidden-chip' : ''}">
+        ${escapeHtml(x.display_name)}
+        <button onclick="toggleVisibility(${a.id}, ${x.child_id}, ${x.hidden ? 0 : 1})">${x.hidden ? '👁️ показать' : '🙈 скрыть'}</button>
+        <button onclick="resetProgress(${a.id}, ${x.child_id})">↺ сброс</button>
+      </span>`).join('');
+    const notAssigned = children.filter(c => !assignedIds.has(c.id));
+    return `
+      <div class="assignment-card" style="cursor:default; flex-direction:column; align-items:stretch">
+        <div style="display:flex; justify-content:space-between">
+          <div>
+            <span class="subject-badge">${subjectLabel(a.subject)}</span>
+            <div><strong>${escapeHtml(a.title)}</strong></div>
+            <div class="muted">${a.taskCount} заданий</div>
+          </div>
+          <button onclick="deleteLibraryAssignment(${a.id})">Удалить совсем</button>
+        </div>
+        <div style="margin-top:8px">${chips || '<span class="muted">Пока никому не назначено</span>'}</div>
+        ${notAssigned.length ? `
+          <div style="margin-top:8px">
+            <select id="assignSelect-${a.id}">
+              ${notAssigned.map(c => `<option value="${c.id}">${escapeHtml(c.display_name)}</option>`).join('')}
+            </select>
+            <button onclick="assignToChild(${a.id})">Назначить</button>
+          </div>` : ''}
+        <div style="margin-top:8px; display:flex; gap:8px; align-items:center">
+          <input type="text" id="reward-${a.id}" placeholder="Награда" value="${escapeHtml(a.reward || '')}" style="flex:1; padding:6px 10px; border-radius:8px; border:1px solid #dfe3ec" />
+          <button onclick="saveReward(${a.id})">Сохранить</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+async function assignToChild(assignmentId) {
+  const sel = document.getElementById(`assignSelect-${assignmentId}`);
+  const childId = Number(sel.value);
+  await api(`/api/assignments/${assignmentId}/assign`, { method: 'POST', body: JSON.stringify({ childIds: [childId] }) });
+  loadLibrary();
+}
+async function toggleVisibility(assignmentId, childId, hidden) {
+  await api(`/api/assignments/${assignmentId}/visibility`, { method: 'PATCH', body: JSON.stringify({ childId, hidden: !!hidden }) });
+  loadLibrary();
+}
+async function resetProgress(assignmentId, childId) {
+  if (!confirm('Сбросить прогресс ребёнка по этому заданию? Все ответы будут удалены, задание можно будет пройти заново.')) return;
+  await api(`/api/assignments/${assignmentId}/reset`, { method: 'POST', body: JSON.stringify({ childId }) });
+  loadLibrary();
+}
+async function saveReward(assignmentId) {
+  const reward = document.getElementById(`reward-${assignmentId}`).value.trim();
+  await api(`/api/assignments/${assignmentId}/reward`, { method: 'PATCH', body: JSON.stringify({ reward: reward || null }) });
+  loadLibrary();
+}
+async function deleteLibraryAssignment(assignmentId) {
+  if (!confirm('Удалить это задание совсем (у всех детей, вместе с ответами)?')) return;
+  try { await api(`/api/assignments/${assignmentId}`, { method: 'DELETE' }); loadLibrary(); }
+  catch (e) { alert('Не удалось удалить (возможно, это задание добавили не вы).'); }
+}
+
+// ---------------- CHILDREN ----------------
 function renderChildrenList() {
   const el = document.getElementById('childrenList');
   el.innerHTML = children.map(ch => `
     <div class="assignment-card" style="cursor:default">
-      <div><strong>${escapeHtml(ch.display_name)}</strong> <span class="muted">(логин: ${escapeHtml(ch.username)})</span></div>
-    </div>
-  `).join('') || '<p class="muted">Пока нет ни одного ребёнка.</p>';
+      <div class="user-chip">${avatarHtml(ch.display_name, ch.avatar_path, 40)}
+        <div><strong>${escapeHtml(ch.display_name)}</strong><div class="muted">логин: ${escapeHtml(ch.username)}</div></div>
+      </div>
+    </div>`).join('') || '<p class="muted">Пока нет ни одного ребёнка.</p>';
 }
 
 document.getElementById('addChildForm').addEventListener('submit', async (e) => {
