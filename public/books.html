@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Книги</title>
+<link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="topbar">
+    <h1>📚 Книжная полка</h1>
+    <div style="display:flex; gap:8px; flex-wrap:wrap">
+      <button id="backBtn">← Назад</button>
+      <button onclick="logout()">Выйти</button>
+    </div>
+  </div>
+  <div class="container">
+    <select id="childSelect" class="child-select" style="display:none"></select>
+
+    <div id="uploadBox" style="display:none" class="task-card">
+      <h3>Загрузить книгу</h3>
+      <form id="uploadForm" class="field-row" style="max-width:420px">
+        <label class="muted">Название<input type="text" id="bookTitle" required /></label>
+        <label class="muted">Автор (необязательно)<input type="text" id="bookAuthor" /></label>
+        <label class="muted">Файл .epub<input type="file" id="bookFile" accept=".epub" required /></label>
+        <label class="muted">Обложка (необязательно, картинка)<input type="file" id="bookCover" accept="image/*" /></label>
+        <button type="submit" class="submit-btn">Загрузить</button>
+      </form>
+      <p id="uploadResult" class="muted"></p>
+    </div>
+
+    <div id="bookList" class="assignment-list" style="margin-top:16px"></div>
+  </div>
+<script src="/js/common.js"></script>
+<script>
+let myRole = null;
+let myId = null;
+let children = [];
+let currentChildId = null;
+
+async function init() {
+  const me = await api('/api/me');
+  myRole = me.user.role;
+  myId = me.user.id;
+  document.getElementById('backBtn').onclick = () => window.location.href = roleHome(myRole);
+
+  if (myRole === 'child') {
+    currentChildId = myId;
+  } else {
+    document.getElementById('uploadBox').style.display = 'block';
+    const { children: c } = await api('/api/children');
+    children = c;
+    const sel = document.getElementById('childSelect');
+    if (children.length > 0) {
+      sel.style.display = 'block';
+      sel.innerHTML = children.map(ch => `<option value="${ch.id}">${escapeHtml(ch.display_name)}</option>`).join('');
+      currentChildId = children[0].id;
+      sel.onchange = () => { currentChildId = Number(sel.value); loadBooks(); };
+    }
+  }
+  loadBooks();
+}
+
+async function loadBooks() {
+  const url = currentChildId ? `/api/books?childId=${currentChildId}` : '/api/books';
+  const { books } = await api(url);
+  const el = document.getElementById('bookList');
+  if (books.length === 0) { el.innerHTML = '<p class="muted">Пока нет ни одной книги.</p>'; return; }
+  el.innerHTML = books.map(b => {
+    const pct = b.progress ? Math.round(b.progress.percentage) : 0;
+    return `
+    <div class="assignment-card" style="cursor:default">
+      <div style="display:flex; gap:12px; flex:1">
+        ${b.coverPath ? `<img src="${b.coverPath}" style="width:56px;height:80px;object-fit:cover;border-radius:6px;flex-shrink:0" />` : `<div style="width:56px;height:80px;border-radius:6px;background:#eef1f8;display:flex;align-items:center;justify-content:center;flex-shrink:0">📖</div>`}
+        <div style="flex:1">
+          <strong>${escapeHtml(b.title)}</strong>
+          ${b.author ? `<div class="muted">${escapeHtml(b.author)}</div>` : ''}
+          <div class="muted">Загрузил: ${escapeHtml(b.uploadedBy || '—')}</div>
+          ${b.progress ? `<div class="progress-bar" style="margin-top:6px"><div style="width:${pct}%"></div></div><div class="muted">${pct}% прочитано</div>` : (myRole === 'child' ? '<div class="muted">Ещё не начато</div>' : '')}
+        </div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:6px; align-items:flex-end">
+        ${myRole === 'child' ? `
+          <button onclick="window.location.href='/reader.html?id=${b.id}'">Читать</button>
+          <button onclick="toggleFavorite(${b.id}, ${b.isFavorite ? 0 : 1})">${b.isFavorite ? '★ В избранном' : '☆ В избранное'}</button>
+        ` : `
+          <button onclick="window.location.href='/reader.html?id=${b.id}&childId=${currentChildId || ''}'">Открыть</button>
+          ${b.canManage ? `<button onclick="deleteBook(${b.id})">Удалить</button>` : ''}
+        `}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function toggleFavorite(bookId, fav) {
+  if (fav) await api(`/api/books/${bookId}/favorite`, { method: 'POST' });
+  else await api(`/api/books/${bookId}/favorite`, { method: 'DELETE' });
+  loadBooks();
+}
+
+async function deleteBook(bookId) {
+  if (!confirm('Удалить эту книгу совсем?')) return;
+  try { await api(`/api/books/${bookId}`, { method: 'DELETE' }); loadBooks(); }
+  catch (e) { alert('Не удалось удалить (возможно, книгу загрузили не вы).'); }
+}
+
+document.getElementById('uploadForm')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const resultEl = document.getElementById('uploadResult');
+  const fd = new FormData();
+  fd.append('title', document.getElementById('bookTitle').value.trim());
+  fd.append('author', document.getElementById('bookAuthor').value.trim());
+  fd.append('epub', document.getElementById('bookFile').files[0]);
+  const cover = document.getElementById('bookCover').files[0];
+  if (cover) fd.append('cover', cover);
+  try {
+    await apiForm('/api/books', fd);
+    resultEl.textContent = 'Книга загружена!';
+    resultEl.style.color = 'var(--correct)';
+    document.getElementById('uploadForm').reset();
+    loadBooks();
+  } catch (err) {
+    resultEl.textContent = 'Не удалось загрузить (проверьте, что это .epub файл, до 80МБ).';
+    resultEl.style.color = 'var(--wrong)';
+  }
+});
+
+init();
+</script>
+</body>
+</html>

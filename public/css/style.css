@@ -280,9 +280,43 @@ table.progress-table th, table.progress-table td {
   font-size: 14px; cursor: pointer;
 }
 
-/* =========================================================
-   МОБИЛЬНАЯ АДАПТАЦИЯ
-   ========================================================= */
+/* ---------- scratchpad (черновик) ---------- */
+.scratch-panel {
+  background: white; border-radius: 14px; width: 100%; max-width: 720px; height: 88vh;
+  max-height: 640px; display: flex; flex-direction: column; overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+.scratch-toolbar {
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;
+  gap: 8px; padding: 10px 14px; border-bottom: 1px solid #eef1f8;
+}
+.scratch-colors { display: flex; gap: 6px; }
+.scratch-color {
+  width: 28px; height: 28px; border-radius: 50%; border: 2px solid transparent; cursor: pointer;
+}
+.scratch-color.active { border-color: #232838; }
+.scratch-tools { display: flex; gap: 4px; flex-wrap: wrap; }
+.scratch-tool-btn {
+  width: 36px; height: 36px; border-radius: 8px; border: 1px solid #dfe3ec; background: white;
+  cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center;
+}
+.scratch-tool-btn.active { background: var(--primary); border-color: var(--primary); filter: brightness(1); }
+.scratch-canvas-wrap { flex: 1; position: relative; background: #fafbfd; touch-action: none; }
+.scratch-canvas { position: absolute; inset: 0; width: 100%; height: 100%; cursor: crosshair; }
+.scratch-footer {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  padding: 10px 14px; border-top: 1px solid #eef1f8;
+}
+.scratch-btn-open {
+  border: none; background: #eef1f8; border-radius: 8px; padding: 8px 14px; cursor: pointer;
+  font-size: 13px; margin-top: 8px;
+}
+
+@media (max-width: 640px) {
+  .scratch-panel { height: 94vh; border-radius: 10px; }
+  .scratch-footer { flex-direction: column; align-items: stretch; }
+  .scratch-footer .wizard-btn { width: 100%; }
+}
 @media (max-width: 640px) {
   .topbar {
     flex-direction: column;

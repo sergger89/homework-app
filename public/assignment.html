@@ -22,6 +22,7 @@
     </div>
   </div>
 <script src="/js/common.js"></script>
+<script src="/js/scratchpad.js"></script>
 <script>
 requireRole('child');
 const params = new URLSearchParams(window.location.search);
@@ -188,12 +189,22 @@ function buildTaskCard(t, idx) {
     const info = document.createElement('div');
     info.className = 'attempts-badge';
     info.textContent = locked
-      ? `Попытки исчерпаны (${attempts.length} из 3)`
+      ? `Попытки исчерпаны (${attempts.length})`
       : awaitingManual
         ? 'Ответ отправлен, ждёт проверки родителем'
-        : `Попытка ${attempts.length} из 3`;
+        : attempts.length >= 3
+          ? `Попытка ${attempts.length} — это была последняя перед бонусной! Есть ещё 1 попытка.`
+          : `Попытка ${attempts.length} из 3`;
     card.appendChild(info);
   }
+
+  // кнопка черновика — есть у всех заданий, кроме тех где отвечать больше нельзя
+  const scratchBtn = document.createElement('button');
+  scratchBtn.type = 'button';
+  scratchBtn.className = 'scratch-btn-open';
+  scratchBtn.textContent = '✏️ Черновик';
+  scratchBtn.onclick = () => openScratchpad(t.id);
+  card.appendChild(scratchBtn);
 
   if (!disabled) {
     const btn = document.createElement('button');
@@ -242,6 +253,9 @@ function showResult(card, res) {
     badge.className = 'result-badge';
     badge.style.color = 'var(--muted)';
     badge.textContent = '📝 Ответ сохранён, ждёт проверки родителем';
+  } else if (res.bonusAttemptGranted) {
+    badge.className = 'result-badge wrong';
+    badge.textContent = '❌ Неверно. Вот подсказка — и ещё один, последний шанс!';
   } else {
     badge.className = 'result-badge ' + (res.isCorrect ? 'correct' : 'wrong');
     badge.textContent = res.isCorrect ? '✅ Верно!' : (res.locked ? '❌ Неверно. Попытки закончились.' : '❌ Неверно, попробуй ещё раз');

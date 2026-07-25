@@ -12,7 +12,7 @@
           ]
         }
       ],
-      "explanation": null
+      "explanation": "Подставь слово, которое подходит по смыслу и грамматике."
     },
     {
       "type": "cloze",
@@ -24,7 +24,7 @@
           ]
         }
       ],
-      "explanation": null
+      "explanation": "Подставь слово, которое подходит по смыслу и грамматике."
     },
     {
       "type": "cloze",
@@ -36,7 +36,7 @@
           ]
         }
       ],
-      "explanation": null
+      "explanation": "Подставь слово, которое подходит по смыслу и грамматике."
     },
     {
       "type": "cloze",
@@ -48,7 +48,7 @@
           ]
         }
       ],
-      "explanation": null
+      "explanation": "Подставь слово, которое подходит по смыслу и грамматике."
     },
     {
       "type": "cloze",
@@ -60,7 +60,7 @@
           ]
         }
       ],
-      "explanation": null
+      "explanation": "Подставь слово, которое подходит по смыслу и грамматике."
     },
     {
       "type": "cloze",
@@ -72,7 +72,7 @@
           ]
         }
       ],
-      "explanation": null
+      "explanation": "Подставь слово, которое подходит по смыслу и грамматике."
     },
     {
       "type": "cloze",
@@ -84,7 +84,7 @@
           ]
         }
       ],
-      "explanation": null
+      "explanation": "Подставь слово, которое подходит по смыслу и грамматике."
     },
     {
       "type": "open_text",
@@ -95,7 +95,7 @@
         "Is her little sister going to the swimming pool?"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «Is her little sister going to the swimming pool?»."
     },
     {
       "type": "open_text",
@@ -106,7 +106,7 @@
         "Ann isn't playing hockey now"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «Ann isn't playing hockey now.»."
     },
     {
       "type": "open_text",
@@ -117,7 +117,7 @@
         "He is not running to school"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «He is not running to school.»."
     },
     {
       "type": "open_text",
@@ -128,7 +128,7 @@
         "Where is my teacher running now?"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «Where is my teacher running now?»."
     },
     {
       "type": "open_text",
@@ -139,7 +139,7 @@
         "What are you playing?"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «What are you playing?»."
     },
     {
       "type": "open_text",
@@ -150,7 +150,7 @@
         "I am taking your ball now"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «I am taking your ball now.»."
     },
     {
       "type": "open_text",
@@ -161,7 +161,7 @@
         "He is playing snowballs now"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «He is playing snowballs now.»."
     },
     {
       "type": "matching",
@@ -214,7 +214,7 @@
           6
         ]
       ],
-      "explanation": null
+      "explanation": "Сопоставь каждый элемент слева с подходящим элементом справа по смыслу."
     },
     {
       "type": "choice_single",
@@ -225,7 +225,7 @@
         "Are"
       ],
       "correctIndex": 1,
-      "explanation": null
+      "explanation": "Верный вариант: «Has» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -236,7 +236,7 @@
         "kitten's Bob"
       ],
       "correctIndex": 0,
-      "explanation": null
+      "explanation": "Верный вариант: «Bob's kitten» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -247,7 +247,7 @@
         "do not"
       ],
       "correctIndex": 1,
-      "explanation": null
+      "explanation": "Верный вариант: «are not» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -258,7 +258,7 @@
         "child"
       ],
       "correctIndex": 1,
-      "explanation": null
+      "explanation": "Верный вариант: «children» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -269,7 +269,7 @@
         "an uncle"
       ],
       "correctIndex": 2,
-      "explanation": null
+      "explanation": "Верный вариант: «an uncle» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -280,7 +280,7 @@
         "Can"
       ],
       "correctIndex": 2,
-      "explanation": null
+      "explanation": "Верный вариант: «Can» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -291,7 +291,7 @@
         "Have you"
       ],
       "correctIndex": 1,
-      "explanation": null
+      "explanation": "Верный вариант: «Do you have» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -301,7 +301,7 @@
         "does"
       ],
       "correctIndex": 0,
-      "explanation": null
+      "explanation": "Верный вариант: «do» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -311,7 +311,7 @@
         "does"
       ],
       "correctIndex": 1,
-      "explanation": null
+      "explanation": "Верный вариант: «does» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -321,7 +321,7 @@
         "Does"
       ],
       "correctIndex": 0,
-      "explanation": null
+      "explanation": "Верный вариант: «Do» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -331,7 +331,7 @@
         "Does"
       ],
       "correctIndex": 1,
-      "explanation": null
+      "explanation": "Верный вариант: «Does» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -341,7 +341,7 @@
         "Does"
       ],
       "correctIndex": 1,
-      "explanation": null
+      "explanation": "Верный вариант: «Does» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -351,7 +351,7 @@
         "Does"
       ],
       "correctIndex": 0,
-      "explanation": null
+      "explanation": "Верный вариант: «Do» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -361,7 +361,7 @@
         "does"
       ],
       "correctIndex": 1,
-      "explanation": null
+      "explanation": "Верный вариант: «does» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -371,7 +371,7 @@
         "doesn't want"
       ],
       "correctIndex": 1,
-      "explanation": null
+      "explanation": "Верный вариант: «doesn't want» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -381,7 +381,7 @@
         "does"
       ],
       "correctIndex": 0,
-      "explanation": null
+      "explanation": "Верный вариант: «do» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -391,7 +391,7 @@
         "loves"
       ],
       "correctIndex": 0,
-      "explanation": null
+      "explanation": "Верный вариант: «love» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -401,7 +401,7 @@
         "don't like"
       ],
       "correctIndex": 0,
-      "explanation": null
+      "explanation": "Верный вариант: «doesn't like» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -411,7 +411,7 @@
         "doesn't"
       ],
       "correctIndex": 0,
-      "explanation": null
+      "explanation": "Верный вариант: «don't» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -421,7 +421,7 @@
         "does"
       ],
       "correctIndex": 0,
-      "explanation": null
+      "explanation": "Верный вариант: «do» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -431,7 +431,7 @@
         "doesn't"
       ],
       "correctIndex": 1,
-      "explanation": null
+      "explanation": "Верный вариант: «doesn't» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "open_text",
@@ -448,7 +448,7 @@
         "The fox can"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «The fox can.»."
     },
     {
       "type": "open_text",
@@ -458,7 +458,7 @@
         "The fish can"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «The fish can.»."
     },
     {
       "type": "open_text",
@@ -468,7 +468,7 @@
         "Yes, he is"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «Yes, he is.»."
     },
     {
       "type": "open_text",
@@ -478,7 +478,7 @@
         "No, he isn't"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «No, he isn't.»."
     },
     {
       "type": "open_text",
@@ -488,7 +488,7 @@
         "Yes, he has"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «Yes, he has.»."
     },
     {
       "type": "open_text",
@@ -498,7 +498,7 @@
         "The fox runs to the tree"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «The fox runs to the tree.»."
     },
     {
       "type": "open_text",
@@ -508,7 +508,7 @@
         "The fox is"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «The fox is.»."
     },
     {
       "type": "matching",
@@ -612,7 +612,7 @@
           2
         ]
       ],
-      "explanation": null
+      "explanation": "Сопоставь каждый элемент слева с подходящим элементом справа по смыслу."
     },
     {
       "type": "open_text",
@@ -621,7 +621,7 @@
         "aunt"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «aunt»."
     },
     {
       "type": "open_text",
@@ -630,7 +630,7 @@
         "three"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «three»."
     },
     {
       "type": "open_text",
@@ -639,7 +639,7 @@
         "son"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «son»."
     },
     {
       "type": "open_text",
@@ -648,7 +648,7 @@
         "rabbit"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «rabbit»."
     },
     {
       "type": "open_text",
@@ -657,7 +657,7 @@
         "skate"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «skate»."
     },
     {
       "type": "open_text",
@@ -666,7 +666,7 @@
         "nine"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «nine»."
     },
     {
       "type": "open_text",
@@ -675,7 +675,7 @@
         "grey"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «grey»."
     }
   ]
 }

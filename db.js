@@ -80,6 +80,42 @@ CREATE TABLE IF NOT EXISTS submissions (
   submitted_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_submissions_task_child ON submissions(task_id, child_id);
+
+-- Черновик (рисование) ребёнка по конкретному заданию - сохраняется как список "мазков"
+CREATE TABLE IF NOT EXISTS drafts (
+  task_id INTEGER NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
+  child_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  strokes TEXT NOT NULL DEFAULT '[]',
+  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (task_id, child_id)
+);
+
+-- Книжная полка (epub)
+CREATE TABLE IF NOT EXISTS books (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  title TEXT NOT NULL,
+  author TEXT,
+  file_path TEXT NOT NULL,
+  cover_path TEXT,
+  uploaded_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS reading_progress (
+  book_id INTEGER NOT NULL REFERENCES books(id) ON DELETE CASCADE,
+  child_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  location TEXT,
+  percentage REAL NOT NULL DEFAULT 0,
+  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (book_id, child_id)
+);
+
+CREATE TABLE IF NOT EXISTS book_favorites (
+  book_id INTEGER NOT NULL REFERENCES books(id) ON DELETE CASCADE,
+  child_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (book_id, child_id)
+);
 `);
 
 // ---------- миграция со старой схемы (submissions с UNIQUE(task_id,child_id)) ----------

@@ -119,6 +119,10 @@ function validateAssignment(assignment) {
       if (!Array.isArray(t.blanks) || t.blanks.length === 0)
         errors.push(`tasks[${i}]: нужен непустой массив "blanks"`);
     }
+    // объяснение обязательно для всех автопроверяемых заданий - показывается при исчерпании попыток
+    if (!t.needsManualReview && (!t.explanation || !String(t.explanation).trim())) {
+      errors.push(`tasks[${i}]: нужно непустое поле "explanation" (кроме заданий с needsManualReview:true)`);
+    }
   });
   return errors;
 }

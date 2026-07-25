@@ -8,12 +8,13 @@ const db = require('./db');
 const { UPLOADS_DIR } = require('./db');
 const { gradeTask, validateAssignment } = require('./grading');
 
-const MAX_ATTEMPTS = 3;
+const REGULAR_ATTEMPTS = 3; // после стольких неверных попыток показываем объяснение и даём бонусную попытку
+const TOTAL_ATTEMPTS = 4;   // после неё, если всё ещё неверно, показываем правильный ответ и блокируем
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(express.json({ limit: '5mb' }));
+app.use(express.json({ limit: '15mb' }));
 app.use(
   session({
     secret: process.env.SESSION_SECRET || 'please-change-this-secret',
@@ -32,10 +33,14 @@ const upload = multer({
       cb(null, `${file.fieldname}-${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`);
     },
   }),
-  limits: { fileSize: 3 * 1024 * 1024 }, // 3MB
+  limits: { fileSize: 80 * 1024 * 1024 }, // 80MB (с запасом под epub-книги)
   fileFilter: (req, file, cb) => {
     if (file.fieldname === 'jsonfile') {
       return cb(null, true); // проверим content-type на стороне парсинга
+    }
+    if (file.fieldname === 'epub') {
+      const ext = path.extname(file.originalname).toLowerCase();
+      return cb(null, ext === '.epub');
     }
     const okTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/x-icon', 'image/svg+xml'];
     cb(null, okTypes.includes(file.mimetype));
@@ -259,7 +264,7 @@ app.post('/api/admin/favicon', requireRole('admin'), upload.single('favicon'), (
 });
 
 // ---------- helper: убрать правильные ответы из задания перед отправкой ребёнку ----------
-function stripAnswer(type, data) {
+function stripAnswer(type, data, { revealExplanation } = {}) {
   const clean = { ...data };
   switch (type) {
     case 'choice_single': delete clean.correctIndex; break;
@@ -269,7 +274,7 @@ function stripAnswer(type, data) {
     case 'matching': delete clean.correctPairs; break;
     case 'cloze': clean.blanks = (clean.blanks || []).map(() => ({})); break;
   }
-  delete clean.explanation;
+  if (!revealExplanation) delete clean.explanation;
   return clean;
 }
 
@@ -451,19 +456,21 @@ app.get('/api/assignments/:id', requireAuth, (req, res) => {
       submittedAt: s.submitted_at,
     }));
     const last = subs[subs.length - 1] || null;
-    const locked = subs.length >= MAX_ATTEMPTS || !!(last && last.isCorrect === true);
-    const attemptsLeft = Math.max(0, MAX_ATTEMPTS - subs.length);
+    const locked = subs.length >= TOTAL_ATTEMPTS || !!(last && last.isCorrect === true);
+    const attemptsLeft = Math.max(0, TOTAL_ATTEMPTS - subs.length);
+    // после 3 неверных попыток показываем объяснение (но не сам ответ) и даём бонусную попытку
+    const explanationRevealed = !locked && subs.length >= REGULAR_ATTEMPTS && last && last.isCorrect === false;
 
     if (role !== 'child') {
       // родителю/админу — всегда полные данные с эталонными ответами и всей историей попыток
       return { id: t.id, type: t.type, ...data, attempts: subs, attemptsLeft, locked };
     }
 
-    if (locked || (last && last.isCorrect === true)) {
+    if (locked) {
       return { id: t.id, type: t.type, ...data, attempts: subs, attemptsLeft, locked };
     }
-    // ещё есть попытки и ответ пока не верный/не финальный — не показываем эталон
-    return { id: t.id, type: t.type, ...stripAnswer(t.type, data), attempts: subs, attemptsLeft, locked };
+    // ещё есть попытки: эталонный ответ не показываем, но объяснение — можем (после 3-й неверной)
+    return { id: t.id, type: t.type, ...stripAnswer(t.type, data, { revealExplanation: explanationRevealed }), attempts: subs, attemptsLeft, locked };
   });
 
   res.json({
@@ -472,7 +479,7 @@ app.get('/api/assignments/:id', requireAuth, (req, res) => {
   });
 });
 
-// ---------- submit answer (child only, до MAX_ATTEMPTS попыток) ----------
+// ---------- submit answer (child only, 3 обычные + 1 бонусная попытка) ----------
 app.post('/api/tasks/:id/submit', requireRole('child'), (req, res) => {
   const task = db.prepare('SELECT * FROM tasks WHERE id=?').get(req.params.id);
   if (!task) return res.status(404).json({ error: 'not_found' });
@@ -485,7 +492,7 @@ app.post('/api/tasks/:id/submit', requireRole('child'), (req, res) => {
   const existing = getSubmissions(task.id, req.session.user.id);
   const lastCorrect = existing.length > 0 && existing[existing.length - 1].is_correct === 1;
   if (lastCorrect) return res.status(409).json({ error: 'already_correct' });
-  if (existing.length >= MAX_ATTEMPTS) return res.status(409).json({ error: 'no_attempts_left' });
+  if (existing.length >= TOTAL_ATTEMPTS) return res.status(409).json({ error: 'no_attempts_left' });
 
   const data = JSON.parse(task.data);
   const { answer } = req.body || {};
@@ -502,11 +509,14 @@ app.post('/api/tasks/:id/submit', requireRole('child'), (req, res) => {
     'INSERT INTO submissions (task_id, child_id, attempt_number, answer, is_correct) VALUES (?,?,?,?,?)'
   ).run(task.id, req.session.user.id, attemptNumber, JSON.stringify(answer), isCorrectValue);
 
-  const attemptsLeft = Math.max(0, MAX_ATTEMPTS - attemptNumber);
-  const locked = attemptNumber >= MAX_ATTEMPTS || isCorrect === true;
+  const attemptsLeft = Math.max(0, TOTAL_ATTEMPTS - attemptNumber);
+  const locked = attemptNumber >= TOTAL_ATTEMPTS || isCorrect === true;
+  // после 3-й неверной попытки показываем объяснение и даём бонусную (4-ю) попытку,
+  // но правильный ответ пока не раскрываем
+  const explanationOnly = !locked && attemptNumber >= REGULAR_ATTEMPTS && isCorrect === false;
 
   let correct;
-  if (locked || isCorrect === true) {
+  if (locked) {
     switch (task.type) {
       case 'choice_single': correct = data.correctIndex; break;
       case 'choice_multiple': correct = data.correctIndices; break;
@@ -519,7 +529,8 @@ app.post('/api/tasks/:id/submit', requireRole('child'), (req, res) => {
 
   res.json({
     isCorrect,
-    explanation: locked || isCorrect === true ? data.explanation || null : null,
+    explanation: locked || explanationOnly ? data.explanation || null : null,
+    bonusAttemptGranted: explanationOnly,
     correct,
     attemptNumber,
     attemptsLeft,
@@ -595,6 +606,47 @@ app.post('/api/assignments/import-file', requireRole(['admin', 'parent']), uploa
   importAssignmentHandler(req, res, parsed);
 });
 
+// обновить содержимое задания (например, добавили объяснения), сохраняя прогресс детей:
+// задания сопоставляются по порядковому индексу в массиве tasks; если новых заданий
+// больше - лишние добавляются; если меньше - лишние (вместе с ответами по ним) удаляются.
+app.put('/api/assignments/:id', requireRole(['admin', 'parent']), (req, res) => {
+  const assignment = db.prepare('SELECT * FROM assignments WHERE id=?').get(req.params.id);
+  if (!assignment) return res.status(404).json({ error: 'not_found' });
+  if (req.session.user.role !== 'admin' && assignment.created_by !== req.session.user.id) {
+    return res.status(403).json({ error: 'not_owner' });
+  }
+  const body = req.body || {};
+  const errors = validateAssignment(body);
+  if (errors.length) return res.status(400).json({ errors });
+
+  const existingTasks = db
+    .prepare('SELECT id FROM tasks WHERE assignment_id=? ORDER BY order_index')
+    .all(assignment.id);
+
+  const updateAssignment = db.prepare('UPDATE assignments SET subject=?, title=?, reward=? WHERE id=?');
+  const updateTask = db.prepare('UPDATE tasks SET type=?, data=? WHERE id=?');
+  const insertTask = db.prepare('INSERT INTO tasks (assignment_id, order_index, type, data) VALUES (?,?,?,?)');
+  const deleteTask = db.prepare('DELETE FROM tasks WHERE id=?');
+
+  const tx = db.transaction(() => {
+    updateAssignment.run(body.subject, body.title, body.reward || null, assignment.id);
+    body.tasks.forEach((t, i) => {
+      const { type, ...rest } = t;
+      if (existingTasks[i]) {
+        updateTask.run(type, JSON.stringify(rest), existingTasks[i].id);
+      } else {
+        insertTask.run(assignment.id, i, type, JSON.stringify(rest));
+      }
+    });
+    // лишние старые задания (если новый список короче) удаляются вместе с ответами по ним
+    for (let i = body.tasks.length; i < existingTasks.length; i++) {
+      deleteTask.run(existingTasks[i].id);
+    }
+  });
+  tx();
+  res.json({ ok: true, tasksChanged: body.tasks.length !== existingTasks.length });
+});
+
 app.delete('/api/assignments/:id', requireRole(['admin', 'parent']), (req, res) => {
   const assignment = db.prepare('SELECT * FROM assignments WHERE id=?').get(req.params.id);
   if (!assignment) return res.status(404).json({ error: 'not_found' });
@@ -657,6 +709,150 @@ app.get('/api/progress', requireRole(['admin', 'parent']), (req, res) => {
 
 // ---------- static frontend ----------
 app.use(express.static(path.join(__dirname, 'public')));
+
+// ---------- черновик (рисование) по заданию ----------
+app.get('/api/tasks/:id/draft', requireAuth, (req, res) => {
+  const role = req.session.user.role;
+  const childId = role === 'child' ? req.session.user.id : req.query.childId ? Number(req.query.childId) : null;
+  if (role !== 'child' && !hasChildAccess(req.session.user, childId)) {
+    return res.status(403).json({ error: 'no_access_to_child' });
+  }
+  const row = db.prepare('SELECT strokes FROM drafts WHERE task_id=? AND child_id=?').get(req.params.id, childId);
+  res.json({ strokes: row ? JSON.parse(row.strokes) : [] });
+});
+
+app.put('/api/tasks/:id/draft', requireRole('child'), (req, res) => {
+  const { strokes } = req.body || {};
+  if (!Array.isArray(strokes)) return res.status(400).json({ error: 'strokes_array_required' });
+  db.prepare(
+    `INSERT INTO drafts (task_id, child_id, strokes, updated_at) VALUES (?,?,?,datetime('now'))
+     ON CONFLICT(task_id, child_id) DO UPDATE SET strokes=excluded.strokes, updated_at=excluded.updated_at`
+  ).run(req.params.id, req.session.user.id, JSON.stringify(strokes));
+  res.json({ ok: true });
+});
+
+// ---------- книжная полка (epub) ----------
+function visibleBookFilter(user) {
+  // возвращает { where, params } для отбора книг, видимых пользователю
+  if (user.role === 'admin') return { where: '1=1', params: [] };
+  if (user.role === 'parent') {
+    return { where: '(b.uploaded_by = ? OR u.role = \'admin\')', params: [user.id] };
+  }
+  // child: книги от админа (глобальные) + от любого из своих родителей
+  return {
+    where: `(u.role = 'admin' OR b.uploaded_by IN (SELECT parent_id FROM parent_child WHERE child_id = ?))`,
+    params: [user.id],
+  };
+}
+
+app.get('/api/books', requireAuth, (req, res) => {
+  const { where, params } = visibleBookFilter(req.session.user);
+  const childId = req.session.user.role === 'child' ? req.session.user.id : req.query.childId ? Number(req.query.childId) : null;
+  if (childId && req.session.user.role !== 'child' && !hasChildAccess(req.session.user, childId)) {
+    return res.status(403).json({ error: 'no_access_to_child' });
+  }
+  const books = db
+    .prepare(
+      `SELECT b.*, u.display_name as uploader_name, u.role as uploader_role
+       FROM books b LEFT JOIN users u ON u.id = b.uploaded_by
+       WHERE ${where} ORDER BY b.created_at DESC`
+    )
+    .all(...params);
+
+  const result = books.map((b) => {
+    let progress = null;
+    let isFavorite = false;
+    if (childId) {
+      const p = db.prepare('SELECT location, percentage, updated_at FROM reading_progress WHERE book_id=? AND child_id=?').get(b.id, childId);
+      progress = p || null;
+      isFavorite = !!db.prepare('SELECT 1 FROM book_favorites WHERE book_id=? AND child_id=?').get(b.id, childId);
+    }
+    return {
+      id: b.id, title: b.title, author: b.author, coverPath: b.cover_path, filePath: b.file_path,
+      uploadedBy: b.uploader_name, canManage: req.session.user.role === 'admin' || b.uploaded_by === req.session.user.id,
+      progress, isFavorite,
+    };
+  });
+  res.json({ books: result });
+});
+
+app.get('/api/books/:id', requireAuth, (req, res) => {
+  const { where, params } = visibleBookFilter(req.session.user);
+  const childId = req.session.user.role === 'child' ? req.session.user.id : req.query.childId ? Number(req.query.childId) : null;
+  const book = db
+    .prepare(
+      `SELECT b.*, u.display_name as uploader_name
+       FROM books b LEFT JOIN users u ON u.id = b.uploaded_by
+       WHERE b.id=? AND (${where})`
+    )
+    .get(req.params.id, ...params);
+  if (!book) return res.status(404).json({ error: 'not_found' });
+  let progress = null, isFavorite = false;
+  if (childId) {
+    progress = db.prepare('SELECT location, percentage, updated_at FROM reading_progress WHERE book_id=? AND child_id=?').get(book.id, childId) || null;
+    isFavorite = !!db.prepare('SELECT 1 FROM book_favorites WHERE book_id=? AND child_id=?').get(book.id, childId);
+  }
+  res.json({
+    book: {
+      id: book.id, title: book.title, author: book.author, coverPath: book.cover_path, filePath: book.file_path,
+      uploadedBy: book.uploader_name, progress, isFavorite,
+    },
+  });
+});
+
+app.post('/api/books', requireRole(['admin', 'parent']), upload.fields([{ name: 'epub', maxCount: 1 }, { name: 'cover', maxCount: 1 }]), (req, res) => {
+  const epubFile = req.files && req.files.epub && req.files.epub[0];
+  if (!epubFile) return res.status(400).json({ error: 'no_file' });
+  const coverFile = req.files && req.files.cover && req.files.cover[0];
+  const { title, author } = req.body || {};
+  if (!title) return res.status(400).json({ error: 'title_required' });
+
+  const info = db
+    .prepare('INSERT INTO books (title, author, file_path, cover_path, uploaded_by) VALUES (?,?,?,?,?)')
+    .run(title, author || null, `/uploads/${epubFile.filename}`, coverFile ? `/uploads/${coverFile.filename}` : null, req.session.user.id);
+  res.json({ ok: true, bookId: info.lastInsertRowid });
+});
+
+app.delete('/api/books/:id', requireRole(['admin', 'parent']), (req, res) => {
+  const book = db.prepare('SELECT * FROM books WHERE id=?').get(req.params.id);
+  if (!book) return res.status(404).json({ error: 'not_found' });
+  if (req.session.user.role !== 'admin' && book.uploaded_by !== req.session.user.id) {
+    return res.status(403).json({ error: 'not_owner' });
+  }
+  db.prepare('DELETE FROM books WHERE id=?').run(req.params.id);
+  const filePath = path.join(UPLOADS_DIR, path.basename(book.file_path));
+  fs.unlink(filePath, () => {});
+  if (book.cover_path) fs.unlink(path.join(UPLOADS_DIR, path.basename(book.cover_path)), () => {});
+  res.json({ ok: true });
+});
+
+app.get('/api/books/:id/progress', requireAuth, (req, res) => {
+  const role = req.session.user.role;
+  const childId = role === 'child' ? req.session.user.id : req.query.childId ? Number(req.query.childId) : null;
+  if (role !== 'child' && (!childId || !hasChildAccess(req.session.user, childId))) {
+    return res.status(403).json({ error: 'no_access_to_child' });
+  }
+  const p = db.prepare('SELECT location, percentage, updated_at FROM reading_progress WHERE book_id=? AND child_id=?').get(req.params.id, childId);
+  res.json({ progress: p || null });
+});
+
+app.put('/api/books/:id/progress', requireRole('child'), (req, res) => {
+  const { location, percentage } = req.body || {};
+  db.prepare(
+    `INSERT INTO reading_progress (book_id, child_id, location, percentage, updated_at) VALUES (?,?,?,?,datetime('now'))
+     ON CONFLICT(book_id, child_id) DO UPDATE SET location=excluded.location, percentage=excluded.percentage, updated_at=excluded.updated_at`
+  ).run(req.params.id, req.session.user.id, location || null, Number(percentage) || 0);
+  res.json({ ok: true });
+});
+
+app.post('/api/books/:id/favorite', requireRole('child'), (req, res) => {
+  db.prepare('INSERT OR IGNORE INTO book_favorites (book_id, child_id) VALUES (?,?)').run(req.params.id, req.session.user.id);
+  res.json({ ok: true });
+});
+app.delete('/api/books/:id/favorite', requireRole('child'), (req, res) => {
+  db.prepare('DELETE FROM book_favorites WHERE book_id=? AND child_id=?').run(req.params.id, req.session.user.id);
+  res.json({ ok: true });
+});
 
 app.listen(PORT, () => {
   console.log(`Homework app listening on port ${PORT}`);

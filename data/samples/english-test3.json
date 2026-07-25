@@ -12,7 +12,7 @@
           ]
         }
       ],
-      "explanation": null
+      "explanation": "Подставь слово, которое подходит по смыслу и грамматике."
     },
     {
       "type": "cloze",
@@ -24,7 +24,7 @@
           ]
         }
       ],
-      "explanation": null
+      "explanation": "Подставь слово, которое подходит по смыслу и грамматике."
     },
     {
       "type": "cloze",
@@ -36,7 +36,7 @@
           ]
         }
       ],
-      "explanation": null
+      "explanation": "Подставь слово, которое подходит по смыслу и грамматике."
     },
     {
       "type": "cloze",
@@ -48,7 +48,7 @@
           ]
         }
       ],
-      "explanation": null
+      "explanation": "Подставь слово, которое подходит по смыслу и грамматике."
     },
     {
       "type": "cloze",
@@ -60,7 +60,7 @@
           ]
         }
       ],
-      "explanation": null
+      "explanation": "Подставь слово, которое подходит по смыслу и грамматике."
     },
     {
       "type": "cloze",
@@ -72,7 +72,7 @@
           ]
         }
       ],
-      "explanation": null
+      "explanation": "Подставь слово, которое подходит по смыслу и грамматике."
     },
     {
       "type": "cloze",
@@ -84,7 +84,7 @@
           ]
         }
       ],
-      "explanation": null
+      "explanation": "Подставь слово, которое подходит по смыслу и грамматике."
     },
     {
       "type": "open_text",
@@ -93,7 +93,7 @@
         "had"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «had»."
     },
     {
       "type": "open_text",
@@ -102,7 +102,7 @@
         "gave"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «gave»."
     },
     {
       "type": "open_text",
@@ -111,7 +111,7 @@
         "went"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «went»."
     },
     {
       "type": "open_text",
@@ -120,7 +120,7 @@
         "saw"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «saw»."
     },
     {
       "type": "open_text",
@@ -129,7 +129,7 @@
         "said"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «said»."
     },
     {
       "type": "open_text",
@@ -138,7 +138,7 @@
         "came"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «came»."
     },
     {
       "type": "open_text",
@@ -147,7 +147,7 @@
         "took"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «took»."
     },
     {
       "type": "open_text",
@@ -156,7 +156,7 @@
         "put"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «put»."
     },
     {
       "type": "open_text",
@@ -165,7 +165,7 @@
         "drank"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «drank»."
     },
     {
       "type": "open_text",
@@ -174,7 +174,7 @@
         "ate"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «ate»."
     },
     {
       "type": "open_text",
@@ -184,7 +184,7 @@
         "Did Mother give us milk for breakfast yesterday"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «Did Mother give us milk for breakfast yesterday?»."
     },
     {
       "type": "open_text",
@@ -194,7 +194,7 @@
         "What did Mother give us for breakfast yesterday"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «What did Mother give us for breakfast yesterday?»."
     },
     {
       "type": "open_text",
@@ -204,7 +204,7 @@
         "Did you get up at 6 yesterday morning"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «Did you get up at 6 yesterday morning?»."
     },
     {
       "type": "open_text",
@@ -214,7 +214,7 @@
         "When did you get up yesterday morning"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «When did you get up yesterday morning?»."
     },
     {
       "type": "open_text",
@@ -224,7 +224,7 @@
         "Did Helen play chess with you yesterday morning"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «Did Helen play chess with you yesterday morning?»."
     },
     {
       "type": "open_text",
@@ -234,7 +234,7 @@
         "With whom did Helen play chess yesterday morning"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «With whom did Helen play chess yesterday morning?»."
     },
     {
       "type": "open_text",
@@ -244,7 +244,7 @@
         "Did my friend's aunt live in London"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «Did my friend's aunt live in London?»."
     },
     {
       "type": "open_text",
@@ -254,7 +254,7 @@
         "Where did my friend's aunt live"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «Where did my friend's aunt live?»."
     },
     {
       "type": "open_text",
@@ -264,7 +264,7 @@
         "Did we see our teacher in the Zoo yesterday"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «Did we see our teacher in the Zoo yesterday?»."
     },
     {
       "type": "open_text",
@@ -274,7 +274,7 @@
         "Whom did we see in the Zoo yesterday"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «Whom did we see in the Zoo yesterday?»."
     },
     {
       "type": "choice_single",
@@ -285,7 +285,7 @@
         "taking"
       ],
       "correctIndex": 0,
-      "explanation": null
+      "explanation": "Верный вариант: «take» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -296,7 +296,7 @@
         "are skating"
       ],
       "correctIndex": 0,
-      "explanation": null
+      "explanation": "Верный вариант: «skate» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -307,7 +307,7 @@
         "played"
       ],
       "correctIndex": 2,
-      "explanation": null
+      "explanation": "Верный вариант: «played» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -318,7 +318,7 @@
         "cleans"
       ],
       "correctIndex": 1,
-      "explanation": null
+      "explanation": "Верный вариант: «clean» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -329,7 +329,7 @@
         "Are"
       ],
       "correctIndex": 1,
-      "explanation": null
+      "explanation": "Верный вариант: «Would» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -340,7 +340,7 @@
         "did not"
       ],
       "correctIndex": 2,
-      "explanation": null
+      "explanation": "Верный вариант: «did not» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -351,7 +351,7 @@
         "for a"
       ],
       "correctIndex": 2,
-      "explanation": null
+      "explanation": "Верный вариант: «for a» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -361,7 +361,7 @@
         "liked"
       ],
       "correctIndex": 1,
-      "explanation": null
+      "explanation": "Верный вариант: «liked» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -371,7 +371,7 @@
         "liked"
       ],
       "correctIndex": 0,
-      "explanation": null
+      "explanation": "Верный вариант: «likes» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -381,7 +381,7 @@
         "washed"
       ],
       "correctIndex": 0,
-      "explanation": null
+      "explanation": "Верный вариант: «wash» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -391,7 +391,7 @@
         "liked"
       ],
       "correctIndex": 0,
-      "explanation": null
+      "explanation": "Верный вариант: «like» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -401,7 +401,7 @@
         "didn't"
       ],
       "correctIndex": 1,
-      "explanation": null
+      "explanation": "Верный вариант: «didn't» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -411,7 +411,7 @@
         "helped"
       ],
       "correctIndex": 1,
-      "explanation": null
+      "explanation": "Верный вариант: «helped» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -421,7 +421,7 @@
         "did"
       ],
       "correctIndex": 1,
-      "explanation": null
+      "explanation": "Верный вариант: «did» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "open_text",
@@ -431,7 +431,7 @@
         "I help my mother about the house"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «I help my mother about the house.»."
     },
     {
       "type": "open_text",
@@ -441,7 +441,7 @@
         "My sisters washed their hands and face yesterday morning"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «My sisters washed their hands and face yesterday morning.»."
     },
     {
       "type": "open_text",
@@ -451,7 +451,7 @@
         "You helped me to do my homework yesterday"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «You helped me to do my homework yesterday.»."
     },
     {
       "type": "open_text",
@@ -461,7 +461,7 @@
         "You like to skate"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «You like to skate.»."
     },
     {
       "type": "open_text",
@@ -471,7 +471,7 @@
         "My sisters liked to watch TV"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «My sisters liked to watch TV.»."
     },
     {
       "type": "open_text",
@@ -481,7 +481,7 @@
         "I watch animals in the Zoo"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «I watch animals in the Zoo.»."
     },
     {
       "type": "open_text",
@@ -491,7 +491,7 @@
         "You watched TV yesterday"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «You watched TV yesterday.»."
     },
     {
       "type": "open_text",
@@ -501,7 +501,7 @@
         "My brother and I wash our hands at home"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «My brother and I wash our hands at home.»."
     },
     {
       "type": "open_text",
@@ -561,7 +561,7 @@
           2
         ]
       ],
-      "explanation": null
+      "explanation": "Сопоставь каждый элемент слева с подходящим элементом справа по смыслу."
     },
     {
       "type": "choice_single",
@@ -574,7 +574,7 @@
         "evening"
       ],
       "correctIndex": 1,
-      "explanation": null
+      "explanation": "Верный вариант: «yesterday» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -587,7 +587,7 @@
         "juice"
       ],
       "correctIndex": 2,
-      "explanation": null
+      "explanation": "Верный вариант: «apple» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -600,7 +600,7 @@
         "sport"
       ],
       "correctIndex": 4,
-      "explanation": null
+      "explanation": "Верный вариант: «sport» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -613,7 +613,7 @@
         "supper"
       ],
       "correctIndex": 0,
-      "explanation": null
+      "explanation": "Верный вариант: «food» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -626,7 +626,7 @@
         "go"
       ],
       "correctIndex": 3,
-      "explanation": null
+      "explanation": "Верный вариант: «play» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -639,7 +639,7 @@
         "porridge"
       ],
       "correctIndex": 1,
-      "explanation": null
+      "explanation": "Верный вариант: «cup» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -652,7 +652,7 @@
         "driver"
       ],
       "correctIndex": 3,
-      "explanation": null
+      "explanation": "Верный вариант: «baby» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -663,7 +663,7 @@
         "yesterday"
       ],
       "correctIndex": 2,
-      "explanation": null
+      "explanation": "Верный вариант: «yesterday» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -674,7 +674,7 @@
         "see"
       ],
       "correctIndex": 0,
-      "explanation": null
+      "explanation": "Верный вариант: «watch» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -685,7 +685,7 @@
         "doghouse"
       ],
       "correctIndex": 2,
-      "explanation": null
+      "explanation": "Верный вариант: «doghouse» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -696,7 +696,7 @@
         "a doctor"
       ],
       "correctIndex": 2,
-      "explanation": null
+      "explanation": "Верный вариант: «a doctor» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -707,7 +707,7 @@
         "frogs and dolphins"
       ],
       "correctIndex": 1,
-      "explanation": null
+      "explanation": "Верный вариант: «sweets and apples» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -718,7 +718,7 @@
         "English toys"
       ],
       "correctIndex": 0,
-      "explanation": null
+      "explanation": "Верный вариант: «Apples» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -729,7 +729,7 @@
         "friend"
       ],
       "correctIndex": 2,
-      "explanation": null
+      "explanation": "Верный вариант: «friend» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "cloze",
@@ -741,7 +741,7 @@
           ]
         }
       ],
-      "explanation": null
+      "explanation": "Подставь слово, которое подходит по смыслу и грамматике."
     },
     {
       "type": "cloze",
@@ -753,7 +753,7 @@
           ]
         }
       ],
-      "explanation": null
+      "explanation": "Подставь слово, которое подходит по смыслу и грамматике."
     },
     {
       "type": "cloze",
@@ -765,7 +765,7 @@
           ]
         }
       ],
-      "explanation": null
+      "explanation": "Подставь слово, которое подходит по смыслу и грамматике."
     },
     {
       "type": "cloze",
@@ -777,7 +777,7 @@
           ]
         }
       ],
-      "explanation": null
+      "explanation": "Подставь слово, которое подходит по смыслу и грамматике."
     },
     {
       "type": "cloze",
@@ -789,7 +789,7 @@
           ]
         }
       ],
-      "explanation": null
+      "explanation": "Подставь слово, которое подходит по смыслу и грамматике."
     },
     {
       "type": "cloze",
@@ -801,7 +801,7 @@
           ]
         }
       ],
-      "explanation": null
+      "explanation": "Подставь слово, которое подходит по смыслу и грамматике."
     },
     {
       "type": "cloze",
@@ -813,7 +813,7 @@
           ]
         }
       ],
-      "explanation": null
+      "explanation": "Подставь слово, которое подходит по смыслу и грамматике."
     },
     {
       "type": "open_text",
@@ -822,7 +822,7 @@
         "juice"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «juice»."
     },
     {
       "type": "open_text",
@@ -831,7 +831,7 @@
         "tea"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «tea»."
     },
     {
       "type": "open_text",
@@ -840,7 +840,7 @@
         "glass"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «glass»."
     },
     {
       "type": "open_text",
@@ -849,7 +849,7 @@
         "apple"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «apple»."
     },
     {
       "type": "open_text",
@@ -858,7 +858,7 @@
         "sweet"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «sweet»."
     },
     {
       "type": "open_text",
@@ -867,7 +867,7 @@
         "coffee"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «coffee»."
     },
     {
       "type": "open_text",
@@ -876,7 +876,7 @@
         "porridge"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «porridge»."
     }
   ]
 }

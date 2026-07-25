@@ -12,7 +12,7 @@
           ]
         }
       ],
-      "explanation": null
+      "explanation": "Подставь слово, которое подходит по смыслу и грамматике."
     },
     {
       "type": "cloze",
@@ -24,7 +24,7 @@
           ]
         }
       ],
-      "explanation": null
+      "explanation": "Подставь слово, которое подходит по смыслу и грамматике."
     },
     {
       "type": "cloze",
@@ -36,7 +36,7 @@
           ]
         }
       ],
-      "explanation": null
+      "explanation": "Подставь слово, которое подходит по смыслу и грамматике."
     },
     {
       "type": "cloze",
@@ -48,7 +48,7 @@
           ]
         }
       ],
-      "explanation": null
+      "explanation": "Подставь слово, которое подходит по смыслу и грамматике."
     },
     {
       "type": "cloze",
@@ -65,7 +65,7 @@
           ]
         }
       ],
-      "explanation": null
+      "explanation": "Подставь слово, которое подходит по смыслу и грамматике."
     },
     {
       "type": "cloze",
@@ -82,7 +82,7 @@
           ]
         }
       ],
-      "explanation": null
+      "explanation": "Подставь слово, которое подходит по смыслу и грамматике."
     },
     {
       "type": "cloze",
@@ -99,7 +99,7 @@
           ]
         }
       ],
-      "explanation": null
+      "explanation": "Подставь слово, которое подходит по смыслу и грамматике."
     },
     {
       "type": "choice_single",
@@ -109,7 +109,7 @@
         "has got"
       ],
       "correctIndex": 0,
-      "explanation": null
+      "explanation": "Верный вариант: «have got» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -119,7 +119,7 @@
         "is"
       ],
       "correctIndex": 1,
-      "explanation": null
+      "explanation": "Верный вариант: «is» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -129,7 +129,7 @@
         "has got"
       ],
       "correctIndex": 0,
-      "explanation": null
+      "explanation": "Верный вариант: «have got» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -139,7 +139,7 @@
         "am"
       ],
       "correctIndex": 1,
-      "explanation": null
+      "explanation": "Верный вариант: «am» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -149,7 +149,7 @@
         "Has...got"
       ],
       "correctIndex": 0,
-      "explanation": null
+      "explanation": "Верный вариант: «Have...got» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -159,7 +159,7 @@
         "are"
       ],
       "correctIndex": 1,
-      "explanation": null
+      "explanation": "Верный вариант: «are» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -169,7 +169,7 @@
         "are"
       ],
       "correctIndex": 0,
-      "explanation": null
+      "explanation": "Верный вариант: «is» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "open_text",
@@ -179,7 +179,7 @@
         "Yes, I am"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «Yes, I am.»."
     },
     {
       "type": "open_text",
@@ -189,7 +189,7 @@
         "No, I mustn't"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «No, I mustn't.»."
     },
     {
       "type": "open_text",
@@ -199,7 +199,7 @@
         "No, I can't"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «No, I can't.»."
     },
     {
       "type": "open_text",
@@ -209,7 +209,7 @@
         "No, she hasn't"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «No, she hasn't.»."
     },
     {
       "type": "open_text",
@@ -219,7 +219,7 @@
         "Yes, he does"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «Yes, he does.»."
     },
     {
       "type": "open_text",
@@ -229,7 +229,7 @@
         "Yes, they are"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «Yes, they are.»."
     },
     {
       "type": "open_text",
@@ -331,7 +331,7 @@
           6
         ]
       ],
-      "explanation": null
+      "explanation": "Сопоставь каждый элемент слева с подходящим элементом справа по смыслу."
     },
     {
       "type": "choice_single",
@@ -341,7 +341,7 @@
         "it"
       ],
       "correctIndex": 0,
-      "explanation": null
+      "explanation": "Верный вариант: «its» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -351,7 +351,7 @@
         "your"
       ],
       "correctIndex": 0,
-      "explanation": null
+      "explanation": "Верный вариант: «you» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -362,7 +362,7 @@
         "their"
       ],
       "correctIndex": 0,
-      "explanation": null
+      "explanation": "Верный вариант: «they» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -373,7 +373,7 @@
         "them"
       ],
       "correctIndex": 0,
-      "explanation": null
+      "explanation": "Верный вариант: «they» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -384,7 +384,7 @@
         "Him"
       ],
       "correctIndex": 1,
-      "explanation": null
+      "explanation": "Верный вариант: «His» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -394,7 +394,7 @@
         "its"
       ],
       "correctIndex": 1,
-      "explanation": null
+      "explanation": "Верный вариант: «its» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -405,7 +405,7 @@
         "His"
       ],
       "correctIndex": 2,
-      "explanation": null
+      "explanation": "Верный вариант: «His» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "open_text",
@@ -415,7 +415,7 @@
         "Those boys don't play football at the school sports ground"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «Those boys don't play football at the school sports ground.»."
     },
     {
       "type": "open_text",
@@ -425,7 +425,7 @@
         "My little bird doesn't like my friend"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «My little bird doesn't like my friend.»."
     },
     {
       "type": "open_text",
@@ -435,7 +435,7 @@
         "My brother Tom can't play tennis very well"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «My brother Tom can't play tennis very well.»."
     },
     {
       "type": "open_text",
@@ -445,7 +445,7 @@
         "Our friends from Africa can play hockey"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «Our friends from Africa can play hockey.»."
     },
     {
       "type": "open_text",
@@ -455,7 +455,7 @@
         "My father isn't a good sportsman"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «My father isn't a good sportsman.»."
     },
     {
       "type": "open_text",
@@ -465,7 +465,7 @@
         "Bob likes to play snowballs with me"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «Bob likes to play snowballs with me.»."
     },
     {
       "type": "open_text",
@@ -475,7 +475,7 @@
         "I think about you"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «I think about you.»."
     },
     {
       "type": "open_text",
@@ -492,7 +492,7 @@
         "False"
       ],
       "correctIndex": 1,
-      "explanation": null
+      "explanation": "Верный вариант: «False» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -502,7 +502,7 @@
         "False"
       ],
       "correctIndex": 1,
-      "explanation": null
+      "explanation": "Верный вариант: «False» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -512,7 +512,7 @@
         "False"
       ],
       "correctIndex": 0,
-      "explanation": null
+      "explanation": "Верный вариант: «True» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -522,7 +522,7 @@
         "False"
       ],
       "correctIndex": 0,
-      "explanation": null
+      "explanation": "Верный вариант: «True» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -532,7 +532,7 @@
         "False"
       ],
       "correctIndex": 1,
-      "explanation": null
+      "explanation": "Верный вариант: «False» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -542,7 +542,7 @@
         "False"
       ],
       "correctIndex": 0,
-      "explanation": null
+      "explanation": "Верный вариант: «True» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "cloze",
@@ -554,7 +554,7 @@
           ]
         }
       ],
-      "explanation": null
+      "explanation": "Подставь слово, которое подходит по смыслу и грамматике."
     },
     {
       "type": "cloze",
@@ -566,7 +566,7 @@
           ]
         }
       ],
-      "explanation": null
+      "explanation": "Подставь слово, которое подходит по смыслу и грамматике."
     },
     {
       "type": "cloze",
@@ -578,7 +578,7 @@
           ]
         }
       ],
-      "explanation": null
+      "explanation": "Подставь слово, которое подходит по смыслу и грамматике."
     },
     {
       "type": "cloze",
@@ -590,7 +590,7 @@
           ]
         }
       ],
-      "explanation": null
+      "explanation": "Подставь слово, которое подходит по смыслу и грамматике."
     },
     {
       "type": "cloze",
@@ -602,7 +602,7 @@
           ]
         }
       ],
-      "explanation": null
+      "explanation": "Подставь слово, которое подходит по смыслу и грамматике."
     },
     {
       "type": "cloze",
@@ -614,7 +614,7 @@
           ]
         }
       ],
-      "explanation": null
+      "explanation": "Подставь слово, которое подходит по смыслу и грамматике."
     },
     {
       "type": "cloze",
@@ -626,7 +626,7 @@
           ]
         }
       ],
-      "explanation": null
+      "explanation": "Подставь слово, которое подходит по смыслу и грамматике."
     },
     {
       "type": "choice_single",
@@ -637,7 +637,7 @@
         "I am glad to meet you"
       ],
       "correctIndex": 2,
-      "explanation": null
+      "explanation": "Верный вариант: «I am glad to meet you» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -648,7 +648,7 @@
         "pupil"
       ],
       "correctIndex": 2,
-      "explanation": null
+      "explanation": "Верный вариант: «pupil» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -659,7 +659,7 @@
         "Please"
       ],
       "correctIndex": 1,
-      "explanation": null
+      "explanation": "Верный вариант: «Of course» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -670,7 +670,7 @@
         "Thank you"
       ],
       "correctIndex": 0,
-      "explanation": null
+      "explanation": "Верный вариант: «How do you do» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "choice_single",
@@ -681,7 +681,7 @@
         "OK"
       ],
       "correctIndex": 2,
-      "explanation": null
+      "explanation": "Верный вариант: «OK» — перечитай условие ещё раз и сравни с остальными вариантами."
     },
     {
       "type": "open_text",
@@ -747,7 +747,7 @@
           7
         ]
       ],
-      "explanation": null
+      "explanation": "Сопоставь каждый элемент слева с подходящим элементом справа по смыслу."
     },
     {
       "type": "open_text",
@@ -756,7 +756,7 @@
         "uncle"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «uncle»."
     },
     {
       "type": "open_text",
@@ -765,7 +765,7 @@
         "monkey"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «monkey»."
     },
     {
       "type": "open_text",
@@ -774,7 +774,7 @@
         "teacher"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «teacher»."
     },
     {
       "type": "open_text",
@@ -783,7 +783,7 @@
         "eight"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «eight»."
     },
     {
       "type": "open_text",
@@ -792,7 +792,7 @@
         "snowball"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «snowball»."
     },
     {
       "type": "open_text",
@@ -801,7 +801,7 @@
         "hockey"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «hockey»."
     },
     {
       "type": "open_text",
@@ -810,7 +810,7 @@
         "daughter"
       ],
       "needsManualReview": false,
-      "explanation": null
+      "explanation": "Ожидаемый ответ: «daughter»."
     }
   ]
 }

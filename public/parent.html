@@ -11,6 +11,7 @@
     <h1>👨‍👩‍👧 Панель родителя</h1>
     <div style="display:flex; gap:8px; flex-wrap:wrap">
       <button id="adminLink" style="display:none" onclick="window.location.href='/admin.html'">Администрирование</button>
+      <button onclick="window.location.href='/books.html'">📚 Книги</button>
       <button onclick="window.location.href='/profile.html'">Профиль</button>
       <button onclick="logout()">Выйти</button>
     </div>
@@ -281,6 +282,7 @@ async function loadLibrary() {
             <div class="muted">${a.taskCount} заданий</div>
           </div>
           <button onclick="deleteLibraryAssignment(${a.id})">Удалить совсем</button>
+          <button onclick="toggleUpdateBox(${a.id})">Обновить JSON</button>
         </div>
         <div style="margin-top:8px">${chips || '<span class="muted">Пока никому не назначено</span>'}</div>
         ${notAssigned.length ? `
@@ -294,8 +296,35 @@ async function loadLibrary() {
           <input type="text" id="reward-${a.id}" placeholder="Награда" value="${escapeHtml(a.reward || '')}" style="flex:1; padding:6px 10px; border-radius:8px; border:1px solid #dfe3ec" />
           <button onclick="saveReward(${a.id})">Сохранить</button>
         </div>
+        <div id="updateBox-${a.id}" style="display:none; margin-top:10px">
+          <p class="muted">Вставьте исправленный JSON целиком (subject, title, tasks). Прогресс детей сохранится, если состав заданий не изменился кардинально.</p>
+          <textarea id="updateJson-${a.id}" style="min-height:140px"></textarea>
+          <div style="margin-top:6px"><button class="submit-btn" onclick="saveUpdate(${a.id})">Сохранить обновление</button></div>
+          <p id="updateResult-${a.id}" class="muted"></p>
+        </div>
       </div>`;
   }).join('');
+}
+
+function toggleUpdateBox(assignmentId) {
+  const box = document.getElementById(`updateBox-${assignmentId}`);
+  box.style.display = box.style.display === 'block' ? 'none' : 'block';
+}
+
+async function saveUpdate(assignmentId) {
+  const raw = document.getElementById(`updateJson-${assignmentId}`).value;
+  const resultEl = document.getElementById(`updateResult-${assignmentId}`);
+  let parsed;
+  try { parsed = JSON.parse(raw); } catch (e) { resultEl.textContent = 'Ошибка: некорректный JSON'; resultEl.style.color = 'var(--wrong)'; return; }
+  try {
+    await api(`/api/assignments/${assignmentId}`, { method: 'PUT', body: JSON.stringify(parsed) });
+    resultEl.textContent = 'Обновлено! Прогресс детей сохранён.';
+    resultEl.style.color = 'var(--correct)';
+    loadLibrary();
+  } catch (e) {
+    resultEl.textContent = 'Ошибка: ' + JSON.stringify(e.data?.errors || e.message);
+    resultEl.style.color = 'var(--wrong)';
+  }
 }
 
 async function assignToChild(assignmentId) {

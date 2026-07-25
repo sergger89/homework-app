@@ -6,17 +6,28 @@
       "type": "cloze",
       "promptTemplate": "Ко___ка сидела на окне и смотрела на со___нце.",
       "blanks": [
-        { "acceptedAnswers": ["ш"] },
-        { "acceptedAnswers": ["л"] }
+        {
+          "acceptedAnswers": [
+            "ш"
+          ]
+        },
+        {
+          "acceptedAnswers": [
+            "л"
+          ]
+        }
       ],
       "explanation": "Кошка, солнце"
     },
     {
       "type": "open_text",
       "prompt": "Напиши слово, противоположное по значению слову «большой»",
-      "acceptedAnswers": ["маленький", "малый"],
+      "acceptedAnswers": [
+        "маленький",
+        "малый"
+      ],
       "caseSensitive": false,
-      "explanation": null
+      "explanation": "Малый — слово с противоположным значением к «большой»."
     },
     {
       "type": "open_text",

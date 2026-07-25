@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Чтение</title>
+<link rel="stylesheet" href="/css/style.css" />
+<style>
+  html, body { height: 100%; margin: 0; }
+  .reader-topbar {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    padding: 10px 14px; background: white; box-shadow: 0 1px 4px rgba(0,0,0,0.06); flex-wrap: wrap;
+  }
+  .reader-topbar h1 { font-size: 16px; margin: 0; }
+  #viewer { position: absolute; top: 56px; bottom: 56px; left: 0; right: 0; }
+  .reader-footer {
+    position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #eef1f8;
+    display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; gap: 10px;
+  }
+  .reader-nav-btn { border: none; background: #eef1f8; border-radius: 8px; padding: 10px 16px; font-size: 18px; cursor: pointer; }
+  #readerProgressText { font-size: 13px; color: var(--muted); }
+</style>
+</head>
+<body>
+  <div class="reader-topbar">
+    <button onclick="window.location.href='/books.html'">← К книгам</button>
+    <h1 id="bookTitle">Загрузка...</h1>
+    <span id="readerProgressText"></span>
+  </div>
+  <div id="viewer"></div>
+  <div class="reader-footer">
+    <button class="reader-nav-btn" id="prevPage">‹ Назад</button>
+    <div class="progress-bar" style="flex:1; margin:0 10px"><div id="readerProgressBar" style="width:0%"></div></div>
+    <button class="reader-nav-btn" id="nextPage">Вперёд ›</button>
+  </div>
+
+<script src="/js/common.js"></script>
+<script src="/vendor/jszip.min.js"></script>
+<script src="/vendor/epub.min.js"></script>
+<script>
+const params = new URLSearchParams(window.location.search);
+const bookId = params.get('id');
+const childIdParam = params.get('childId');
+let isChildViewer = true; // сохраняем прогресс, только если реально читает ребёнок (не родитель в режиме просмотра)
+
+async function init() {
+  const me = await api('/api/me');
+  isChildViewer = me.user.role === 'child';
+
+  const qs = childIdParam ? `?childId=${childIdParam}` : '';
+  const { book } = await api(`/api/books/${bookId}${qs}`);
+  document.getElementById('bookTitle').textContent = book.title + (book.author ? ` — ${book.author}` : '');
+
+  const rendition = ePub(book.filePath).renderTo('viewer', {
+    width: '100%', height: '100%', flow: 'paginated', spread: 'auto',
+  });
+
+  const startCfi = book.progress?.location || undefined;
+  rendition.display(startCfi);
+
+  const bookObj = rendition.book;
+  bookObj.ready.then(() => bookObj.locations.generate(1000)).then(() => {
+    rendition.on('relocated', (location) => {
+      const pct = bookObj.locations.percentageFromCfi(location.start.cfi) * 100;
+      document.getElementById('readerProgressBar').style.width = pct.toFixed(1) + '%';
+      document.getElementById('readerProgressText').textContent = pct.toFixed(0) + '%';
+      if (isChildViewer) saveProgress(location.start.cfi, pct);
+    });
+  });
+
+  document.getElementById('prevPage').onclick = () => rendition.prev();
+  document.getElementById('nextPage').onclick = () => rendition.next();
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') rendition.prev();
+    if (e.key === 'ArrowRight') rendition.next();
+  });
+
+  // свайпы для мобильных
+  let touchStartX = null;
+  document.getElementById('viewer').addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
+  document.getElementById('viewer').addEventListener('touchend', (e) => {
+    if (touchStartX === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (dx > 60) rendition.prev();
+    else if (dx < -60) rendition.next();
+    touchStartX = null;
+  });
+}
+
+let saveTimer = null;
+function saveProgress(location, percentage) {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    api(`/api/books/${bookId}/progress`, { method: 'PUT', body: JSON.stringify({ location, percentage }) }).catch(() => {});
+  }, 800);
+}
+
+init();
+</script>
+</body>
+</html>
