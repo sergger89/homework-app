@@ -18,11 +18,21 @@ async function api(url, opts) {
 
 // для multipart/form-data запросов (загрузка файлов) - не выставляем Content-Type вручную
 async function apiForm(url, formData, method = 'POST') {
-  const res = await fetch(url, { method, body: formData });
-  const data = await res.json().catch(() => ({}));
+  let res;
+  try {
+    res = await fetch(url, { method, body: formData });
+  } catch (networkErr) {
+    // сеть оборвалась / запрос отклонён ещё до ответа сервера (часто - прокси/ingress режет большие файлы)
+    const err = new Error('network_error');
+    err.data = { error: 'network_error', status: 0 };
+    throw err;
+  }
+  const rawText = await res.text();
+  let data = {};
+  try { data = rawText ? JSON.parse(rawText) : {}; } catch (e) { /* ответ не JSON - например, страница ошибки от прокси */ }
   if (!res.ok) {
-    const err = new Error(data.error || 'request_failed');
-    err.data = data;
+    const err = new Error(data.error || `http_${res.status}`);
+    err.data = { ...data, status: res.status, rawText: data.error ? undefined : rawText.slice(0, 300) };
     throw err;
   }
   return data;

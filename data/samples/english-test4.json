@@ -94,7 +94,7 @@
         "you have got"
       ],
       "correctIndex": 0,
-      "explanation": "Верный вариант: «have you got» — перечитай условие ещё раз и сравни с остальными вариантами."
+      "explanation": "Подставь по очереди каждый вариант на место пропуска — только один будет звучать правильно и по смыслу, и по форме."
     },
     {
       "type": "choice_single",
@@ -104,7 +104,7 @@
         "says"
       ],
       "correctIndex": 1,
-      "explanation": "Верный вариант: «says» — перечитай условие ещё раз и сравни с остальными вариантами."
+      "explanation": "Подставь по очереди каждый вариант на место пропуска — только один будет звучать правильно и по смыслу, и по форме."
     },
     {
       "type": "choice_single",
@@ -114,7 +114,7 @@
         "was"
       ],
       "correctIndex": 1,
-      "explanation": "Верный вариант: «was» — перечитай условие ещё раз и сравни с остальными вариантами."
+      "explanation": "Подставь по очереди каждый вариант на место пропуска — только один будет звучать правильно и по смыслу, и по форме."
     },
     {
       "type": "choice_single",
@@ -124,7 +124,7 @@
         "ate"
       ],
       "correctIndex": 1,
-      "explanation": "Верный вариант: «ate» — перечитай условие ещё раз и сравни с остальными вариантами."
+      "explanation": "Подставь по очереди каждый вариант на место пропуска — только один будет звучать правильно и по смыслу, и по форме."
     },
     {
       "type": "choice_single",
@@ -134,7 +134,7 @@
         "didn't like"
       ],
       "correctIndex": 0,
-      "explanation": "Верный вариант: «doesn't like» — перечитай условие ещё раз и сравни с остальными вариантами."
+      "explanation": "Подставь по очереди каждый вариант на место пропуска — только один будет звучать правильно и по смыслу, и по форме."
     },
     {
       "type": "choice_single",
@@ -144,7 +144,7 @@
         "weren't"
       ],
       "correctIndex": 1,
-      "explanation": "Верный вариант: «weren't» — перечитай условие ещё раз и сравни с остальными вариантами."
+      "explanation": "Подставь по очереди каждый вариант на место пропуска — только один будет звучать правильно и по смыслу, и по форме."
     },
     {
       "type": "choice_single",
@@ -154,7 +154,7 @@
         "Were"
       ],
       "correctIndex": 1,
-      "explanation": "Верный вариант: «Were» — перечитай условие ещё раз и сравни с остальными вариантами."
+      "explanation": "Подставь по очереди каждый вариант на место пропуска — только один будет звучать правильно и по смыслу, и по форме."
     },
     {
       "type": "open_text",
@@ -164,7 +164,7 @@
         "He didn't make soup without meat"
       ],
       "needsManualReview": false,
-      "explanation": "Ожидаемый ответ: «He didn't make soup without meat.»."
+      "explanation": "Сверься с формулировкой задания и похожими примерами — какое слово подходит по смыслу и форме."
     },
     {
       "type": "open_text",
@@ -174,7 +174,7 @@
         "My mother didn't eat salad with bread"
       ],
       "needsManualReview": false,
-      "explanation": "Ожидаемый ответ: «My mother didn't eat salad with bread.»."
+      "explanation": "Сверься с формулировкой задания и похожими примерами — какое слово подходит по смыслу и форме."
     },
     {
       "type": "open_text",
@@ -184,7 +184,7 @@
         "Jill didn't buy sweet carrots yesterday"
       ],
       "needsManualReview": false,
-      "explanation": "Ожидаемый ответ: «Jill didn't buy sweet carrots yesterday.»."
+      "explanation": "Сверься с формулировкой задания и похожими примерами — какое слово подходит по смыслу и форме."
     },
     {
       "type": "open_text",
@@ -194,7 +194,7 @@
         "My parents didn't come home at eight"
       ],
       "needsManualReview": false,
-      "explanation": "Ожидаемый ответ: «My parents didn't come home at eight.»."
+      "explanation": "Сверься с формулировкой задания и похожими примерами — какое слово подходит по смыслу и форме."
     },
     {
       "type": "open_text",
@@ -204,7 +204,7 @@
         "You didn't give me your puppy"
       ],
       "needsManualReview": false,
-      "explanation": "Ожидаемый ответ: «You didn't give me your puppy.»."
+      "explanation": "Сверься с формулировкой задания и похожими примерами — какое слово подходит по смыслу и форме."
     },
     {
       "type": "open_text",
@@ -214,7 +214,7 @@
         "They didn't play leapfrog yesterday"
       ],
       "needsManualReview": false,
-      "explanation": "Ожидаемый ответ: «They didn't play leapfrog yesterday.»."
+      "explanation": "Сверься с формулировкой задания и похожими примерами — какое слово подходит по смыслу и форме."
     },
     {
       "type": "open_text",
@@ -224,7 +224,7 @@
         "Mary didn't drink apple juice yesterday"
       ],
       "needsManualReview": false,
-      "explanation": "Ожидаемый ответ: «Mary didn't drink apple juice yesterday.»."
+      "explanation": "Сверься с формулировкой задания и похожими примерами — какое слово подходит по смыслу и форме."
     },
     {
       "type": "open_text",
@@ -234,7 +234,7 @@
         "A little boy bought ice cream."
       ],
       "needsManualReview": false,
-      "explanation": "Ожидаемый ответ: «A little boy bought ice cream.»."
+      "explanation": "Переведи по смыслу, обращая внимание на время действия и порядок слов — сверься с похожими примерами в задании."
     },
     {
       "type": "open_text",
@@ -244,7 +244,7 @@
         "Did a little boy buy ice cream?"
       ],
       "needsManualReview": false,
-      "explanation": "Ожидаемый ответ: «Did a little boy buy ice cream?»."
+      "explanation": "Переведи по смыслу, обращая внимание на время действия и порядок слов — сверься с похожими примерами в задании."
     },
     {
       "type": "open_text",
@@ -254,7 +254,7 @@
         "Father made tasty soup."
       ],
       "needsManualReview": false,
-      "explanation": "Ожидаемый ответ: «Father made tasty soup.»."
+      "explanation": "Переведи по смыслу, обращая внимание на время действия и порядок слов — сверься с похожими примерами в задании."
     },
     {
       "type": "open_text",
@@ -264,7 +264,7 @@
         "Did Father make tasty soup?"
       ],
       "needsManualReview": false,
-      "explanation": "Ожидаемый ответ: «Did Father make tasty soup?»."
+      "explanation": "Переведи по смыслу, обращая внимание на время действия и порядок слов — сверься с похожими примерами в задании."
     },
     {
       "type": "open_text",
@@ -274,7 +274,7 @@
         "You ate fruit salad yesterday."
       ],
       "needsManualReview": false,
-      "explanation": "Ожидаемый ответ: «You ate fruit salad yesterday.»."
+      "explanation": "Переведи по смыслу, обращая внимание на время действия и порядок слов — сверься с похожими примерами в задании."
     },
     {
       "type": "open_text",
@@ -284,7 +284,7 @@
         "Did you eat fruit salad yesterday?"
       ],
       "needsManualReview": false,
-      "explanation": "Ожидаемый ответ: «Did you eat fruit salad yesterday?»."
+      "explanation": "Переведи по смыслу, обращая внимание на время действия и порядок слов — сверься с похожими примерами в задании."
     },
     {
       "type": "open_text",
@@ -294,7 +294,7 @@
         "Mother drank apple juice."
       ],
       "needsManualReview": false,
-      "explanation": "Ожидаемый ответ: «Mother drank apple juice.»."
+      "explanation": "Переведи по смыслу, обращая внимание на время действия и порядок слов — сверься с похожими примерами в задании."
     },
     {
       "type": "open_text",
@@ -304,7 +304,7 @@
         "Did Mother drink apple juice?"
       ],
       "needsManualReview": false,
-      "explanation": "Ожидаемый ответ: «Did Mother drink apple juice?»."
+      "explanation": "Переведи по смыслу, обращая внимание на время действия и порядок слов — сверься с похожими примерами в задании."
     },
     {
       "type": "open_text",
@@ -314,7 +314,7 @@
         "Where is my porridge"
       ],
       "needsManualReview": false,
-      "explanation": "Ожидаемый ответ: «Where is my porridge?»."
+      "explanation": "Сверься с формулировкой задания и похожими примерами — какое слово подходит по смыслу и форме."
     },
     {
       "type": "open_text",
@@ -324,7 +324,7 @@
         "Was my hamster cold in winter"
       ],
       "needsManualReview": false,
-      "explanation": "Ожидаемый ответ: «Was my hamster cold in winter?»."
+      "explanation": "Сверься с формулировкой задания и похожими примерами — какое слово подходит по смыслу и форме."
     },
     {
       "type": "open_text",
@@ -334,7 +334,7 @@
         "Were the flowers red or orange"
       ],
       "needsManualReview": false,
-      "explanation": "Ожидаемый ответ: «Were the flowers red or orange?»."
+      "explanation": "Сверься с формулировкой задания и похожими примерами — какое слово подходит по смыслу и форме."
     },
     {
       "type": "open_text",
@@ -344,7 +344,7 @@
         "How old are you"
       ],
       "needsManualReview": false,
-      "explanation": "Ожидаемый ответ: «How old are you?»."
+      "explanation": "Сверься с формулировкой задания и похожими примерами — какое слово подходит по смыслу и форме."
     },
     {
       "type": "open_text",
@@ -354,7 +354,7 @@
         "Why were you out yesterday"
       ],
       "needsManualReview": false,
-      "explanation": "Ожидаемый ответ: «Why were you out yesterday?»."
+      "explanation": "Сверься с формулировкой задания и похожими примерами — какое слово подходит по смыслу и форме."
     },
     {
       "type": "open_text",
@@ -364,7 +364,7 @@
         "Why are you always late for school"
       ],
       "needsManualReview": false,
-      "explanation": "Ожидаемый ответ: «Why are you always late for school?»."
+      "explanation": "Сверься с формулировкой задания и похожими примерами — какое слово подходит по смыслу и форме."
     },
     {
       "type": "open_text",
@@ -374,7 +374,7 @@
         "Are tomatoes fruit"
       ],
       "needsManualReview": false,
-      "explanation": "Ожидаемый ответ: «Are tomatoes fruit?»."
+      "explanation": "Сверься с формулировкой задания и похожими примерами — какое слово подходит по смыслу и форме."
     },
     {
       "type": "matching",
@@ -451,7 +451,7 @@
         "I don't know"
       ],
       "correctIndex": 0,
-      "explanation": "Верный вариант: «True» — перечитай условие ещё раз и сравни с остальными вариантами."
+      "explanation": "Подставь по очереди каждый вариант на место пропуска — только один будет звучать правильно и по смыслу, и по форме."
     },
     {
       "type": "choice_single",
@@ -462,7 +462,7 @@
         "I don't know"
       ],
       "correctIndex": 0,
-      "explanation": "Верный вариант: «True» — перечитай условие ещё раз и сравни с остальными вариантами."
+      "explanation": "Подставь по очереди каждый вариант на место пропуска — только один будет звучать правильно и по смыслу, и по форме."
     },
     {
       "type": "choice_single",
@@ -473,7 +473,7 @@
         "I don't know"
       ],
       "correctIndex": 1,
-      "explanation": "Верный вариант: «False» — перечитай условие ещё раз и сравни с остальными вариантами."
+      "explanation": "Подставь по очереди каждый вариант на место пропуска — только один будет звучать правильно и по смыслу, и по форме."
     },
     {
       "type": "choice_single",
@@ -484,7 +484,7 @@
         "I don't know"
       ],
       "correctIndex": 2,
-      "explanation": "Верный вариант: «I don't know» — перечитай условие ещё раз и сравни с остальными вариантами."
+      "explanation": "Подставь по очереди каждый вариант на место пропуска — только один будет звучать правильно и по смыслу, и по форме."
     },
     {
       "type": "choice_single",
@@ -495,7 +495,7 @@
         "I don't know"
       ],
       "correctIndex": 0,
-      "explanation": "Верный вариант: «True» — перечитай условие ещё раз и сравни с остальными вариантами."
+      "explanation": "Подставь по очереди каждый вариант на место пропуска — только один будет звучать правильно и по смыслу, и по форме."
     },
     {
       "type": "choice_single",
@@ -506,7 +506,7 @@
         "I don't know"
       ],
       "correctIndex": 2,
-      "explanation": "Верный вариант: «I don't know» — перечитай условие ещё раз и сравни с остальными вариантами."
+      "explanation": "Подставь по очереди каждый вариант на место пропуска — только один будет звучать правильно и по смыслу, и по форме."
     },
     {
       "type": "choice_single",
@@ -517,7 +517,7 @@
         "I don't know"
       ],
       "correctIndex": 0,
-      "explanation": "Верный вариант: «True» — перечитай условие ещё раз и сравни с остальными вариантами."
+      "explanation": "Подставь по очереди каждый вариант на место пропуска — только один будет звучать правильно и по смыслу, и по форме."
     },
     {
       "type": "choice_single",
@@ -528,7 +528,7 @@
         "five"
       ],
       "correctIndex": 2,
-      "explanation": "Верный вариант: «five» — перечитай условие ещё раз и сравни с остальными вариантами."
+      "explanation": "Подставь по очереди каждый вариант на место пропуска — только один будет звучать правильно и по смыслу, и по форме."
     },
     {
       "type": "choice_single",
@@ -539,7 +539,7 @@
         "ball"
       ],
       "correctIndex": 1,
-      "explanation": "Верный вариант: «grandfather» — перечитай условие ещё раз и сравни с остальными вариантами."
+      "explanation": "Подставь по очереди каждый вариант на место пропуска — только один будет звучать правильно и по смыслу, и по форме."
     },
     {
       "type": "choice_single",
@@ -550,7 +550,7 @@
         "grandmother"
       ],
       "correctIndex": 1,
-      "explanation": "Верный вариант: «stadium» — перечитай условие ещё раз и сравни с остальными вариантами."
+      "explanation": "Подставь по очереди каждый вариант на место пропуска — только один будет звучать правильно и по смыслу, и по форме."
     },
     {
       "type": "choice_single",
@@ -561,7 +561,7 @@
         "leaves"
       ],
       "correctIndex": 1,
-      "explanation": "Верный вариант: «fruit» — перечитай условие ещё раз и сравни с остальными вариантами."
+      "explanation": "Подставь по очереди каждый вариант на место пропуска — только один будет звучать правильно и по смыслу, и по форме."
     },
     {
       "type": "choice_single",
@@ -572,7 +572,7 @@
         "grow"
       ],
       "correctIndex": 2,
-      "explanation": "Верный вариант: «grow» — перечитай условие ещё раз и сравни с остальными вариантами."
+      "explanation": "Подставь по очереди каждый вариант на место пропуска — только один будет звучать правильно и по смыслу, и по форме."
     },
     {
       "type": "choice_single",
@@ -583,7 +583,7 @@
         "juice"
       ],
       "correctIndex": 2,
-      "explanation": "Верный вариант: «juice» — перечитай условие ещё раз и сравни с остальными вариантами."
+      "explanation": "Подставь по очереди каждый вариант на место пропуска — только один будет звучать правильно и по смыслу, и по форме."
     },
     {
       "type": "choice_single",
@@ -594,7 +594,7 @@
         "salad"
       ],
       "correctIndex": 0,
-      "explanation": "Верный вариант: «fruit» — перечитай условие ещё раз и сравни с остальными вариантами."
+      "explanation": "Подставь по очереди каждый вариант на место пропуска — только один будет звучать правильно и по смыслу, и по форме."
     },
     {
       "type": "cloze",
@@ -675,7 +675,7 @@
         "animal"
       ],
       "needsManualReview": false,
-      "explanation": "Ожидаемый ответ: «animal»."
+      "explanation": "Вспомни, какой звук обозначает каждый знак транскрипции, и подбери подходящие буквы."
     },
     {
       "type": "open_text",
@@ -684,7 +684,7 @@
         "carrot"
       ],
       "needsManualReview": false,
-      "explanation": "Ожидаемый ответ: «carrot»."
+      "explanation": "Вспомни, какой звук обозначает каждый знак транскрипции, и подбери подходящие буквы."
     },
     {
       "type": "open_text",
@@ -693,7 +693,7 @@
         "vegetable"
       ],
       "needsManualReview": false,
-      "explanation": "Ожидаемый ответ: «vegetable»."
+      "explanation": "Вспомни, какой звук обозначает каждый знак транскрипции, и подбери подходящие буквы."
     },
     {
       "type": "open_text",
@@ -702,7 +702,7 @@
         "hungry"
       ],
       "needsManualReview": false,
-      "explanation": "Ожидаемый ответ: «hungry»."
+      "explanation": "Вспомни, какой звук обозначает каждый знак транскрипции, и подбери подходящие буквы."
     },
     {
       "type": "open_text",
@@ -711,7 +711,7 @@
         "make"
       ],
       "needsManualReview": false,
-      "explanation": "Ожидаемый ответ: «make»."
+      "explanation": "Вспомни, какой звук обозначает каждый знак транскрипции, и подбери подходящие буквы."
     },
     {
       "type": "open_text",
@@ -720,7 +720,7 @@
         "thirsty"
       ],
       "needsManualReview": false,
-      "explanation": "Ожидаемый ответ: «thirsty»."
+      "explanation": "Вспомни, какой звук обозначает каждый знак транскрипции, и подбери подходящие буквы."
     },
     {
       "type": "open_text",
@@ -729,7 +729,7 @@
         "potato"
       ],
       "needsManualReview": false,
-      "explanation": "Ожидаемый ответ: «potato»."
+      "explanation": "Вспомни, какой звук обозначает каждый знак транскрипции, и подбери подходящие буквы."
     }
   ]
 }

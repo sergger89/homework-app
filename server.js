@@ -854,6 +854,23 @@ app.delete('/api/books/:id/favorite', requireRole('child'), (req, res) => {
   res.json({ ok: true });
 });
 
+// ---------- обработка ошибок загрузки файлов (multer) и прочих сбоев ----------
+// без этого multer/Express при слишком большом файле или сетевом сбое отдавали бы HTML-страницу
+// с ошибкой вместо понятного JSON, и фронтенд не мог показать пользователю причину.
+app.use((err, req, res, next) => {
+  if (err && err.name === 'MulterError') {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(413).json({ error: 'file_too_large' });
+    }
+    return res.status(400).json({ error: 'upload_error', detail: err.message });
+  }
+  if (err) {
+    console.error('Необработанная ошибка:', err);
+    return res.status(500).json({ error: 'server_error' });
+  }
+  next();
+});
+
 app.listen(PORT, () => {
   console.log(`Homework app listening on port ${PORT}`);
 });

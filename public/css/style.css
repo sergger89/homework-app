@@ -274,6 +274,28 @@ table.progress-table th, table.progress-table td {
 .assigned-chip.hidden-chip { opacity: 0.5; text-decoration: line-through; }
 .assigned-chip button { border: none; background: none; cursor: pointer; font-size: 13px; color: var(--muted); }
 
+/* ---------- library calendar ---------- */
+.cal-header {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;
+}
+.cal-header button {
+  border: none; background: #eef1f8; border-radius: 8px; width: 32px; height: 32px; cursor: pointer; font-size: 16px;
+}
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.cal-weekdays { margin-bottom: 4px; text-align: center; color: var(--muted); font-size: 12px; }
+.cal-day {
+  position: relative; aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+  border-radius: 8px; font-size: 13px; cursor: pointer; background: #fafbfd;
+}
+.cal-day:hover { background: #eef1f8; }
+.cal-day.has-items { background: #eef1ff; font-weight: 600; }
+.cal-day.selected { background: var(--primary); color: white; }
+.cal-dot {
+  position: absolute; bottom: 4px; width: 5px; height: 5px; border-radius: 50%; background: var(--primary);
+}
+.cal-day.selected .cal-dot { background: white; }
+.assignment-card.date-highlighted { border: 2px solid var(--primary); box-shadow: 0 0 0 3px #eef1ff; }
+
 /* ---------- generic form bits ---------- */
 .field-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
 .field-row input, .field-row select {

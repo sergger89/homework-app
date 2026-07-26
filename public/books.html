@@ -120,10 +120,33 @@ document.getElementById('uploadForm')?.addEventListener('submit', async (e) => {
     document.getElementById('uploadForm').reset();
     loadBooks();
   } catch (err) {
-    resultEl.textContent = 'Не удалось загрузить (проверьте, что это .epub файл, до 80МБ).';
+    resultEl.innerHTML = describeUploadError(err);
     resultEl.style.color = 'var(--wrong)';
   }
 });
+
+function describeUploadError(err) {
+  const status = err.data?.status;
+  if (status === 0) {
+    return 'Загрузка прервалась, не дойдя до сервера. Часто это значит, что прокси/ingress перед приложением ' +
+      'обрезает большие запросы — попросите администратора увеличить лимит размера тела запроса (например, ' +
+      'для nginx-ingress: <code>proxy-body-size</code>).';
+  }
+  if (status === 413) {
+    return 'Сервер (или прокси перед ним) отклонил файл как слишком большой (HTTP 413). Приложение само ' +
+      'разрешает файлы до 80МБ — если ошибка всё равно возникает, увеличьте лимит на уровне reverse proxy/ingress.';
+  }
+  if (err.data?.error === 'no_file') {
+    return 'Файл не распознан как .epub (проверьте расширение файла) или не был приложен к форме.';
+  }
+  if (err.data?.error === 'title_required') {
+    return 'Укажите название книги.';
+  }
+  if (status) {
+    return `Не удалось загрузить (HTTP ${status}${err.data?.rawText ? ': ' + escapeHtml(err.data.rawText) : ''}).`;
+  }
+  return 'Не удалось загрузить: ' + escapeHtml(err.message || 'неизвестная ошибка');
+}
 
 init();
 </script>

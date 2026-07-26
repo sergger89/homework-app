@@ -30,26 +30,54 @@
     <div id="viewAssignments" style="display:none"></div>
 
     <div id="viewLibrary" style="display:none">
-      <h3>Добавить новое задание в библиотеку</h3>
-      <p class="muted">Вставьте JSON (см. <code>PARSING_PROMPT.md</code>) или загрузите .json файл.
-        Задание можно назначить детям сразу или позже, из списка ниже.</p>
+      <h3>Добавить или обновить задание</h3>
+      <p class="muted">Вставьте JSON текстом и/или выберите сразу несколько .json файлов с диска.
+        Если название задания совпадёт с уже существующим в библиотеке — вас спросят, что делать;
+        если нет — задание просто добавится.</p>
       <textarea id="importJson" placeholder='{"subject":"math","title":"...","tasks":[...]}'></textarea>
       <div class="file-drop" id="fileDropZone" style="margin-top:10px">
-        📎 Или выберите .json файл с диска
-        <input type="file" id="importFile" accept=".json,application/json" style="display:block; margin:10px auto 0" />
+        📎 Выберите один или несколько .json файлов
+        <input type="file" id="importFiles" accept=".json,application/json" multiple style="display:block; margin:10px auto 0" />
       </div>
-      <p style="margin-top:10px"><strong>Награда за это задание (необязательно):</strong></p>
-      <input type="text" id="importReward" placeholder="Например: 30 минут игр на планшете" style="width:100%; padding:9px 12px; border-radius:8px; border:1px solid #dfe3ec" />
-      <p style="margin-top:10px"><strong>Назначить сразу (можно пропустить и назначить позже):</strong></p>
+      <p style="margin-top:10px"><strong>Кому назначить НОВЫЕ задания (для обновлений не требуется):</strong></p>
       <div id="importChildrenCheckboxes" class="muted"></div>
       <div style="margin-top:10px">
-        <button class="submit-btn" onclick="importAssignment()">Добавить в библиотеку</button>
+        <button class="submit-btn" onclick="prepareBatch()">Проверить и загрузить</button>
       </div>
       <p id="importResult" class="muted"></p>
 
-      <h3 style="margin-top:30px">Библиотека заданий</h3>
+      <div id="batchReview" style="display:none; margin-top:16px">
+        <h3>Проверьте перед загрузкой</h3>
+        <div id="batchReviewList"></div>
+        <div style="margin-top:10px">
+          <button class="submit-btn" onclick="confirmBatch()">Подтвердить и загрузить</button>
+          <button onclick="cancelBatch()">Отмена</button>
+        </div>
+        <p id="batchResult" class="muted"></p>
+      </div>
+
+      <h3 style="margin-top:30px">Календарь добавления заданий</h3>
+      <div id="libraryCalendar"></div>
+      <label style="display:flex; align-items:center; gap:6px; margin-top:8px; font-size:14px">
+        <input type="checkbox" id="onlySelectedDayCb" onchange="renderLibraryList()" />
+        Показывать только выбранный день (иначе просто подсветит и пролистает к нему)
+      </label>
+
+      <h3 style="margin-top:24px">Библиотека заданий</h3>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px">
+        <select id="filterSubject" onchange="renderLibraryList()">
+          <option value="">Все предметы</option>
+        </select>
+        <select id="sortOrder" onchange="renderLibraryList()">
+          <option value="date_desc">Сначала новые</option>
+          <option value="date_asc">Сначала старые</option>
+          <option value="subject">По предмету (А-Я)</option>
+        </select>
+        <button id="clearDateFilter" style="display:none" onclick="selectedDate=null; document.getElementById('onlySelectedDayCb').checked=false; renderLibraryList(); renderCalendar();">✕ сбросить дату</button>
+      </div>
       <div id="libraryList"></div>
     </div>
+
 
     <div id="viewChildren" style="display:none">
       <h3>Мои дети</h3>
@@ -227,44 +255,227 @@ function renderImportCheckboxes() {
     </label>`).join('');
 }
 
-async function importAssignment() {
-  const raw = document.getElementById('importJson').value;
-  const file = document.getElementById('importFile').files[0];
-  const reward = document.getElementById('importReward').value.trim();
-  const resultEl = document.getElementById('importResult');
-  const childIds = [...document.querySelectorAll('.import-child-cb:checked')].map(cb => Number(cb.value));
+let libraryAssignments = [];
+let selectedDate = null; // 'YYYY-MM-DD'
+let calendarMonth = new Date();
+let pendingBatch = []; // [{source, data, title, subject, taskCount, status:'new'|'exists', matchId, action}]
 
-  try {
-    if (file) {
-      const fd = new FormData();
-      fd.append('jsonfile', file);
-      fd.append('childIds', JSON.stringify(childIds));
-      await apiForm('/api/assignments/import-file', fd);
-    } else {
-      if (!raw.trim()) { resultEl.textContent = 'Вставьте JSON или выберите файл.'; resultEl.style.color = 'var(--wrong)'; return; }
-      let parsed;
-      try { parsed = JSON.parse(raw); } catch (e) { resultEl.textContent = 'Ошибка: некорректный JSON'; resultEl.style.color = 'var(--wrong)'; return; }
-      parsed.childIds = childIds;
-      if (reward) parsed.reward = reward;
-      await api('/api/assignments/import', { method: 'POST', body: JSON.stringify(parsed) });
+// ---------------- UNIFIED ADD/UPDATE (пакетная загрузка) ----------------
+async function prepareBatch() {
+  const resultEl = document.getElementById('importResult');
+  resultEl.textContent = '';
+  const raw = document.getElementById('importJson').value.trim();
+  const files = [...document.getElementById('importFiles').files];
+
+  const entries = []; // { source: строка-описание, data: object }
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) parsed.forEach((p, i) => entries.push({ source: `вставленный текст #${i + 1}`, data: p }));
+      else entries.push({ source: 'вставленный текст', data: parsed });
+    } catch (e) {
+      resultEl.textContent = 'Ошибка: текст в поле вставки — не корректный JSON.';
+      resultEl.style.color = 'var(--wrong)';
+      return;
     }
-    resultEl.textContent = 'Готово! Задание добавлено в библиотеку' + (childIds.length ? ' и назначено.' : '.');
-    resultEl.style.color = 'var(--correct)';
-    document.getElementById('importJson').value = '';
-    document.getElementById('importFile').value = '';
-    document.getElementById('importReward').value = '';
-    loadLibrary();
-  } catch (e) {
-    resultEl.textContent = 'Ошибка: ' + JSON.stringify(e.data?.errors || e.message);
-    resultEl.style.color = 'var(--wrong)';
   }
+  for (const file of files) {
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      if (Array.isArray(parsed)) parsed.forEach((p, i) => entries.push({ source: `${file.name} #${i + 1}`, data: p }));
+      else entries.push({ source: file.name, data: parsed });
+    } catch (e) {
+      resultEl.textContent = `Ошибка: файл «${file.name}» — не корректный JSON.`;
+      resultEl.style.color = 'var(--wrong)';
+      return;
+    }
+  }
+  if (entries.length === 0) {
+    resultEl.textContent = 'Вставьте JSON текстом или выберите хотя бы один файл.';
+    resultEl.style.color = 'var(--wrong)';
+    return;
+  }
+
+  // сверяем с уже существующими в библиотеке ПО ТОЧНОМУ НАЗВАНИЮ, плюс с дублями внутри самой пачки
+  const seenInBatch = new Map(); // title -> index в pendingBatch
+  pendingBatch = [];
+  for (const entry of entries) {
+    const title = (entry.data?.title || '').trim();
+    const existing = libraryAssignments.find(a => a.title === title);
+    const dupIndexInBatch = seenInBatch.get(title);
+    let status = 'new', matchId = null;
+    if (existing) { status = 'exists'; matchId = existing.id; }
+    else if (dupIndexInBatch !== undefined) { status = 'exists'; matchId = { batchIndex: dupIndexInBatch }; }
+
+    pendingBatch.push({
+      source: entry.source,
+      data: entry.data,
+      title: title || '(без названия)',
+      subject: entry.data?.subject || '?',
+      taskCount: Array.isArray(entry.data?.tasks) ? entry.data.tasks.length : 0,
+      status,
+      matchId,
+      action: status === 'exists' ? 'update' : 'add',
+    });
+    if (status !== 'exists') seenInBatch.set(title, pendingBatch.length - 1);
+  }
+
+  renderBatchReview();
 }
 
+function renderBatchReview() {
+  document.getElementById('batchReview').style.display = 'block';
+  document.getElementById('batchResult').textContent = '';
+  const el = document.getElementById('batchReviewList');
+  el.innerHTML = pendingBatch.map((item, i) => `
+    <div class="assignment-card" style="cursor:default; flex-direction:column; align-items:stretch">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px">
+        <div>
+          <span class="subject-badge">${subjectLabel(item.subject)}</span>
+          ${item.status === 'exists' ? '<span class="muted">⚠ уже существует</span>' : '<span class="muted">🆕 новое</span>'}
+          <div><strong>${escapeHtml(item.title)}</strong></div>
+          <div class="muted">${item.source} · ${item.taskCount} заданий</div>
+        </div>
+        <select onchange="pendingBatch[${i}].action=this.value">
+          ${item.status === 'exists' ? `
+            <option value="update" ${item.action === 'update' ? 'selected' : ''}>Обновить существующее</option>
+            <option value="add" ${item.action === 'add' ? 'selected' : ''}>Добавить как новое (отдельно)</option>
+            <option value="skip" ${item.action === 'skip' ? 'selected' : ''}>Пропустить</option>
+          ` : `
+            <option value="add" ${item.action === 'add' ? 'selected' : ''}>Добавить</option>
+            <option value="skip" ${item.action === 'skip' ? 'selected' : ''}>Пропустить</option>
+          `}
+        </select>
+      </div>
+    </div>
+  `).join('');
+}
+
+function cancelBatch() {
+  pendingBatch = [];
+  document.getElementById('batchReview').style.display = 'none';
+}
+
+async function confirmBatch() {
+  const resultEl = document.getElementById('batchResult');
+  const childIds = [...document.querySelectorAll('.import-child-cb:checked')].map(cb => Number(cb.value));
+  let added = 0, updated = 0, skipped = 0, failed = 0;
+
+  // сперва обрабатываем те, что добавляются как новые (чтобы дубли внутри пачки могли сослаться на них)
+  const idByBatchIndex = {};
+  for (let i = 0; i < pendingBatch.length; i++) {
+    const item = pendingBatch[i];
+    if (item.action === 'skip') { skipped++; continue; }
+    try {
+      if (item.action === 'add') {
+        const body = { ...item.data, childIds };
+        const res = await api('/api/assignments/import', { method: 'POST', body: JSON.stringify(body) });
+        idByBatchIndex[i] = res.assignmentId;
+        added++;
+      } else if (item.action === 'update') {
+        let targetId = item.matchId;
+        if (targetId && typeof targetId === 'object') targetId = idByBatchIndex[targetId.batchIndex]; // дубль внутри пачки
+        if (!targetId) { failed++; continue; }
+        await api(`/api/assignments/${targetId}`, { method: 'PUT', body: JSON.stringify(item.data) });
+        updated++;
+      }
+    } catch (e) {
+      failed++;
+    }
+  }
+
+  resultEl.textContent = `Готово: добавлено ${added}, обновлено ${updated}, пропущено ${skipped}${failed ? `, ошибок ${failed}` : ''}.`;
+  resultEl.style.color = failed ? 'var(--wrong)' : 'var(--correct)';
+  document.getElementById('importJson').value = '';
+  document.getElementById('importFiles').value = '';
+  pendingBatch = [];
+  setTimeout(() => { document.getElementById('batchReview').style.display = 'none'; }, 2500);
+  await loadLibrary();
+}
+
+// ---------------- ЗАГРУЗКА + КАЛЕНДАРЬ + ФИЛЬТРЫ/СОРТИРОВКА ----------------
 async function loadLibrary() {
   const { assignments } = await api('/api/assignments/library');
+  libraryAssignments = assignments;
+  fillSubjectFilter();
+  renderCalendar();
+  renderLibraryList();
+}
+
+function fillSubjectFilter() {
+  const sel = document.getElementById('filterSubject');
+  const current = sel.value;
+  const subjects = [...new Set(libraryAssignments.map(a => a.subject))];
+  sel.innerHTML = '<option value="">Все предметы</option>' + subjects.map(s => `<option value="${s}">${subjectLabel(s)}</option>`).join('');
+  if (subjects.includes(current)) sel.value = current;
+}
+
+function dateOf(a) { return (a.createdAt || '').slice(0, 10); }
+
+function renderCalendar() {
+  const el = document.getElementById('libraryCalendar');
+  const year = calendarMonth.getFullYear();
+  const month = calendarMonth.getMonth();
+  const counts = {};
+  for (const a of libraryAssignments) counts[dateOf(a)] = (counts[dateOf(a)] || 0) + 1;
+
+  const first = new Date(year, month, 1);
+  const startWeekday = (first.getDay() + 6) % 7; // понедельник = 0
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const monthNames = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+
+  let cells = '';
+  for (let i = 0; i < startWeekday; i++) cells += '<div></div>';
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const has = counts[dateStr];
+    const isSelected = dateStr === selectedDate;
+    cells += `<div class="cal-day ${has ? 'has-items' : ''} ${isSelected ? 'selected' : ''}" onclick="pickDate('${dateStr}')">
+      ${d}${has ? `<span class="cal-dot"></span>` : ''}
+    </div>`;
+  }
+
+  el.innerHTML = `
+    <div class="cal-header">
+      <button onclick="shiftMonth(-1)">‹</button>
+      <strong>${monthNames[month]} ${year}</strong>
+      <button onclick="shiftMonth(1)">›</button>
+    </div>
+    <div class="cal-grid cal-weekdays">${['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(d => `<div>${d}</div>`).join('')}</div>
+    <div class="cal-grid">${cells}</div>
+  `;
+}
+
+function shiftMonth(delta) {
+  calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + delta, 1);
+  renderCalendar();
+}
+
+function pickDate(dateStr) {
+  selectedDate = selectedDate === dateStr ? null : dateStr;
+  document.getElementById('clearDateFilter').style.display = selectedDate ? 'inline-block' : 'none';
+  renderCalendar();
+  renderLibraryList();
+}
+
+function renderLibraryList() {
   const el = document.getElementById('libraryList');
-  if (assignments.length === 0) { el.innerHTML = '<p class="muted">Библиотека пуста.</p>'; return; }
-  el.innerHTML = assignments.map(a => {
+  const subjectFilter = document.getElementById('filterSubject').value;
+  const sortOrder = document.getElementById('sortOrder').value;
+  const onlySelectedDay = document.getElementById('onlySelectedDayCb').checked;
+
+  let list = [...libraryAssignments];
+  if (subjectFilter) list = list.filter(a => a.subject === subjectFilter);
+  if (selectedDate && onlySelectedDay) list = list.filter(a => dateOf(a) === selectedDate);
+
+  if (sortOrder === 'date_asc') list.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  else if (sortOrder === 'subject') list.sort((a, b) => subjectLabel(a.subject).localeCompare(subjectLabel(b.subject), 'ru'));
+  else list.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+
+  if (list.length === 0) { el.innerHTML = '<p class="muted">Ничего не найдено по текущим фильтрам.</p>'; return; }
+
+  el.innerHTML = list.map(a => {
     const assignedIds = new Set(a.assignedTo.map(x => x.child_id));
     const chips = a.assignedTo.map(x => `
       <span class="assigned-chip ${x.hidden ? 'hidden-chip' : ''}">
@@ -273,16 +484,17 @@ async function loadLibrary() {
         <button onclick="resetProgress(${a.id}, ${x.child_id})">↺ сброс</button>
       </span>`).join('');
     const notAssigned = children.filter(c => !assignedIds.has(c.id));
+    const isSelectedDay = selectedDate && dateOf(a) === selectedDate;
     return `
-      <div class="assignment-card" style="cursor:default; flex-direction:column; align-items:stretch">
+      <div class="assignment-card ${isSelectedDay ? 'date-highlighted' : ''}" id="lib-item-${a.id}" style="cursor:default; flex-direction:column; align-items:stretch">
         <div style="display:flex; justify-content:space-between">
           <div>
             <span class="subject-badge">${subjectLabel(a.subject)}</span>
+            <span class="muted">· ${dateOf(a)}</span>
             <div><strong>${escapeHtml(a.title)}</strong></div>
             <div class="muted">${a.taskCount} заданий</div>
           </div>
           <button onclick="deleteLibraryAssignment(${a.id})">Удалить совсем</button>
-          <button onclick="toggleUpdateBox(${a.id})">Обновить JSON</button>
         </div>
         <div style="margin-top:8px">${chips || '<span class="muted">Пока никому не назначено</span>'}</div>
         ${notAssigned.length ? `
@@ -296,34 +508,15 @@ async function loadLibrary() {
           <input type="text" id="reward-${a.id}" placeholder="Награда" value="${escapeHtml(a.reward || '')}" style="flex:1; padding:6px 10px; border-radius:8px; border:1px solid #dfe3ec" />
           <button onclick="saveReward(${a.id})">Сохранить</button>
         </div>
-        <div id="updateBox-${a.id}" style="display:none; margin-top:10px">
-          <p class="muted">Вставьте исправленный JSON целиком (subject, title, tasks). Прогресс детей сохранится, если состав заданий не изменился кардинально.</p>
-          <textarea id="updateJson-${a.id}" style="min-height:140px"></textarea>
-          <div style="margin-top:6px"><button class="submit-btn" onclick="saveUpdate(${a.id})">Сохранить обновление</button></div>
-          <p id="updateResult-${a.id}" class="muted"></p>
-        </div>
       </div>`;
   }).join('');
-}
 
-function toggleUpdateBox(assignmentId) {
-  const box = document.getElementById(`updateBox-${assignmentId}`);
-  box.style.display = box.style.display === 'block' ? 'none' : 'block';
-}
-
-async function saveUpdate(assignmentId) {
-  const raw = document.getElementById(`updateJson-${assignmentId}`).value;
-  const resultEl = document.getElementById(`updateResult-${assignmentId}`);
-  let parsed;
-  try { parsed = JSON.parse(raw); } catch (e) { resultEl.textContent = 'Ошибка: некорректный JSON'; resultEl.style.color = 'var(--wrong)'; return; }
-  try {
-    await api(`/api/assignments/${assignmentId}`, { method: 'PUT', body: JSON.stringify(parsed) });
-    resultEl.textContent = 'Обновлено! Прогресс детей сохранён.';
-    resultEl.style.color = 'var(--correct)';
-    loadLibrary();
-  } catch (e) {
-    resultEl.textContent = 'Ошибка: ' + JSON.stringify(e.data?.errors || e.message);
-    resultEl.style.color = 'var(--wrong)';
+  if (selectedDate) {
+    const firstMatch = list.find(a => dateOf(a) === selectedDate);
+    if (firstMatch) {
+      const node = document.getElementById(`lib-item-${firstMatch.id}`);
+      node?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
   }
 }
 
