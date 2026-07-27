@@ -116,6 +116,18 @@ CREATE TABLE IF NOT EXISTS book_favorites (
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   PRIMARY KEY (book_id, child_id)
 );
+
+-- Заметки ребёнка по книге: выделенная цитата + свой комментарий + цвет выделения
+CREATE TABLE IF NOT EXISTS book_notes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  book_id INTEGER NOT NULL REFERENCES books(id) ON DELETE CASCADE,
+  child_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  cfi_range TEXT NOT NULL,
+  excerpt TEXT NOT NULL,
+  comment TEXT,
+  color TEXT NOT NULL DEFAULT '#ffe066',
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
 `);
 
 // ---------- миграция со старой схемы (submissions с UNIQUE(task_id,child_id)) ----------

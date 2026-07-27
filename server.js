@@ -854,6 +854,49 @@ app.delete('/api/books/:id/favorite', requireRole('child'), (req, res) => {
   res.json({ ok: true });
 });
 
+// ---------- заметки по книге (выделенный текст + комментарий) ----------
+app.get('/api/books/:id/notes', requireAuth, (req, res) => {
+  const role = req.session.user.role;
+  const childId = role === 'child' ? req.session.user.id : req.query.childId ? Number(req.query.childId) : null;
+  if (role !== 'child' && (!childId || !hasChildAccess(req.session.user, childId))) {
+    return res.status(403).json({ error: 'no_access_to_child' });
+  }
+  const notes = db
+    .prepare('SELECT * FROM book_notes WHERE book_id=? AND child_id=? ORDER BY created_at DESC')
+    .all(req.params.id, childId);
+  res.json({
+    notes: notes.map((n) => ({
+      id: n.id, cfiRange: n.cfi_range, excerpt: n.excerpt, comment: n.comment, color: n.color, createdAt: n.created_at,
+    })),
+  });
+});
+
+app.post('/api/books/:id/notes', requireRole('child'), (req, res) => {
+  const { cfiRange, excerpt, comment, color } = req.body || {};
+  if (!cfiRange || !excerpt) return res.status(400).json({ error: 'cfiRange_excerpt_required' });
+  const info = db
+    .prepare('INSERT INTO book_notes (book_id, child_id, cfi_range, excerpt, comment, color) VALUES (?,?,?,?,?,?)')
+    .run(req.params.id, req.session.user.id, cfiRange, excerpt.slice(0, 2000), (comment || '').slice(0, 2000) || null, color || '#ffe066');
+  res.json({ ok: true, noteId: info.lastInsertRowid });
+});
+
+app.patch('/api/books/:id/notes/:noteId', requireRole('child'), (req, res) => {
+  const note = db.prepare('SELECT * FROM book_notes WHERE id=? AND book_id=? AND child_id=?').get(req.params.noteId, req.params.id, req.session.user.id);
+  if (!note) return res.status(404).json({ error: 'not_found' });
+  const { comment, color } = req.body || {};
+  db.prepare('UPDATE book_notes SET comment=?, color=? WHERE id=?').run(
+    comment !== undefined ? (comment || null) : note.comment,
+    color || note.color,
+    note.id
+  );
+  res.json({ ok: true });
+});
+
+app.delete('/api/books/:id/notes/:noteId', requireRole('child'), (req, res) => {
+  db.prepare('DELETE FROM book_notes WHERE id=? AND book_id=? AND child_id=?').run(req.params.noteId, req.params.id, req.session.user.id);
+  res.json({ ok: true });
+});
+
 // ---------- обработка ошибок загрузки файлов (multer) и прочих сбоев ----------
 // без этого multer/Express при слишком большом файле или сетевом сбое отдавали бы HTML-страницу
 // с ошибкой вместо понятного JSON, и фронтенд не мог показать пользователю причину.

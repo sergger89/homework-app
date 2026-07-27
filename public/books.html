@@ -29,6 +29,12 @@
       <p id="uploadResult" class="muted"></p>
     </div>
 
+    <div id="bookTabs" class="tabs" style="display:none">
+      <button id="tabAllBooks" class="active">📖 Общая</button>
+      <button id="tabContinueBooks">▶️ Продолжить чтение</button>
+      <button id="tabFavBooks">★ Избранное</button>
+    </div>
+
     <div id="bookList" class="assignment-list" style="margin-top:16px"></div>
   </div>
 <script src="/js/common.js"></script>
@@ -37,6 +43,7 @@ let myRole = null;
 let myId = null;
 let children = [];
 let currentChildId = null;
+let bookTab = 'all';
 
 async function init() {
   const me = await api('/api/me');
@@ -46,6 +53,10 @@ async function init() {
 
   if (myRole === 'child') {
     currentChildId = myId;
+    document.getElementById('bookTabs').style.display = 'flex';
+    document.getElementById('tabAllBooks').onclick = () => switchBookTab('all');
+    document.getElementById('tabContinueBooks').onclick = () => switchBookTab('continue');
+    document.getElementById('tabFavBooks').onclick = () => switchBookTab('fav');
   } else {
     document.getElementById('uploadBox').style.display = 'block';
     const { children: c } = await api('/api/children');
@@ -61,11 +72,35 @@ async function init() {
   loadBooks();
 }
 
+function switchBookTab(tab) {
+  bookTab = tab;
+  document.getElementById('tabAllBooks').classList.toggle('active', tab === 'all');
+  document.getElementById('tabContinueBooks').classList.toggle('active', tab === 'continue');
+  document.getElementById('tabFavBooks').classList.toggle('active', tab === 'fav');
+  loadBooks();
+}
+
 async function loadBooks() {
   const url = currentChildId ? `/api/books?childId=${currentChildId}` : '/api/books';
-  const { books } = await api(url);
+  const { books: allBooks } = await api(url);
+  let books = allBooks;
+  if (myRole === 'child' && bookTab === 'fav') {
+    books = allBooks.filter(b => b.isFavorite);
+  } else if (myRole === 'child' && bookTab === 'continue') {
+    books = allBooks
+      .filter(b => b.progress && b.progress.percentage > 0 && b.progress.percentage < 99)
+      .sort((a, b) => (b.progress.updated_at || '').localeCompare(a.progress.updated_at || ''));
+  }
   const el = document.getElementById('bookList');
-  if (books.length === 0) { el.innerHTML = '<p class="muted">Пока нет ни одной книги.</p>'; return; }
+  if (books.length === 0) {
+    const emptyText = bookTab === 'fav'
+      ? 'Пока нет книг в избранном — отмечайте звёздочкой ★ на карточке книги.'
+      : bookTab === 'continue'
+        ? 'Пока нет книг, которые ты уже начал(а) читать.'
+        : 'Пока нет ни одной книги.';
+    el.innerHTML = `<p class="muted">${emptyText}</p>`;
+    return;
+  }
   el.innerHTML = books.map(b => {
     const pct = b.progress ? Math.round(b.progress.percentage) : 0;
     return `

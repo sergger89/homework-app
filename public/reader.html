@@ -11,23 +11,87 @@
     display: flex; align-items: center; justify-content: space-between; gap: 8px;
     padding: 10px 14px; background: white; box-shadow: 0 1px 4px rgba(0,0,0,0.06); flex-wrap: wrap;
   }
-  .reader-topbar h1 { font-size: 16px; margin: 0; }
+  .reader-topbar h1 { font-size: 15px; margin: 0; flex: 1; text-align: center; }
+  .reader-tabs { display: flex; gap: 6px; }
+  .reader-tab-btn {
+    border: none; background: #eef1f8; border-radius: 8px; padding: 8px 12px; font-size: 13px; cursor: pointer;
+  }
+  .reader-tab-btn.active { background: var(--primary); color: white; }
   #viewer { position: absolute; top: 56px; bottom: 56px; left: 0; right: 0; }
   .reader-footer {
     position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #eef1f8;
     display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; gap: 10px;
   }
   .reader-nav-btn { border: none; background: #eef1f8; border-radius: 8px; padding: 10px 16px; font-size: 18px; cursor: pointer; }
-  #readerProgressText { font-size: 13px; color: var(--muted); }
+  #readerProgressText { font-size: 13px; color: var(--muted); white-space: nowrap; }
+
+  #notesPanel {
+    position: absolute; top: 56px; bottom: 56px; left: 0; right: 0; overflow-y: auto;
+    padding: 14px; background: #fafbfd;
+  }
+  .note-card {
+    background: white; border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 6px solid #ffe066;
+  }
+  .note-excerpt { font-style: italic; color: #444; font-size: 14px; }
+  .note-comment { margin-top: 6px; font-size: 14px; }
+  .note-actions { margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .note-actions button { border: none; background: #eef1f8; border-radius: 8px; padding: 6px 10px; font-size: 12px; cursor: pointer; }
+
+  #selectionBar {
+    position: fixed; left: 0; right: 0; bottom: 66px; background: white; border-top: 1px solid #eef1f8;
+    box-shadow: 0 -4px 16px rgba(0,0,0,0.08); padding: 12px 14px; display: none; z-index: 50;
+  }
+  #selectionBar .sel-quote { font-style: italic; font-size: 13px; color: var(--muted); margin-bottom: 8px;
+    max-height: 60px; overflow-y: auto; }
+  #selectionBar .sel-colors { display: flex; gap: 8px; margin-bottom: 8px; }
+  #selectionBar .sel-color-btn { width: 26px; height: 26px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; }
+  #selectionBar .sel-color-btn.active { border-color: #232838; }
+  #selectionBar textarea { width: 100%; min-height: 50px; border-radius: 8px; border: 1px solid #dfe3ec; padding: 8px; font-size: 13px; }
+  #selectionBar .sel-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+
+  #returnBanner {
+    position: fixed; top: 56px; left: 0; right: 0; background: #fff3d6; border-bottom: 1px solid #f0dfa0;
+    padding: 8px 14px; display: none; align-items: center; justify-content: space-between; gap: 10px; z-index: 40;
+    font-size: 13px;
+  }
+  #returnBanner button { border: none; background: var(--primary); color: white; border-radius: 8px; padding: 6px 12px; cursor: pointer; }
 </style>
 </head>
 <body>
   <div class="reader-topbar">
     <button onclick="window.location.href='/books.html'">← К книгам</button>
     <h1 id="bookTitle">Загрузка...</h1>
+    <div class="reader-tabs">
+      <button class="reader-tab-btn active" id="tabReading">📖 Чтение</button>
+      <button class="reader-tab-btn" id="tabNotes">📝 Заметки (<span id="notesCount">0</span>)</button>
+    </div>
     <span id="readerProgressText"></span>
   </div>
+
+  <div id="returnBanner">
+    <span>Вы просматриваете заметку — прогресс чтения не меняется.</span>
+    <button id="returnToReadingBtn">Вернуться к чтению</button>
+  </div>
+
   <div id="viewer"></div>
+  <div id="notesPanel" style="display:none"></div>
+
+  <div id="selectionBar">
+    <div class="sel-quote" id="selQuoteText"></div>
+    <div class="sel-colors">
+      <button class="sel-color-btn" data-color="#ffe066" style="background:#ffe066"></button>
+      <button class="sel-color-btn" data-color="#a0e6a0" style="background:#a0e6a0"></button>
+      <button class="sel-color-btn" data-color="#9fd3ff" style="background:#9fd3ff"></button>
+      <button class="sel-color-btn" data-color="#ffb3c1" style="background:#ffb3c1"></button>
+    </div>
+    <textarea id="noteCommentInput" placeholder="Добавь свою мысль (необязательно)..."></textarea>
+    <div class="sel-actions">
+      <button class="reader-nav-btn" id="cancelSelectionBtn">Отмена</button>
+      <button class="reader-nav-btn" id="saveNoteBtn" style="background:var(--primary); color:white">Добавить в заметки</button>
+    </div>
+  </div>
+
   <div class="reader-footer">
     <button class="reader-nav-btn" id="prevPage">‹ Назад</button>
     <div class="progress-bar" style="flex:1; margin:0 10px"><div id="readerProgressBar" style="width:0%"></div></div>
@@ -41,50 +105,184 @@
 const params = new URLSearchParams(window.location.search);
 const bookId = params.get('id');
 const childIdParam = params.get('childId');
-let isChildViewer = true; // сохраняем прогресс, только если реально читает ребёнок (не родитель в режиме просмотра)
+let isChildViewer = true; // сохраняем прогресс и можно добавлять заметки, только если реально читает ребёнок
+let rendition, bookObj;
+let notes = [];
+let selectedColor = '#ffe066';
+let currentCfiRange = null;
+let currentExcerpt = '';
+let viewingNote = false;
+let lastRealCfi = null;
 
 async function init() {
   const me = await api('/api/me');
   isChildViewer = me.user.role === 'child';
+  const effectiveChildId = isChildViewer ? me.user.id : childIdParam;
 
   const qs = childIdParam ? `?childId=${childIdParam}` : '';
   const { book } = await api(`/api/books/${bookId}${qs}`);
   document.getElementById('bookTitle').textContent = book.title + (book.author ? ` — ${book.author}` : '');
 
-  const rendition = ePub(book.filePath).renderTo('viewer', {
+  rendition = ePub(book.filePath).renderTo('viewer', {
     width: '100%', height: '100%', flow: 'paginated', spread: 'auto',
   });
+  bookObj = rendition.book;
 
   const startCfi = book.progress?.location || undefined;
+  lastRealCfi = startCfi;
   rendition.display(startCfi);
 
-  const bookObj = rendition.book;
-  bookObj.ready.then(() => bookObj.locations.generate(1000)).then(() => {
+  bookObj.ready.then(() => bookObj.locations.generate(1000)).then(async () => {
     rendition.on('relocated', (location) => {
       const pct = bookObj.locations.percentageFromCfi(location.start.cfi) * 100;
       document.getElementById('readerProgressBar').style.width = pct.toFixed(1) + '%';
       document.getElementById('readerProgressText').textContent = pct.toFixed(0) + '%';
-      if (isChildViewer) saveProgress(location.start.cfi, pct);
+      if (!viewingNote) {
+        lastRealCfi = location.start.cfi;
+        if (isChildViewer) saveProgress(location.start.cfi, pct);
+      }
     });
+    await loadNotes(effectiveChildId);
   });
 
-  document.getElementById('prevPage').onclick = () => rendition.prev();
-  document.getElementById('nextPage').onclick = () => rendition.next();
+  rendition.on('selected', (cfiRange, contents) => {
+    if (!isChildViewer) return; // родитель/админ - только просмотр, без создания заметок
+    const text = contents.window.getSelection().toString().trim();
+    if (!text) return;
+    currentCfiRange = cfiRange;
+    currentExcerpt = text;
+    openSelectionBar(text);
+  });
+
+  document.getElementById('prevPage').onclick = () => { turnOffNoteViewing(); rendition.prev(); };
+  document.getElementById('nextPage').onclick = () => { turnOffNoteViewing(); rendition.next(); };
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowLeft') rendition.prev();
-    if (e.key === 'ArrowRight') rendition.next();
+    if (e.key === 'ArrowLeft') { turnOffNoteViewing(); rendition.prev(); }
+    if (e.key === 'ArrowRight') { turnOffNoteViewing(); rendition.next(); }
   });
 
-  // свайпы для мобильных
   let touchStartX = null;
   document.getElementById('viewer').addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
   document.getElementById('viewer').addEventListener('touchend', (e) => {
     if (touchStartX === null) return;
     const dx = e.changedTouches[0].clientX - touchStartX;
-    if (dx > 60) rendition.prev();
-    else if (dx < -60) rendition.next();
+    if (dx > 60) { turnOffNoteViewing(); rendition.prev(); }
+    else if (dx < -60) { turnOffNoteViewing(); rendition.next(); }
     touchStartX = null;
   });
+
+  document.getElementById('tabReading').onclick = () => switchReaderTab('reading');
+  document.getElementById('tabNotes').onclick = () => switchReaderTab('notes');
+  document.getElementById('returnToReadingBtn').onclick = returnToReading;
+}
+
+function switchReaderTab(tab) {
+  document.getElementById('tabReading').classList.toggle('active', tab === 'reading');
+  document.getElementById('tabNotes').classList.toggle('active', tab === 'notes');
+  document.getElementById('viewer').style.display = tab === 'reading' ? 'block' : 'none';
+  document.getElementById('notesPanel').style.display = tab === 'notes' ? 'block' : 'none';
+  if (tab === 'notes') renderNotesPanel();
+}
+
+// ---------------- выделение текста -> заметка ----------------
+function openSelectionBar(text) {
+  document.getElementById('selQuoteText').textContent = `«${text.length > 200 ? text.slice(0, 200) + '…' : text}»`;
+  document.getElementById('noteCommentInput').value = '';
+  document.getElementById('selectionBar').style.display = 'block';
+  document.querySelectorAll('.sel-color-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.sel-color-btn[data-color="${selectedColor}"]`).classList.add('active');
+}
+document.querySelectorAll('.sel-color-btn').forEach(btn => {
+  btn.onclick = () => {
+    selectedColor = btn.dataset.color;
+    document.querySelectorAll('.sel-color-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  };
+});
+document.getElementById('cancelSelectionBtn').onclick = () => {
+  document.getElementById('selectionBar').style.display = 'none';
+};
+document.getElementById('saveNoteBtn').onclick = async () => {
+  if (!currentCfiRange) return;
+  const comment = document.getElementById('noteCommentInput').value.trim();
+  try {
+    const res = await api(`/api/books/${bookId}/notes`, {
+      method: 'POST',
+      body: JSON.stringify({ cfiRange: currentCfiRange, excerpt: currentExcerpt, comment, color: selectedColor }),
+    });
+    applyHighlight(currentCfiRange, selectedColor, res.noteId);
+    document.getElementById('selectionBar').style.display = 'none';
+    await loadNotes(null, true);
+  } catch (e) {
+    alert('Не удалось сохранить заметку.');
+  }
+};
+
+function applyHighlight(cfiRange, color, noteId) {
+  try {
+    rendition.annotations.add('highlight', cfiRange, { noteId }, undefined, 'reader-highlight', {
+      fill: color, 'fill-opacity': '0.4', 'mix-blend-mode': 'multiply',
+    });
+  } catch (e) { /* диапазон мог устареть между перерисовками - не критично */ }
+}
+
+// ---------------- заметки ----------------
+async function loadNotes(childIdOverride, skipHighlightReset) {
+  const cid = childIdOverride || childIdParam || '';
+  const qs = cid ? `?childId=${cid}` : '';
+  const { notes: fetched } = await api(`/api/books/${bookId}/notes${qs}`);
+  notes = fetched;
+  document.getElementById('notesCount').textContent = notes.length;
+  if (!skipHighlightReset) {
+    notes.forEach(n => applyHighlight(n.cfiRange, n.color, n.id));
+  }
+  if (document.getElementById('notesPanel').style.display !== 'none') renderNotesPanel();
+}
+
+function renderNotesPanel() {
+  const el = document.getElementById('notesPanel');
+  if (notes.length === 0) {
+    el.innerHTML = `<p class="muted">${isChildViewer ? 'Пока нет заметок — выдели текст в книге, чтобы добавить первую.' : 'У ребёнка пока нет заметок по этой книге.'}</p>`;
+    return;
+  }
+  el.innerHTML = notes.map(n => `
+    <div class="note-card" style="border-left-color:${n.color}">
+      <div class="note-excerpt">«${escapeHtml(n.excerpt)}»</div>
+      ${n.comment ? `<div class="note-comment">${escapeHtml(n.comment)}</div>` : ''}
+      <div class="muted" style="font-size:12px; margin-top:4px">${new Date(n.createdAt + 'Z').toLocaleString('ru-RU')}</div>
+      <div class="note-actions">
+        <button onclick="goToNote('${n.cfiRange}')">📍 Перейти на страницу</button>
+        ${isChildViewer ? `<button onclick="deleteNote(${n.id})">🗑️ Удалить</button>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function goToNote(cfiRange) {
+  viewingNote = true;
+  switchReaderTab('reading');
+  rendition.display(cfiRange);
+  document.getElementById('returnBanner').style.display = 'flex';
+}
+
+function returnToReading() {
+  viewingNote = false;
+  document.getElementById('returnBanner').style.display = 'none';
+  if (lastRealCfi) rendition.display(lastRealCfi);
+}
+
+function turnOffNoteViewing() {
+  if (viewingNote) {
+    viewingNote = false;
+    document.getElementById('returnBanner').style.display = 'none';
+  }
+}
+
+async function deleteNote(noteId) {
+  if (!confirm('Удалить эту заметку?')) return;
+  await api(`/api/books/${bookId}/notes/${noteId}`, { method: 'DELETE' });
+  await loadNotes();
+  renderNotesPanel();
 }
 
 let saveTimer = null;
