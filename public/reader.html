@@ -171,9 +171,11 @@ async function init() {
     const t = event.touches ? event.touches[0] : event;
     touchStartX = t.screenX;
     touchStartY = t.screenY;
+    setNativeDrawingActive(true);
   });
 
   rendition.on('touchend', (event, contents) => {
+    setNativeDrawingActive(false);
     if (touchStartX === null) return;
     const t = event.changedTouches ? event.changedTouches[0] : event;
     const dx = t.screenX - touchStartX;

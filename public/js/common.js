@@ -79,6 +79,17 @@ function escapeHtml(str) {
 }
 
 // применяет favicon, загруженный админом (если есть) - вызывать на каждой странице
+// сообщает Android-приложению (если открыто в нём), что сейчас идёт жест рисования/пролистывания
+// внутри страницы - чтобы нативный "потяни вниз, чтобы обновить" не перехватывал движение.
+// В обычном браузере window.AndroidBridge не существует - вызов просто ничего не делает.
+function setNativeDrawingActive(active) {
+  try {
+    if (window.AndroidBridge && typeof window.AndroidBridge.setDrawingActive === 'function') {
+      window.AndroidBridge.setDrawingActive(active);
+    }
+  } catch (e) { /* игнорируем - не критично */ }
+}
+
 function applyFavicon() {
   fetch('/api/settings').then(r => r.json()).then(({ faviconUrl }) => {
     if (!faviconUrl) return;

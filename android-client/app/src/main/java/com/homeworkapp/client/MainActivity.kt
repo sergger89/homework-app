@@ -11,6 +11,7 @@ import android.provider.MediaStore
 import android.view.Menu
 import android.view.MenuItem
 import android.webkit.CookieManager
+import android.webkit.JavascriptInterface
 import android.webkit.SslErrorHandler
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
@@ -88,6 +89,12 @@ class MainActivity : AppCompatActivity() {
         setupWebView()
 
         swipeRefresh.setOnRefreshListener { webView.reload() }
+
+        // Мост, чтобы веб-страница сама могла временно отключать нативный "потяни вниз,
+        // чтобы обновить" во время рисования в черновике/пролистывания книги - иначе
+        // SwipeRefreshLayout перехватывает вертикальный жест на уровне Android ещё до того,
+        // как до него доберётся JS на странице, и никакой preventDefault() там не поможет.
+        webView.addJavascriptInterface(NativeGestureBridge(), "AndroidBridge")
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -261,6 +268,18 @@ class MainActivity : AppCompatActivity() {
             R.id.action_settings -> { openSettings(); true }
             R.id.action_reload -> { webView.reload(); true }
             else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    /**
+     * Доступен на веб-странице как window.AndroidBridge.setDrawingActive(true/false).
+     * Пока true - "потяни вниз, чтобы обновить" выключен, чтобы не перехватывать жест
+     * рисования в черновике/пролистывания книги.
+     */
+    inner class NativeGestureBridge {
+        @JavascriptInterface
+        fun setDrawingActive(active: Boolean) {
+            runOnUiThread { swipeRefresh.isEnabled = !active }
         }
     }
 }

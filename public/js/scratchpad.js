@@ -123,6 +123,7 @@ function openScratchpad(taskId, promptText) {
     canvas.style.touchAction = 'none';
     canvas.addEventListener('pointerdown', (e) => {
       e.preventDefault();
+      setNativeDrawingActive(true);
       canvas.setPointerCapture(e.pointerId);
       drawing = { tool: currentTool, color: currentColor, points: [pointerPos(e)] };
       redoStack = [];
@@ -141,12 +142,14 @@ function openScratchpad(taskId, promptText) {
     // вертикальном движении - гасим нативный touchmove на холсте явно.
     canvas.addEventListener('touchmove', (e) => { if (drawing) e.preventDefault(); }, { passive: false });
     function endStroke() {
+      setNativeDrawingActive(false);
       if (!drawing) return;
       if (drawing.points.length > 1) strokes.push(drawing);
       drawing = null;
     }
     canvas.addEventListener('pointerup', endStroke);
     canvas.addEventListener('pointerleave', endStroke);
+    canvas.addEventListener('pointercancel', endStroke);
 
     overlay.querySelectorAll('.scratch-color').forEach(btn => {
       btn.onclick = () => {
@@ -205,6 +208,7 @@ function openScratchpad(taskId, promptText) {
     canvas.addEventListener('pointerup', scheduleSave);
 
     overlay.querySelector('#scratchDone').onclick = () => {
+      setNativeDrawingActive(false);
       clearTimeout(saveTimer);
       api(`/api/tasks/${taskId}/draft`, { method: 'PUT', body: JSON.stringify({ strokes }) }).finally(() => {
         document.body.removeChild(overlay);
