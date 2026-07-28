@@ -319,6 +319,7 @@ table.progress-table th, table.progress-table td {
   background: white; border-radius: 14px; width: 100%; max-width: min(96vw, 1100px); height: 92vh;
   display: flex; flex-direction: column; overflow: hidden;
   box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  overscroll-behavior: none; touch-action: none;
 }
 .scratch-toolbar {
   display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;
@@ -335,7 +336,7 @@ table.progress-table th, table.progress-table td {
   cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center;
 }
 .scratch-tool-btn.active { background: var(--primary); border-color: var(--primary); filter: brightness(1); }
-.scratch-canvas-wrap { flex: 1; position: relative; background: #fafbfd; touch-action: none; }
+.scratch-canvas-wrap { flex: 1; position: relative; background: #fafbfd; touch-action: none; overscroll-behavior: none; }
 .scratch-task-bar {
   position: absolute; top: 0; left: 0; right: 0; z-index: 5;
   display: flex; align-items: flex-start; gap: 8px;

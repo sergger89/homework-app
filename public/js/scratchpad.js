@@ -8,7 +8,8 @@ function openScratchpad(taskId, promptText) {
     const overlay = document.createElement('div');
     overlay.style.cssText = `
       position:fixed; inset:0; background:rgba(20,22,30,0.55); z-index:1000;
-      display:flex; align-items:center; justify-content:center; padding:10px;`;
+      display:flex; align-items:center; justify-content:center; padding:10px;
+      overscroll-behavior:none; touch-action:none;`;
     overlay.innerHTML = `
       <div class="scratch-panel">
         <div class="scratch-toolbar">
@@ -121,18 +122,24 @@ function openScratchpad(taskId, promptText) {
 
     canvas.style.touchAction = 'none';
     canvas.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
       canvas.setPointerCapture(e.pointerId);
       drawing = { tool: currentTool, color: currentColor, points: [pointerPos(e)] };
       redoStack = [];
     });
     canvas.addEventListener('pointermove', (e) => {
       if (!drawing) return;
+      e.preventDefault();
       drawing.points.push(pointerPos(e));
       redraw();
       const w = canvas.width / (window.devicePixelRatio || 1);
       const h = canvas.height / (window.devicePixelRatio || 1);
       drawStroke(drawing, w, h);
     });
+    // подстраховка: даже с touch-action:none некоторые мобильные браузеры (особенно
+    // Chrome/Android) всё равно триггерят "потяни вниз, чтобы обновить" на резком
+    // вертикальном движении - гасим нативный touchmove на холсте явно.
+    canvas.addEventListener('touchmove', (e) => { if (drawing) e.preventDefault(); }, { passive: false });
     function endStroke() {
       if (!drawing) return;
       if (drawing.points.length > 1) strokes.push(drawing);
