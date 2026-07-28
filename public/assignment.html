@@ -212,7 +212,7 @@ function buildTaskCard(t, idx) {
   scratchBtn.type = 'button';
   scratchBtn.className = 'scratch-btn-open';
   scratchBtn.textContent = '✏️ Черновик';
-  scratchBtn.onclick = () => openScratchpad(t.id);
+  scratchBtn.onclick = () => openScratchpad(t.id, t.prompt || t.promptTemplate || '');
   card.appendChild(scratchBtn);
 
   if (!disabled) {

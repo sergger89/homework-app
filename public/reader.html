@@ -161,14 +161,40 @@ async function init() {
     if (e.key === 'ArrowRight') { turnOffNoteViewing(); rendition.next(); }
   });
 
+  // Свайпы: важно вешать их через rendition.on(...), а не на внешний div - сам текст книги
+  // рендерится внутри iframe, и обычные DOM-слушатели снаружи до него просто не долетают.
   let touchStartX = null;
-  document.getElementById('viewer').addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
-  document.getElementById('viewer').addEventListener('touchend', (e) => {
+  let touchStartY = null;
+  const SWIPE_THRESHOLD = 50;
+
+  rendition.on('touchstart', (event) => {
+    const t = event.touches ? event.touches[0] : event;
+    touchStartX = t.screenX;
+    touchStartY = t.screenY;
+  });
+
+  rendition.on('touchend', (event, contents) => {
     if (touchStartX === null) return;
-    const dx = e.changedTouches[0].clientX - touchStartX;
-    if (dx > 60) { turnOffNoteViewing(); rendition.prev(); }
-    else if (dx < -60) { turnOffNoteViewing(); rendition.next(); }
+    const t = event.changedTouches ? event.changedTouches[0] : event;
+    const dx = t.screenX - touchStartX;
+    const dy = t.screenY - touchStartY;
     touchStartX = null;
+    touchStartY = null;
+
+    // если пользователь только что выделил текст (для заметки) - это не свайп страницы
+    let hasSelection = false;
+    try {
+      const sel = contents && contents.window && contents.window.getSelection();
+      hasSelection = !!(sel && !sel.isCollapsed && sel.toString().trim().length > 0);
+    } catch (e) { /* игнорируем - разные версии/окружения могут не давать доступ */ }
+    if (hasSelection) return;
+
+    // свайп должен быть в основном горизонтальным, иначе это вертикальная прокрутка/жест
+    if (Math.abs(dx) < SWIPE_THRESHOLD || Math.abs(dx) < Math.abs(dy)) return;
+
+    turnOffNoteViewing();
+    if (dx < 0) rendition.next();
+    else rendition.prev();
   });
 
   document.getElementById('tabReading').onclick = () => switchReaderTab('reading');

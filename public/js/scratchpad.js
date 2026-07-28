@@ -3,7 +3,7 @@
 
 const SCRATCH_COLORS = ['#222222', '#e0473b', '#4a6cf7', '#22a06b', '#f5a623'];
 
-function openScratchpad(taskId) {
+function openScratchpad(taskId, promptText) {
   return new Promise((resolve) => {
     const overlay = document.createElement('div');
     overlay.style.cssText = `
@@ -25,6 +25,11 @@ function openScratchpad(taskId) {
           </div>
         </div>
         <div class="scratch-canvas-wrap">
+          ${promptText ? `
+          <div class="scratch-task-bar" id="scratchTaskBar">
+            <div class="scratch-task-text" id="scratchTaskText">${escapeHtml(promptText)}</div>
+            <button class="scratch-task-toggle" id="scratchTaskToggle">▾</button>
+          </div>` : ''}
           <canvas class="scratch-canvas"></canvas>
         </div>
         <div class="scratch-footer">
@@ -34,6 +39,22 @@ function openScratchpad(taskId) {
       </div>
     `;
     document.body.appendChild(overlay);
+
+    const taskBar = overlay.querySelector('#scratchTaskBar');
+    if (taskBar) {
+      const toggleBtn = overlay.querySelector('#scratchTaskToggle');
+      const textEl = overlay.querySelector('#scratchTaskText');
+      toggleBtn.onclick = () => {
+        const expanded = taskBar.classList.toggle('expanded');
+        toggleBtn.textContent = expanded ? '▴' : '▾';
+      };
+      // короткий текст - сразу без кнопки сворачивания, он и так поместится в 1-2 строки
+      requestAnimationFrame(() => {
+        if (textEl.scrollHeight <= textEl.clientHeight + 2) {
+          toggleBtn.style.display = 'none';
+        }
+      });
+    }
 
     const canvas = overlay.querySelector('.scratch-canvas');
     const ctx = canvas.getContext('2d');

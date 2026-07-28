@@ -143,7 +143,7 @@ async function reloadChildren() {
 // ---------------- PROGRESS ----------------
 async function loadProgress() {
   if (!currentChildId) { document.getElementById('viewProgress').innerHTML = '<p class="muted">Сначала добавьте ребёнка во вкладке «Мои дети».</p>'; return; }
-  const { bySubject, recent, attemptsByTask } = await api(`/api/progress?childId=${currentChildId}`);
+  const { bySubject, recent, attemptsByTask, completedToday } = await api(`/api/progress?childId=${currentChildId}`);
   const view = document.getElementById('viewProgress');
   const rows = bySubject.map(s => `
     <tr><td>${subjectLabel(s.subject)}</td><td>${s.doneTasks} / ${s.totalTasks}</td>
@@ -159,6 +159,10 @@ async function loadProgress() {
     <td>${a.solved ? '✅ решено' : (a.attempts >= 3 ? '❌ попытки исчерпаны' : '⏳ в процессе')}</td></tr>`).join('');
 
   view.innerHTML = `
+    <div class="today-counter">
+      <span class="today-counter-num">${completedToday}</span>
+      <span class="today-counter-label">заданий выполнено сегодня</span>
+    </div>
     <h3>По предметам</h3>
     <table class="progress-table"><tr><th>Предмет</th><th>Выполнено</th><th>Точность</th></tr>
       ${rows || '<tr><td colspan=3 class="muted">Пока нет данных</td></tr>'}</table>

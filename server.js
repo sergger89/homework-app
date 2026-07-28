@@ -689,6 +689,14 @@ app.get('/api/progress', requireRole(['admin', 'parent']), (req, res) => {
     )
     .all(childId);
 
+  const completedTodayRow = db
+    .prepare(
+      `SELECT COUNT(DISTINCT s.task_id) as count
+       FROM submissions s
+       WHERE s.child_id = ? AND date(s.submitted_at) = date('now')`
+    )
+    .get(childId);
+
   // количество попыток по каждому заданию (для отображения в панели прогресса)
   const attemptsByTask = db
     .prepare(
@@ -704,7 +712,7 @@ app.get('/api/progress', requireRole(['admin', 'parent']), (req, res) => {
     )
     .all(childId, childId);
 
-  res.json({ bySubject, recent, attemptsByTask });
+  res.json({ bySubject, recent, attemptsByTask, completedToday: completedTodayRow.count });
 });
 
 // ---------- static frontend ----------
