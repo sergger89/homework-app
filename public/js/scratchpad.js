@@ -33,7 +33,7 @@ function openScratchpad(taskId, promptText) {
           <canvas class="scratch-canvas"></canvas>
         </div>
         <div class="scratch-footer">
-          <span class="muted" id="scratchStatus">Черновик — сюда можно писать вычисления, ничего не оценивается</span>
+          <span class="scratch-save-indicator" id="scratchStatus"></span>
           <button class="wizard-btn primary" id="scratchDone">Готово</button>
         </div>
       </div>
@@ -176,16 +176,22 @@ function openScratchpad(taskId, promptText) {
     };
 
     let saveTimer = null;
+    let hideStatusTimer = null;
     function scheduleSave() {
       const statusEl = overlay.querySelector('#scratchStatus');
-      statusEl.textContent = 'Сохраняю...';
+      clearTimeout(hideStatusTimer);
+      statusEl.textContent = '● сохранение…';
+      statusEl.classList.remove('saved', 'error');
       clearTimeout(saveTimer);
       saveTimer = setTimeout(async () => {
         try {
           await api(`/api/tasks/${taskId}/draft`, { method: 'PUT', body: JSON.stringify({ strokes }) });
-          statusEl.textContent = 'Черновик сохранён';
+          statusEl.textContent = '✓ сохранено';
+          statusEl.classList.add('saved');
+          hideStatusTimer = setTimeout(() => { statusEl.textContent = ''; }, 1500);
         } catch (e) {
-          statusEl.textContent = 'Не удалось сохранить черновик';
+          statusEl.textContent = '⚠ не сохранено';
+          statusEl.classList.add('error');
         }
       }, 500);
     }
