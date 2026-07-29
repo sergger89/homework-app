@@ -13,16 +13,16 @@ function openScratchpad(taskId, promptText) {
     overlay.innerHTML = `
       <div class="scratch-panel">
         <div class="scratch-toolbar">
-          <div class="scratch-colors">
-            ${SCRATCH_COLORS.map(c => `<button class="scratch-color" data-color="${c}" style="background:${c}"></button>`).join('')}
+          <div class="scratch-colors" role="group" aria-label="Выбор цвета">
+            ${SCRATCH_COLORS.map((c, i) => `<button class="scratch-color" data-color="${c}" style="background:${c}" aria-label="Цвет ${i + 1}"></button>`).join('')}
           </div>
-          <div class="scratch-tools">
-            <button class="scratch-tool-btn active" data-tool="pen" title="Карандаш">✏️</button>
-            <button class="scratch-tool-btn" data-tool="highlighter" title="Выделение">🖍️</button>
-            <button class="scratch-tool-btn" data-tool="eraser" title="Ластик">🧽</button>
-            <button class="scratch-tool-btn" data-action="undo" title="Отменить">↺</button>
-            <button class="scratch-tool-btn" data-action="redo" title="Вернуть">↻</button>
-            <button class="scratch-tool-btn" data-action="clear" title="Стереть всё">🗑️</button>
+          <div class="scratch-tools" role="group" aria-label="Инструменты рисования">
+            <button class="scratch-tool-btn active" data-tool="pen" title="Карандаш" aria-label="Карандаш">✏️</button>
+            <button class="scratch-tool-btn" data-tool="highlighter" title="Выделение" aria-label="Маркер-выделение">🖍️</button>
+            <button class="scratch-tool-btn" data-tool="eraser" title="Ластик" aria-label="Ластик">🧽</button>
+            <button class="scratch-tool-btn" data-action="undo" title="Отменить" aria-label="Отменить">↺</button>
+            <button class="scratch-tool-btn" data-action="redo" title="Вернуть" aria-label="Вернуть">↻</button>
+            <button class="scratch-tool-btn" data-action="clear" title="Стереть всё" aria-label="Стереть всё">🗑️</button>
           </div>
         </div>
         <div class="scratch-canvas-wrap">
@@ -177,9 +177,10 @@ function openScratchpad(taskId, promptText) {
       strokes.push(redoStack.pop());
       redraw();
     };
-    overlay.querySelector('[data-action="clear"]').onclick = () => {
+    overlay.querySelector('[data-action="clear"]').onclick = async () => {
       if (strokes.length === 0) return;
-      if (!confirm('Стереть весь черновик?')) return;
+      const ok = await showConfirmDialog('Все нарисованные линии будут удалены.', { title: 'Стереть весь черновик?', danger: true, confirmText: 'Стереть' });
+      if (!ok) return;
       redoStack = [];
       strokes = [];
       redraw();

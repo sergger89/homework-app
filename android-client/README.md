@@ -14,9 +14,8 @@
 
 Сборка происходит на публичных GitHub Actions раннерах, ничего локально ставить не нужно.
 
-1. Закоммитьте папку `android-client/` (эту) в корень вашего репозитория вместе с
-   `.github/workflows/android-build.yml` (тоже внутри этой папки — переместите его в
-   `.github/workflows/android-build.yml` в корне репозитория, если у вас уже есть другие workflow).
+1. Эта папка (`android-client/`) вместе с папкой `.github/` уже лежат рядом с `homework-app/`
+   в одном архиве/репозитории — переносить workflow никуда не нужно, всё уже на своих местах.
 2. Запушьте в `main`/`master`, либо запустите вручную: вкладка **Actions** →
    **Build Android APK** → **Run workflow**.
 3. Через пару минут в результатах запуска (Artifacts) появится `homework-app-client-debug` —

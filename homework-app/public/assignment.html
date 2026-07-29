@@ -13,8 +13,15 @@
   </div>
   <div class="container">
     <div id="rewardBanner"></div>
+    <div id="compactProgress" class="wizard-compact-progress" style="display:none">
+      <span id="compactProgressText"></span>
+      <div class="progress-bar" style="flex:1; margin:0 10px"><div id="compactProgressBar" style="width:0%"></div></div>
+      <button id="openTaskListBtn" class="wizard-btn">📋 Все задания</button>
+    </div>
     <div id="wizardDots" class="wizard-dots"></div>
-    <div id="taskHolder"></div>
+    <div id="taskHolder">
+      <div class="loading-state"><span class="spinner" aria-hidden="true"></span>Загрузка...</div>
+    </div>
     <div class="wizard-nav">
       <button class="wizard-btn" id="prevBtn">← Назад</button>
       <button class="wizard-btn" id="skipBtn">Пропустить →</button>
@@ -52,17 +59,72 @@ function renderReward() {
   el.innerHTML = `<div class="reward-banner">🎁 <span>Награда за это задание: <strong>${escapeHtml(assignmentInfo.reward)}</strong></span></div>`;
 }
 
+const DOTS_THRESHOLD = 24; // больше этого - точки превращаются в кашу, показываем компактный прогресс
+
+function taskStatusClass(t) {
+  const last = t.attempts && t.attempts.length ? t.attempts[t.attempts.length - 1] : null;
+  if (last && last.isCorrect === true) return 'answered-correct';
+  if (t.locked) return 'answered-wrong';
+  if (last) return 'skipped';
+  return '';
+}
+
 function renderDots() {
-  const el = document.getElementById('wizardDots');
-  el.innerHTML = tasks.map((t, i) => {
-    let cls = 'wizard-dot';
+  const dotsEl = document.getElementById('wizardDots');
+  const compactEl = document.getElementById('compactProgress');
+
+  if (tasks.length > DOTS_THRESHOLD) {
+    dotsEl.style.display = 'none';
+    compactEl.style.display = 'flex';
+    const doneCount = tasks.filter(t => t.attempts && t.attempts.length > 0).length;
+    document.getElementById('compactProgressText').textContent = `Задание ${currentIndex + 1} из ${tasks.length}`;
+    document.getElementById('compactProgressBar').style.width = `${Math.round(100 * doneCount / tasks.length)}%`;
+    return;
+  }
+
+  dotsEl.style.display = 'flex';
+  compactEl.style.display = 'none';
+  dotsEl.innerHTML = tasks.map((t, i) => {
+    let cls = 'wizard-dot ' + taskStatusClass(t);
     if (i === currentIndex) cls += ' current';
-    const last = t.attempts && t.attempts.length ? t.attempts[t.attempts.length - 1] : null;
-    if (last && last.isCorrect === true) cls += ' answered-correct';
-    else if (t.locked) cls += ' answered-wrong';
-    else if (last) cls += ' skipped'; // отвечал, но ещё не заблокировано и не верно - считаем "в процессе"
     return `<div class="${cls}" onclick="goTo(${i})">${i + 1}</div>`;
   }).join('');
+}
+
+document.getElementById('openTaskListBtn').onclick = openTaskListOverlay;
+
+function openTaskListOverlay() {
+  const overlay = document.createElement('div');
+  overlay.className = 'dialog-overlay';
+  overlay.innerHTML = `
+    <div class="dialog-card task-list-card" role="dialog" aria-modal="true">
+      <h3>Все задания (${tasks.length})</h3>
+      <div class="task-list-scroll">
+        ${tasks.map((t, i) => {
+          const cls = taskStatusClass(t);
+          const icon = cls === 'answered-correct' ? '✅' : cls === 'answered-wrong' ? '❌' : cls === 'skipped' ? '⏳' : '⬜';
+          const label = (t.prompt || t.promptTemplate || '').slice(0, 60);
+          return `<button type="button" class="task-list-row ${i === currentIndex ? 'current' : ''}" data-i="${i}">
+            <span class="task-list-icon">${icon}</span>
+            <span class="task-list-num">${i + 1}.</span>
+            <span class="task-list-label">${escapeHtml(label)}</span>
+          </button>`;
+        }).join('')}
+      </div>
+      <div class="dialog-actions">
+        <button class="wizard-btn" id="closeTaskListBtn">Закрыть</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  const close = () => document.body.removeChild(overlay);
+  overlay.querySelector('#closeTaskListBtn').onclick = close;
+  overlay.querySelectorAll('.task-list-row').forEach(btn => {
+    btn.onclick = () => { close(); goTo(Number(btn.dataset.i)); };
+  });
+  overlay.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+  // сразу прокручиваем к текущему заданию в списке
+  overlay.querySelector('.task-list-row.current')?.scrollIntoView({ block: 'center' });
 }
 
 function goTo(i) {

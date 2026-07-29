@@ -56,6 +56,40 @@
     font-size: 13px;
   }
   #returnBanner button { border: none; background: var(--primary); color: white; border-radius: 8px; padding: 6px 12px; cursor: pointer; }
+
+  #readerSettingsBtn { border: none; background: #eef1f8; border-radius: 8px; width: 36px; height: 36px; font-size: 16px; cursor: pointer; }
+  .reader-settings-panel {
+    position: fixed; top: 56px; right: 10px; z-index: 45; background: white; border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15); padding: 14px; width: 260px;
+  }
+  .reader-settings-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .reader-settings-row:last-child { margin-bottom: 0; }
+  .reader-theme-btns { display: flex; gap: 4px; }
+  .reader-theme-btn {
+    border: 1px solid #dfe3ec; background: white; border-radius: 8px; padding: 6px 8px; font-size: 12px; cursor: pointer;
+  }
+  .reader-theme-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+  .reader-font-btns { display: flex; align-items: center; gap: 8px; }
+  .reader-font-btns button {
+    border: 1px solid #dfe3ec; background: white; border-radius: 8px; width: 30px; height: 30px; cursor: pointer;
+  }
+  #fontSizeLabel { font-size: 13px; color: var(--muted); min-width: 36px; text-align: center; }
+
+  /* тёмная тема окружающего интерфейса читалки (не только текста книги) */
+  body.reader-dark { background: #14141f; }
+  body.reader-dark .reader-topbar { background: #1e1e2e; box-shadow: none; border-bottom: 1px solid #2c2c40; }
+  body.reader-dark .reader-topbar button, body.reader-dark .reader-tab-btn, body.reader-dark #readerSettingsBtn { background: #2c2c40; color: #e4e6eb; }
+  body.reader-dark .reader-tab-btn.active { background: var(--primary); color: white; }
+  body.reader-dark #readerProgressText { color: #9a9ab0; }
+  body.reader-dark .reader-footer { background: #1e1e2e; border-top: 1px solid #2c2c40; }
+  body.reader-dark .reader-nav-btn { background: #2c2c40; color: #e4e6eb; }
+  body.reader-dark .reader-settings-panel { background: #1e1e2e; color: #e4e6eb; }
+  body.reader-dark .reader-theme-btn { background: #2c2c40; border-color: #33334a; color: #e4e6eb; }
+  body.reader-dark .reader-font-btns button { background: #2c2c40; border-color: #33334a; color: #e4e6eb; }
+  body.reader-dark #notesPanel { background: #14141f; }
+  body.reader-dark .note-card { background: #1e1e2e; color: #e4e6eb; box-shadow: none; }
+  body.reader-dark .note-excerpt { color: #c4c6d0; }
+  body.reader-dark .note-actions button { background: #2c2c40; color: #e4e6eb; }
 </style>
 </head>
 <body>
@@ -66,7 +100,27 @@
       <button class="reader-tab-btn active" id="tabReading">📖 Чтение</button>
       <button class="reader-tab-btn" id="tabNotes">📝 Заметки (<span id="notesCount">0</span>)</button>
     </div>
+    <button id="readerSettingsBtn" aria-label="Настройки чтения" title="Настройки чтения">⚙️</button>
     <span id="readerProgressText"></span>
+  </div>
+
+  <div id="readerSettingsPanel" class="reader-settings-panel" style="display:none">
+    <div class="reader-settings-row">
+      <span class="muted">Тема</span>
+      <div class="reader-theme-btns">
+        <button data-theme="light" class="reader-theme-btn">☀️ Светлая</button>
+        <button data-theme="sepia" class="reader-theme-btn">📜 Сепия</button>
+        <button data-theme="dark" class="reader-theme-btn">🌙 Тёмная</button>
+      </div>
+    </div>
+    <div class="reader-settings-row">
+      <span class="muted">Размер шрифта</span>
+      <div class="reader-font-btns">
+        <button id="fontSmaller" aria-label="Уменьшить шрифт">A-</button>
+        <span id="fontSizeLabel">100%</span>
+        <button id="fontBigger" aria-label="Увеличить шрифт">A+</button>
+      </div>
+    </div>
   </div>
 
   <div id="returnBanner">
@@ -127,6 +181,12 @@ async function init() {
     width: '100%', height: '100%', flow: 'paginated', spread: 'auto',
   });
   bookObj = rendition.book;
+
+  rendition.themes.register('light', { body: { color: '#232838 !important', background: '#ffffff !important' } });
+  rendition.themes.register('sepia', { body: { color: '#5b4636 !important', background: '#f4ecd8 !important' } });
+  rendition.themes.register('dark', { body: { color: '#dcdde3 !important', background: '#1a1a2e !important' },
+    a: { color: '#8ab4ff !important' } });
+  applyReaderPrefs();
 
   const startCfi = book.progress?.location || undefined;
   lastRealCfi = startCfi;
@@ -242,7 +302,7 @@ document.getElementById('saveNoteBtn').onclick = async () => {
     document.getElementById('selectionBar').style.display = 'none';
     await loadNotes(null, true);
   } catch (e) {
-    alert('Не удалось сохранить заметку.');
+    await showAlertDialog('Не удалось сохранить заметку.');
   }
 };
 
@@ -307,7 +367,8 @@ function turnOffNoteViewing() {
 }
 
 async function deleteNote(noteId) {
-  if (!confirm('Удалить эту заметку?')) return;
+  const ok = await showConfirmDialog('Заметка и выделение в тексте будут удалены.', { title: 'Удалить эту заметку?', danger: true, confirmText: 'Удалить' });
+  if (!ok) return;
   await api(`/api/books/${bookId}/notes/${noteId}`, { method: 'DELETE' });
   await loadNotes();
   renderNotesPanel();
@@ -320,6 +381,58 @@ function saveProgress(location, percentage) {
     api(`/api/books/${bookId}/progress`, { method: 'PUT', body: JSON.stringify({ location, percentage }) }).catch(() => {});
   }, 800);
 }
+
+// ---------------- настройки чтения: тема + размер шрифта (хранятся локально в браузере) ----------------
+function getReaderPrefs() {
+  try {
+    return JSON.parse(localStorage.getItem('reader_prefs')) || { theme: 'light', fontSize: 100 };
+  } catch (e) { return { theme: 'light', fontSize: 100 }; }
+}
+function saveReaderPrefs(prefs) {
+  try { localStorage.setItem('reader_prefs', JSON.stringify(prefs)); } catch (e) { /* приватный режим и т.п. - не критично */ }
+}
+
+function applyReaderPrefs() {
+  const prefs = getReaderPrefs();
+  rendition.themes.select(prefs.theme);
+  rendition.themes.fontSize(prefs.fontSize + '%');
+  document.body.classList.toggle('reader-dark', prefs.theme === 'dark');
+  document.getElementById('fontSizeLabel').textContent = prefs.fontSize + '%';
+  document.querySelectorAll('.reader-theme-btn').forEach(b => b.classList.toggle('active', b.dataset.theme === prefs.theme));
+}
+
+document.getElementById('readerSettingsBtn').onclick = () => {
+  const panel = document.getElementById('readerSettingsPanel');
+  panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+};
+document.querySelectorAll('.reader-theme-btn').forEach(btn => {
+  btn.onclick = () => {
+    const prefs = getReaderPrefs();
+    prefs.theme = btn.dataset.theme;
+    saveReaderPrefs(prefs);
+    applyReaderPrefs();
+  };
+});
+document.getElementById('fontSmaller').onclick = () => {
+  const prefs = getReaderPrefs();
+  prefs.fontSize = Math.max(70, prefs.fontSize - 10);
+  saveReaderPrefs(prefs);
+  applyReaderPrefs();
+};
+document.getElementById('fontBigger').onclick = () => {
+  const prefs = getReaderPrefs();
+  prefs.fontSize = Math.min(180, prefs.fontSize + 10);
+  saveReaderPrefs(prefs);
+  applyReaderPrefs();
+};
+// закрыть панель настроек по клику вне неё
+document.addEventListener('click', (e) => {
+  const panel = document.getElementById('readerSettingsPanel');
+  const btn = document.getElementById('readerSettingsBtn');
+  if (panel.style.display === 'block' && !panel.contains(e.target) && e.target !== btn) {
+    panel.style.display = 'none';
+  }
+});
 
 init();
 </script>

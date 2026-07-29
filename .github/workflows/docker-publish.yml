@@ -8,6 +8,9 @@ on:
   push:
     branches: ["main", "master"]
     tags: ["v*.*.*"]
+    paths:
+      - "homework-app/**"
+      - ".github/workflows/docker-publish.yml"
   workflow_dispatch: {}
 
 # Нужно для публикации в GitHub Container Registry (ghcr.io) через встроенный GITHUB_TOKEN,
@@ -56,8 +59,8 @@ jobs:
       - name: Build and push image
         uses: docker/build-push-action@v6
         with:
-          context: .
-          file: ./Dockerfile
+          context: homework-app
+          file: homework-app/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

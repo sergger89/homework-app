@@ -24,7 +24,9 @@
       <button id="tabSettings">Настройки приложения</button>
     </div>
 
-    <div id="viewUsers"></div>
+    <div id="viewUsers">
+      <div class="loading-state"><span class="spinner" aria-hidden="true"></span>Загрузка...</div>
+    </div>
 
     <div id="viewCreate" style="display:none">
       <h3>Создать новый аккаунт</h3>
@@ -38,7 +40,12 @@
         </label>
         <label class="muted">Имя (отображается в интерфейсе)<input type="text" id="newDisplayName" required /></label>
         <label class="muted">Логин<input type="text" id="newUsername" required /></label>
-        <label class="muted">Пароль<input type="text" id="newPassword" required /></label>
+        <label class="muted">Пароль
+          <div class="password-field">
+            <input type="password" id="newPassword" required autocomplete="new-password" />
+            <button type="button" class="password-toggle" data-target="newPassword" aria-label="Показать пароль">👁️</button>
+          </div>
+        </label>
         <label class="muted" id="parentPickerWrap" style="display:none">
           Сразу привязать к родителю (необязательно)
           <select id="parentPicker"><option value="">— не привязывать —</option></select>
@@ -127,32 +134,34 @@ function renderUsers() {
 }
 
 async function changeRole(id, role, name) {
-  if (!confirm(`Сменить роль пользователя «${name}» на «${ROLE_LABELS[role]}»?`)) { await loadAll(); renderUsers(); return; }
+  const ok = await showConfirmDialog(`Сменить роль пользователя «${name}» на «${ROLE_LABELS[role]}»?`, { title: 'Смена роли' });
+  if (!ok) { await loadAll(); renderUsers(); return; }
   try {
     await api(`/api/admin/users/${id}/role`, { method: 'PATCH', body: JSON.stringify({ role }) });
     await loadAll();
     renderUsers();
   } catch (e) {
-    alert(e.data?.error === 'cannot_demote_last_admin' ? 'Нельзя разжаловать последнего администратора.' : 'Не удалось сменить роль.');
+    await showAlertDialog(e.data?.error === 'cannot_demote_last_admin' ? 'Нельзя разжаловать последнего администратора.' : 'Не удалось сменить роль.');
     await loadAll(); renderUsers();
   }
 }
 
 async function resetPassword(id, name) {
-  const newPassword = prompt(`Новый пароль для «${name}»:`);
+  const newPassword = await showPasswordDialog(`Новый пароль для «${name}»`);
   if (!newPassword) return;
   try {
     await api(`/api/admin/users/${id}/password`, { method: 'POST', body: JSON.stringify({ newPassword }) });
-    alert('Пароль изменён.');
+    await showAlertDialog('Пароль изменён.');
   } catch (e) {
-    alert('Не удалось сменить пароль (минимум 4 символа).');
+    await showAlertDialog('Не удалось сменить пароль (минимум 4 символа).');
   }
 }
 
 async function deleteUser(id, name) {
-  if (!confirm(`Удалить аккаунт «${name}»? Это действие необратимо.`)) return;
+  const ok = await showConfirmDialog(`Удалить аккаунт «${name}»? Это действие необратимо.`, { danger: true, confirmText: 'Удалить' });
+  if (!ok) return;
   try { await api(`/api/admin/users/${id}`, { method: 'DELETE' }); await loadAll(); renderUsers(); }
-  catch (e) { alert(e.data?.error === 'cannot_delete_last_admin' ? 'Нельзя удалить последнего администратора.' : 'Не удалось удалить.'); }
+  catch (e) { await showAlertDialog(e.data?.error === 'cannot_delete_last_admin' ? 'Нельзя удалить последнего администратора.' : 'Не удалось удалить.'); }
 }
 
 function fillParentPicker() {
@@ -196,7 +205,7 @@ function renderAccessMatrix() {
     html += `<tr><td>${escapeHtml(k.display_name)}</td>`;
     for (const p of parents) {
       const checked = linkSet.has(`${p.id}:${k.id}`) ? 'checked' : '';
-      html += `<td style="text-align:center"><input type="checkbox" ${checked} onchange="toggleAccess(${p.id},${k.id},this.checked)" /></td>`;
+      html += `<td style="text-align:center"><input type="checkbox" ${checked} onchange="toggleAccess(${p.id},${k.id},this.checked)" aria-label="Доступ ${escapeHtml(p.display_name)} к ${escapeHtml(k.display_name)}" /></td>`;
     }
     html += '</tr>';
   }
@@ -208,7 +217,7 @@ async function toggleAccess(parentId, childId, granted) {
     if (granted) await api('/api/admin/links', { method: 'POST', body: JSON.stringify({ parentId, childId }) });
     else await api('/api/admin/links', { method: 'DELETE', body: JSON.stringify({ parentId, childId }) });
     await loadAll();
-  } catch (e) { alert('Не удалось изменить доступ.'); await loadAll(); renderAccessMatrix(); }
+  } catch (e) { await showAlertDialog('Не удалось изменить доступ.'); await loadAll(); renderAccessMatrix(); }
 }
 
 async function loadFavicon() {
@@ -238,6 +247,7 @@ document.getElementById('faviconInput').addEventListener('change', async (e) => 
 (async () => {
   const me = await api('/api/me');
   myId = me.user.id;
+  wirePasswordToggles(document);
   await loadAll();
   switchTab('users');
 })();

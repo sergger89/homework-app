@@ -65,6 +65,8 @@
 
       <h3 style="margin-top:24px">Библиотека заданий</h3>
       <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px">
+        <input type="search" id="filterTitle" placeholder="🔍 Поиск по названию..." oninput="renderLibraryList()"
+          style="flex:1; min-width:160px; padding:9px 12px; border-radius:8px; border:1px solid #dfe3ec" aria-label="Поиск по названию задания" />
         <select id="filterSubject" onchange="renderLibraryList()">
           <option value="">Все предметы</option>
         </select>
@@ -86,7 +88,12 @@
       <form id="addChildForm" class="field-row" style="max-width:340px">
         <label class="muted">Имя ребёнка<input type="text" id="newChildName" required /></label>
         <label class="muted">Логин<input type="text" id="newChildUsername" required /></label>
-        <label class="muted">Пароль<input type="text" id="newChildPassword" required /></label>
+        <label class="muted">Пароль
+          <div class="password-field">
+            <input type="password" id="newChildPassword" required autocomplete="new-password" />
+            <button type="button" class="password-toggle" data-target="newChildPassword" aria-label="Показать пароль">👁️</button>
+          </div>
+        </label>
         <button type="submit" class="submit-btn">Создать аккаунт ребёнка</button>
       </form>
       <p id="addChildResult" class="muted"></p>
@@ -120,6 +127,7 @@ async function init() {
   const me = await api('/api/me');
   myRole = me.user.role;
   myId = me.user.id;
+  wirePasswordToggles(document);
   if (myRole === 'admin') document.getElementById('adminLink').style.display = 'inline-block';
   await reloadChildren();
   switchTab('progress');
@@ -143,6 +151,7 @@ async function reloadChildren() {
 // ---------------- PROGRESS ----------------
 async function loadProgress() {
   if (!currentChildId) { document.getElementById('viewProgress').innerHTML = '<p class="muted">Сначала добавьте ребёнка во вкладке «Мои дети».</p>'; return; }
+  document.getElementById('viewProgress').innerHTML = loadingHtml();
   const { bySubject, recent, attemptsByTask, completedToday } = await api(`/api/progress?childId=${currentChildId}`);
   const view = document.getElementById('viewProgress');
   const rows = bySubject.map(s => `
@@ -179,6 +188,7 @@ async function loadProgress() {
 // ---------------- ASSIGNMENTS (per-child, с ревью ответов) ----------------
 async function loadAssignments() {
   if (!currentChildId) { document.getElementById('viewAssignments').innerHTML = '<p class="muted">Сначала добавьте ребёнка во вкладке «Мои дети».</p>'; return; }
+  document.getElementById('viewAssignments').innerHTML = loadingHtml();
   const { assignments } = await api(`/api/assignments?childId=${currentChildId}`);
   const view = document.getElementById('viewAssignments');
   if (assignments.length === 0) {
@@ -400,6 +410,7 @@ async function confirmBatch() {
 
 // ---------------- ЗАГРУЗКА + КАЛЕНДАРЬ + ФИЛЬТРЫ/СОРТИРОВКА ----------------
 async function loadLibrary() {
+  if (!libraryAssignments.length) document.getElementById('libraryList').innerHTML = loadingHtml();
   const { assignments } = await api('/api/assignments/library');
   libraryAssignments = assignments;
   fillSubjectFilter();
@@ -442,9 +453,9 @@ function renderCalendar() {
 
   el.innerHTML = `
     <div class="cal-header">
-      <button onclick="shiftMonth(-1)">‹</button>
+      <button onclick="shiftMonth(-1)" aria-label="Предыдущий месяц">‹</button>
       <strong>${monthNames[month]} ${year}</strong>
-      <button onclick="shiftMonth(1)">›</button>
+      <button onclick="shiftMonth(1)" aria-label="Следующий месяц">›</button>
     </div>
     <div class="cal-grid cal-weekdays">${['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(d => `<div>${d}</div>`).join('')}</div>
     <div class="cal-grid">${cells}</div>
@@ -468,10 +479,12 @@ function renderLibraryList() {
   const subjectFilter = document.getElementById('filterSubject').value;
   const sortOrder = document.getElementById('sortOrder').value;
   const onlySelectedDay = document.getElementById('onlySelectedDayCb').checked;
+  const titleQuery = document.getElementById('filterTitle').value.trim().toLowerCase();
 
   let list = [...libraryAssignments];
   if (subjectFilter) list = list.filter(a => a.subject === subjectFilter);
   if (selectedDate && onlySelectedDay) list = list.filter(a => dateOf(a) === selectedDate);
+  if (titleQuery) list = list.filter(a => a.title.toLowerCase().includes(titleQuery));
 
   if (sortOrder === 'date_asc') list.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
   else if (sortOrder === 'subject') list.sort((a, b) => subjectLabel(a.subject).localeCompare(subjectLabel(b.subject), 'ru'));
@@ -535,7 +548,8 @@ async function toggleVisibility(assignmentId, childId, hidden) {
   loadLibrary();
 }
 async function resetProgress(assignmentId, childId) {
-  if (!confirm('Сбросить прогресс ребёнка по этому заданию? Все ответы будут удалены, задание можно будет пройти заново.')) return;
+  const ok = await showConfirmDialog('Все ответы будут удалены, задание можно будет пройти заново.', { title: 'Сбросить прогресс ребёнка по этому заданию?', danger: true, confirmText: 'Сбросить' });
+  if (!ok) return;
   await api(`/api/assignments/${assignmentId}/reset`, { method: 'POST', body: JSON.stringify({ childId }) });
   loadLibrary();
 }
@@ -545,9 +559,10 @@ async function saveReward(assignmentId) {
   loadLibrary();
 }
 async function deleteLibraryAssignment(assignmentId) {
-  if (!confirm('Удалить это задание совсем (у всех детей, вместе с ответами)?')) return;
+  const ok = await showConfirmDialog('У всех детей, вместе с ответами. Это действие необратимо.', { title: 'Удалить это задание совсем?', danger: true, confirmText: 'Удалить' });
+  if (!ok) return;
   try { await api(`/api/assignments/${assignmentId}`, { method: 'DELETE' }); loadLibrary(); }
-  catch (e) { alert('Не удалось удалить (возможно, это задание добавили не вы).'); }
+  catch (e) { await showAlertDialog('Не удалось удалить (возможно, это задание добавили не вы).'); }
 }
 
 // ---------------- CHILDREN ----------------

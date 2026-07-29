@@ -81,6 +81,7 @@ function switchBookTab(tab) {
 }
 
 async function loadBooks() {
+  document.getElementById('bookList').innerHTML = loadingHtml();
   const url = currentChildId ? `/api/books?childId=${currentChildId}` : '/api/books';
   const { books: allBooks } = await api(url);
   let books = allBooks;
@@ -134,9 +135,10 @@ async function toggleFavorite(bookId, fav) {
 }
 
 async function deleteBook(bookId) {
-  if (!confirm('Удалить эту книгу совсем?')) return;
+  const ok = await showConfirmDialog('Книга будет удалена у всех детей вместе с прогрессом чтения и заметками.', { title: 'Удалить эту книгу совсем?', danger: true, confirmText: 'Удалить' });
+  if (!ok) return;
   try { await api(`/api/books/${bookId}`, { method: 'DELETE' }); loadBooks(); }
-  catch (e) { alert('Не удалось удалить (возможно, книгу загрузили не вы).'); }
+  catch (e) { await showAlertDialog('Не удалось удалить (возможно, книгу загрузили не вы).'); }
 }
 
 document.getElementById('uploadForm')?.addEventListener('submit', async (e) => {

@@ -28,7 +28,10 @@
       <h3>Сменить пароль</h3>
       <form id="passForm" class="field-row">
         <label class="muted">Новый пароль
-          <input type="text" id="newPassword" required minlength="4" />
+          <div class="password-field">
+            <input type="password" id="newPassword" required minlength="4" autocomplete="new-password" />
+            <button type="button" class="password-toggle" data-target="newPassword" aria-label="Показать пароль">👁️</button>
+          </div>
         </label>
         <button type="submit" class="submit-btn">Сменить пароль</button>
       </form>
@@ -43,6 +46,7 @@ async function load() {
   const me = await api('/api/me');
   document.getElementById('backBtn').onclick = () => window.location.href = roleHome(me.user.role);
   document.getElementById('currentAvatar').innerHTML = avatarHtml(me.user.name, me.user.avatarPath, 64);
+  wirePasswordToggles(document);
 }
 load();
 
