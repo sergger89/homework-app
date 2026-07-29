@@ -9,6 +9,7 @@
 <body>
   <div class="topbar">
     <h1 id="title">Задание</h1>
+    <span id="coinBadge" class="coin-badge" style="display:none">🪙 0</span>
     <button onclick="window.location.href='/child.html'">← К списку</button>
   </div>
   <div class="container">
@@ -44,6 +45,7 @@ async function load(keepIndex) {
   tasks = t;
   document.getElementById('title').textContent = `${subjectLabel(assignment.subject)} — ${assignment.title}`;
   renderReward();
+  refreshCoinBadge();
   if (!keepIndex) {
     // открываем первое ещё не отвеченное/не заблокированное задание, если есть
     const firstOpen = tasks.findIndex(t => !t.locked);
@@ -51,6 +53,15 @@ async function load(keepIndex) {
   }
   renderDots();
   renderTask();
+}
+
+function refreshCoinBadge() {
+  api('/api/me').then(({ user }) => {
+    if (user.role !== 'child') return;
+    const badge = document.getElementById('coinBadge');
+    badge.style.display = 'inline-block';
+    api('/api/me/coins').then(({ balance }) => { badge.textContent = `🪙 ${balance}`; });
+  });
 }
 
 function renderReward() {
@@ -246,6 +257,70 @@ function buildTaskCard(t, idx) {
     getAnswer = () => [...body.querySelectorAll('input')].map(inp => inp.value);
   }
 
+  else if (t.type === 'word_table') {
+    const savedRows = lastAttempt ? lastAttempt.answer : [];
+    const wrap = document.createElement('div');
+    wrap.className = 'word-table-wrap';
+    wrap.style.setProperty('--wt-cols', t.columns.length);
+
+    function buildRow(values) {
+      const row = document.createElement('div');
+      row.className = 'word-table-row';
+      t.columns.forEach((col, ci) => {
+        const val = values ? (values[ci] ?? '') : '';
+        let field;
+        if (col.type === 'select') {
+          field = document.createElement('select');
+          field.innerHTML = '<option value="">—</option>' + col.options.map(o =>
+            `<option value="${escapeHtml(o)}" ${o === val ? 'selected' : ''}>${escapeHtml(o)}</option>`).join('');
+        } else {
+          field = document.createElement('input');
+          field.type = 'text';
+          field.value = val;
+          field.placeholder = col.label;
+        }
+        field.className = 'word-table-field';
+        field.disabled = disabled;
+        field.dataset.col = ci;
+        row.appendChild(field);
+      });
+      if (!disabled) {
+        const delBtn = document.createElement('button');
+        delBtn.type = 'button';
+        delBtn.className = 'word-table-del';
+        delBtn.textContent = '✕';
+        delBtn.setAttribute('aria-label', 'Удалить строку');
+        delBtn.onclick = () => row.remove();
+        row.appendChild(delBtn);
+      }
+      return row;
+    }
+
+    const header = document.createElement('div');
+    header.className = 'word-table-row word-table-header';
+    header.innerHTML = t.columns.map(c => `<span>${escapeHtml(c.label)}</span>`).join('') + (disabled ? '' : '<span></span>');
+    wrap.appendChild(header);
+
+    const rowsHolder = document.createElement('div');
+    rowsHolder.className = 'word-table-rows';
+    (savedRows.length ? savedRows : disabled ? [] : [null]).forEach(v => rowsHolder.appendChild(buildRow(v)));
+    wrap.appendChild(rowsHolder);
+
+    if (!disabled) {
+      const addBtn = document.createElement('button');
+      addBtn.type = 'button';
+      addBtn.className = 'scratch-btn-open';
+      addBtn.textContent = '+ Добавить слово';
+      addBtn.onclick = () => rowsHolder.appendChild(buildRow(null));
+      wrap.appendChild(addBtn);
+    }
+
+    body.appendChild(wrap);
+    getAnswer = () => [...rowsHolder.querySelectorAll('.word-table-row')].map(row =>
+      [...row.querySelectorAll('.word-table-field')].map(f => f.value)
+    ).filter(r => r.some(v => v.trim() !== ''));
+  }
+
   // история попыток
   if (attempts.length > 0) {
     const info = document.createElement('div');
@@ -258,6 +333,32 @@ function buildTaskCard(t, idx) {
           ? `Попытка ${attempts.length} — это была последняя перед бонусной! Есть ещё 1 попытка.`
           : `Попытка ${attempts.length} из 3`;
     card.appendChild(info);
+  }
+
+  // кнопка "отправить на ручную проверку" - если ребёнок не согласен с автооценкой.
+  // не показываем для заданий, которые и так уже ждут ручной проверки (needsManualReview).
+  if (lastAttempt && !awaitingManual && !lastAttempt.manuallyGraded) {
+    if (lastAttempt.flaggedForReview) {
+      const flaggedInfo = document.createElement('div');
+      flaggedInfo.className = 'flag-review-status';
+      flaggedInfo.textContent = '🚩 Отправлено на проверку родителю';
+      card.appendChild(flaggedInfo);
+    } else {
+      const flagBtn = document.createElement('button');
+      flagBtn.type = 'button';
+      flagBtn.className = 'flag-review-btn';
+      flagBtn.textContent = '🚩 Отправить на проверку';
+      flagBtn.onclick = async () => {
+        flagBtn.disabled = true;
+        try {
+          await api(`/api/tasks/${t.id}/flag-review`, { method: 'POST' });
+          load(true);
+        } catch (e) {
+          flagBtn.disabled = false;
+        }
+      };
+      card.appendChild(flagBtn);
+    }
   }
 
   // объяснение, раскрытое сервером (после 3-й ошибки или при блокировке) — показываем ПОСТОЯННО,
@@ -334,6 +435,18 @@ function showResult(card, res) {
   card.appendChild(badge);
   // само объяснение теперь показывает постоянный блок в buildTaskCard (переживает перезагрузку) -
   // здесь его не дублируем.
+  if (res.coinsEarned > 0) showCoinToast(res.coinsEarned, res.coinBalance);
+}
+
+function showCoinToast(amount, balance) {
+  const toast = document.createElement('div');
+  toast.className = 'coin-toast';
+  toast.textContent = `🪙 +${amount}`;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.classList.add('show'), 10);
+  setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 1800);
+  const badge = document.getElementById('coinBadge');
+  if (badge && balance !== undefined) badge.textContent = `🪙 ${balance}`;
 }
 
 load();

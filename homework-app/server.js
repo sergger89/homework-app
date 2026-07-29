@@ -10,6 +10,7 @@ const { gradeTask, validateAssignment } = require('./grading');
 
 const REGULAR_ATTEMPTS = 3; // после стольких неверных попыток показываем объяснение и даём бонусную попытку
 const TOTAL_ATTEMPTS = 4;   // после неё, если всё ещё неверно, показываем правильный ответ и блокируем
+const COINS_PER_TASK = 10;  // фиксированная награда монетками за верно решённое задание
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -69,6 +70,23 @@ function hasChildAccess(user, childId) {
   const row = db.prepare('SELECT 1 FROM parent_child WHERE parent_id=? AND child_id=?').get(user.id, childId);
   return !!row;
 }
+
+function getCoinBalance(childId) {
+  const row = db.prepare('SELECT COALESCE(SUM(amount),0) as balance FROM coin_transactions WHERE child_id=?').get(childId);
+  return row.balance;
+}
+
+// начисляем монеты за верно решённое задание - идемпотентно (не начислим второй раз за то же
+// задание, даже если родитель потом несколько раз меняет оценку туда-обратно)
+function awardCoinsForTaskIfNeeded(taskId, childId) {
+  const existing = db
+    .prepare("SELECT 1 FROM coin_transactions WHERE child_id=? AND related_type='task' AND related_id=?")
+    .get(childId, taskId);
+  if (existing) return;
+  db.prepare(
+    "INSERT INTO coin_transactions (child_id, amount, reason, related_type, related_id) VALUES (?,?,?,?,?)"
+  ).run(childId, COINS_PER_TASK, 'task_correct', 'task', taskId);
+}
 function refreshSessionUser(req) {
   const u = db.prepare('SELECT id, role, display_name, avatar_path FROM users WHERE id=?').get(req.session.user.id);
   if (u) req.session.user = { id: u.id, role: u.role, name: u.display_name, avatarPath: u.avatar_path };
@@ -77,8 +95,9 @@ function refreshSessionUser(req) {
 
 // ---------- public settings (favicon и т.п.), доступно без логина ----------
 app.get('/api/settings', (req, res) => {
-  const row = db.prepare("SELECT value FROM app_settings WHERE key='favicon_path'").get();
-  res.json({ faviconUrl: row ? row.value : null });
+  const favicon = db.prepare("SELECT value FROM app_settings WHERE key='favicon_path'").get();
+  const mascot = db.prepare("SELECT value FROM app_settings WHERE key='mascot_path'").get();
+  res.json({ faviconUrl: favicon ? favicon.value : null, mascotUrl: mascot ? mascot.value : null });
 });
 
 // ---------- auth routes ----------
@@ -453,6 +472,7 @@ app.get('/api/assignments/:id', requireAuth, (req, res) => {
       answer: JSON.parse(s.answer),
       isCorrect: s.is_correct === null ? null : !!s.is_correct,
       manuallyGraded: !!s.manually_graded,
+      flaggedForReview: !!s.flagged_for_review,
       submittedAt: s.submitted_at,
     }));
     const last = subs[subs.length - 1] || null;
@@ -509,6 +529,12 @@ app.post('/api/tasks/:id/submit', requireRole('child'), (req, res) => {
     'INSERT INTO submissions (task_id, child_id, attempt_number, answer, is_correct) VALUES (?,?,?,?,?)'
   ).run(task.id, req.session.user.id, attemptNumber, JSON.stringify(answer), isCorrectValue);
 
+  let coinsEarned = 0;
+  if (isCorrect === true) {
+    awardCoinsForTaskIfNeeded(task.id, req.session.user.id);
+    coinsEarned = COINS_PER_TASK;
+  }
+
   const attemptsLeft = Math.max(0, TOTAL_ATTEMPTS - attemptNumber);
   const locked = attemptNumber >= TOTAL_ATTEMPTS || isCorrect === true;
   // после 3-й неверной попытки показываем объяснение и даём бонусную (4-ю) попытку,
@@ -535,7 +561,20 @@ app.post('/api/tasks/:id/submit', requireRole('child'), (req, res) => {
     attemptNumber,
     attemptsLeft,
     locked,
+    coinsEarned,
+    coinBalance: getCoinBalance(req.session.user.id),
   });
+});
+
+// ребёнок просит родителя перепроверить его последний ответ вручную (даже если тот уже
+// проверен автоматически) - например, если ребёнок не согласен с автопроверкой
+app.post('/api/tasks/:id/flag-review', requireRole('child'), (req, res) => {
+  const subs = getSubmissions(req.params.id, req.session.user.id);
+  if (subs.length === 0) return res.status(400).json({ error: 'no_submission_yet' });
+  const last = subs[subs.length - 1];
+  if (last.manually_graded) return res.status(409).json({ error: 'already_graded' });
+  db.prepare('UPDATE submissions SET flagged_for_review=1 WHERE id=?').run(last.id);
+  res.json({ ok: true });
 });
 
 // ручная проверка/переоценка задания родителем или админом (для needsManualReview или в целом коррекция)
@@ -550,9 +589,64 @@ app.post('/api/tasks/:id/grade', requireRole(['admin', 'parent']), (req, res) =>
   const subs = getSubmissions(task.id, childId);
   if (subs.length === 0) return res.status(400).json({ error: 'no_submission_yet' });
   const last = subs[subs.length - 1];
-  db.prepare('UPDATE submissions SET is_correct=?, manually_graded=1 WHERE id=?').run(isCorrect ? 1 : 0, last.id);
+  db.prepare('UPDATE submissions SET is_correct=?, manually_graded=1, flagged_for_review=0 WHERE id=?').run(isCorrect ? 1 : 0, last.id);
+  if (isCorrect) awardCoinsForTaskIfNeeded(task.id, childId);
   res.json({ ok: true });
 });
+
+// список всех ответов, ожидающих внимания родителя/админа (across всех доступных детей):
+// задания на ручную проверку (needsManualReview) + вручную отмеченные ребёнком "перепроверь"
+app.get('/api/parent/pending-review', requireRole(['admin', 'parent']), (req, res) => {
+  const childrenRows =
+    req.session.user.role === 'admin'
+      ? db.prepare("SELECT id, display_name FROM users WHERE role='child'").all()
+      : db
+          .prepare(
+            `SELECT u.id, u.display_name FROM users u
+             JOIN parent_child pc ON pc.child_id = u.id WHERE pc.parent_id = ?`
+          )
+          .all(req.session.user.id);
+  const childIds = childrenRows.map((c) => c.id);
+  if (childIds.length === 0) return res.json({ items: [] });
+
+  const placeholders = childIds.map(() => '?').join(',');
+  const rows = db
+    .prepare(
+      `SELECT s.id as submission_id, s.task_id, s.child_id, s.answer, s.is_correct, s.flagged_for_review,
+              s.submitted_at, tk.type as task_type, tk.data as task_data,
+              a.id as assignment_id, a.title as assignment_title, a.subject as subject
+       FROM submissions s
+       JOIN tasks tk ON tk.id = s.task_id
+       JOIN assignments a ON a.id = tk.assignment_id
+       WHERE s.manually_graded = 0
+         AND (s.is_correct IS NULL OR s.flagged_for_review = 1)
+         AND s.child_id IN (${placeholders})
+         AND s.id = (SELECT MAX(id) FROM submissions s2 WHERE s2.task_id = s.task_id AND s2.child_id = s.child_id)
+       ORDER BY s.submitted_at DESC`
+    )
+    .all(...childIds);
+
+  const childNameById = Object.fromEntries(childrenRows.map((c) => [c.id, c.display_name]));
+  const items = rows.map((r) => {
+    const data = JSON.parse(r.task_data);
+    return {
+      submissionId: r.submission_id,
+      taskId: r.task_id,
+      childId: r.child_id,
+      childName: childNameById[r.child_id],
+      assignmentId: r.assignment_id,
+      assignmentTitle: r.assignment_title,
+      subject: r.subject,
+      taskType: r.task_type,
+      prompt: data.prompt || data.promptTemplate || '',
+      answer: JSON.parse(r.answer),
+      awaitingType: r.is_correct === null ? 'manual_review' : 'flagged_by_child',
+      submittedAt: r.submitted_at,
+    };
+  });
+  res.json({ items });
+});
+
 
 // ---------- import assignment (в библиотеку; можно сразу назначить detям через childIds) ----------
 function importAssignmentHandler(req, res, assignmentBody) {
@@ -920,6 +1014,139 @@ app.use((err, req, res, next) => {
     return res.status(500).json({ error: 'server_error' });
   }
   next();
+});
+
+// ---------- монеты и магазин наград ----------
+app.get('/api/me/coins', requireAuth, (req, res) => {
+  const childId = req.session.user.role === 'child' ? req.session.user.id : req.query.childId ? Number(req.query.childId) : null;
+  if (req.session.user.role !== 'child' && (!childId || !hasChildAccess(req.session.user, childId))) {
+    return res.status(403).json({ error: 'no_access_to_child' });
+  }
+  res.json({ balance: getCoinBalance(childId) });
+});
+
+function visibleShopFilter(user) {
+  if (user.role === 'admin') return { where: '1=1', params: [] };
+  if (user.role === 'parent') {
+    return { where: '(si.created_by = ? OR u.role = \'admin\')', params: [user.id] };
+  }
+  return {
+    where: `(u.role = 'admin' OR si.created_by IN (SELECT parent_id FROM parent_child WHERE child_id = ?))`,
+    params: [user.id],
+  };
+}
+
+app.get('/api/shop/items', requireAuth, (req, res) => {
+  const { where, params } = visibleShopFilter(req.session.user);
+  const activeFilter = req.session.user.role === 'child' ? 'AND si.active = 1' : '';
+  const items = db
+    .prepare(
+      `SELECT si.*, u.display_name as creator_name FROM shop_items si
+       LEFT JOIN users u ON u.id = si.created_by
+       WHERE ${where} ${activeFilter}
+       ORDER BY si.cost ASC`
+    )
+    .all(...params);
+  res.json({
+    items: items.map((i) => ({
+      id: i.id, name: i.name, description: i.description, cost: i.cost, icon: i.icon, active: !!i.active,
+      createdBy: i.creator_name, canManage: req.session.user.role === 'admin' || i.created_by === req.session.user.id,
+    })),
+  });
+});
+
+app.post('/api/shop/items', requireRole(['admin', 'parent']), (req, res) => {
+  const { name, description, cost, icon } = req.body || {};
+  if (!name || !Number.isFinite(Number(cost)) || Number(cost) <= 0) {
+    return res.status(400).json({ error: 'name_and_positive_cost_required' });
+  }
+  const info = db
+    .prepare('INSERT INTO shop_items (name, description, cost, icon, created_by) VALUES (?,?,?,?,?)')
+    .run(name, description || null, Math.round(Number(cost)), icon || '🎁', req.session.user.id);
+  res.json({ ok: true, itemId: info.lastInsertRowid });
+});
+
+app.patch('/api/shop/items/:id', requireRole(['admin', 'parent']), (req, res) => {
+  const item = db.prepare('SELECT * FROM shop_items WHERE id=?').get(req.params.id);
+  if (!item) return res.status(404).json({ error: 'not_found' });
+  if (req.session.user.role !== 'admin' && item.created_by !== req.session.user.id) {
+    return res.status(403).json({ error: 'not_owner' });
+  }
+  const { name, description, cost, icon, active } = req.body || {};
+  db.prepare('UPDATE shop_items SET name=?, description=?, cost=?, icon=?, active=? WHERE id=?').run(
+    name ?? item.name,
+    description !== undefined ? description : item.description,
+    cost !== undefined ? Math.round(Number(cost)) : item.cost,
+    icon || item.icon,
+    active !== undefined ? (active ? 1 : 0) : item.active,
+    item.id
+  );
+  res.json({ ok: true });
+});
+
+app.delete('/api/shop/items/:id', requireRole(['admin', 'parent']), (req, res) => {
+  const item = db.prepare('SELECT * FROM shop_items WHERE id=?').get(req.params.id);
+  if (!item) return res.status(404).json({ error: 'not_found' });
+  if (req.session.user.role !== 'admin' && item.created_by !== req.session.user.id) {
+    return res.status(403).json({ error: 'not_owner' });
+  }
+  db.prepare('DELETE FROM shop_items WHERE id=?').run(req.params.id);
+  res.json({ ok: true });
+});
+
+app.post('/api/shop/purchase', requireRole('child'), (req, res) => {
+  const { itemId } = req.body || {};
+  const item = db.prepare('SELECT * FROM shop_items WHERE id=? AND active=1').get(itemId);
+  if (!item) return res.status(404).json({ error: 'item_not_found' });
+
+  try {
+    const purchaseId = db.transaction(() => {
+      const balance = getCoinBalance(req.session.user.id);
+      if (balance < item.cost) throw new Error('insufficient_funds');
+      const info = db
+        .prepare('INSERT INTO shop_purchases (item_id, child_id, item_name_snapshot, cost_at_purchase, status) VALUES (?,?,?,?,?)')
+        .run(item.id, req.session.user.id, item.name, item.cost, 'pending');
+      db.prepare(
+        "INSERT INTO coin_transactions (child_id, amount, reason, related_type, related_id) VALUES (?,?,?,?,?)"
+      ).run(req.session.user.id, -item.cost, 'purchase', 'shop_purchase', info.lastInsertRowid);
+      return info.lastInsertRowid;
+    })();
+    res.json({ ok: true, purchaseId, balance: getCoinBalance(req.session.user.id) });
+  } catch (e) {
+    if (e.message === 'insufficient_funds') return res.status(400).json({ error: 'insufficient_funds' });
+    res.status(500).json({ error: 'purchase_failed' });
+  }
+});
+
+app.get('/api/shop/purchases', requireAuth, (req, res) => {
+  const childId = req.session.user.role === 'child' ? req.session.user.id : req.query.childId ? Number(req.query.childId) : null;
+  if (req.session.user.role !== 'child' && (!childId || !hasChildAccess(req.session.user, childId))) {
+    return res.status(403).json({ error: 'no_access_to_child' });
+  }
+  const purchases = db
+    .prepare('SELECT * FROM shop_purchases WHERE child_id=? ORDER BY created_at DESC')
+    .all(childId);
+  res.json({
+    purchases: purchases.map((p) => ({
+      id: p.id, itemName: p.item_name_snapshot, cost: p.cost_at_purchase, status: p.status,
+      createdAt: p.created_at, fulfilledAt: p.fulfilled_at,
+    })),
+  });
+});
+
+app.post('/api/shop/purchases/:id/fulfill', requireRole(['admin', 'parent']), (req, res) => {
+  const purchase = db.prepare('SELECT * FROM shop_purchases WHERE id=?').get(req.params.id);
+  if (!purchase) return res.status(404).json({ error: 'not_found' });
+  if (!hasChildAccess(req.session.user, purchase.child_id)) return res.status(403).json({ error: 'no_access_to_child' });
+  db.prepare("UPDATE shop_purchases SET status='fulfilled', fulfilled_at=datetime('now') WHERE id=?").run(purchase.id);
+  res.json({ ok: true });
+});
+
+app.post('/api/admin/mascot', requireRole('admin'), upload.single('mascot'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'no_file' });
+  const relPath = `/uploads/${req.file.filename}`;
+  db.prepare("INSERT INTO app_settings (key, value) VALUES ('mascot_path', ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value").run(relPath);
+  res.json({ ok: true, mascotUrl: relPath });
 });
 
 app.listen(PORT, () => {

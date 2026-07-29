@@ -6,7 +6,17 @@ function normalizeText(s) {
   return String(s ?? '').trim().toLowerCase().replace(/\s+/g, ' ');
 }
 
+// Типы, для которых у самого задания в принципе нет единственно верного ответа -
+// они ВСЕГДА идут на ручную проверку родителем, независимо от флага needsManualReview.
+const ALWAYS_MANUAL_TYPES = ['word_table'];
+
 function gradeTask(task, answer) {
+  // "ждёт проверки родителем" может быть явно указано (needsManualReview:true) для
+  // любого типа задания, либо подразумеваться самим типом (например, word_table).
+  if (task.needsManualReview || ALWAYS_MANUAL_TYPES.includes(task.type)) {
+    return { isCorrect: null };
+  }
+
   switch (task.type) {
     case 'choice_single': {
       const idx = Number(answer);
@@ -20,9 +30,6 @@ function gradeTask(task, answer) {
       return { isCorrect };
     }
     case 'open_text': {
-      if (task.needsManualReview) {
-        return { isCorrect: null }; // ждёт проверки родителем
-      }
       const given = normalizeText(answer);
       const accepted = (task.acceptedAnswers || []).map((a) =>
         task.caseSensitive ? String(a).trim() : normalizeText(a)
@@ -57,12 +64,15 @@ function gradeTask(task, answer) {
       });
       return { isCorrect: allCorrect };
     }
+    case 'word_table':
+      // сюда не должны попадать - word_table всегда обрабатывается веткой needsManualReview выше.
+      return { isCorrect: null };
     default:
       return { isCorrect: false, error: 'unknown_task_type' };
   }
 }
 
-const VALID_TYPES = ['choice_single', 'choice_multiple', 'open_text', 'open_number', 'matching', 'cloze'];
+const VALID_TYPES = ['choice_single', 'choice_multiple', 'open_text', 'open_number', 'matching', 'cloze', 'word_table'];
 
 // Базовая валидация структуры присланного assignment JSON перед вставкой в БД.
 function validateAssignment(assignment) {
@@ -88,39 +98,59 @@ function validateAssignment(assignment) {
     if (!t.prompt && !t.promptTemplate) {
       errors.push(`tasks[${i}]: нужно поле "prompt" (или "promptTemplate" для cloze)`);
     }
+    const manual = !!t.needsManualReview || ALWAYS_MANUAL_TYPES.includes(t.type);
+
+    // Структурные поля (варианты/пары/пропуски) нужны всегда - без них нечего рендерить.
+    // А вот сами "правильные ответы" внутри этой структуры обязательны только если
+    // задание НЕ отправлено на ручную проверку.
     if (t.type === 'choice_single') {
       if (!Array.isArray(t.options) || t.options.length < 2)
         errors.push(`tasks[${i}]: нужно минимум 2 "options"`);
-      if (typeof t.correctIndex !== 'number')
-        errors.push(`tasks[${i}]: нужно числовое "correctIndex"`);
+      if (!manual && typeof t.correctIndex !== 'number')
+        errors.push(`tasks[${i}]: нужно числовое "correctIndex" (или needsManualReview:true)`);
     }
     if (t.type === 'choice_multiple') {
       if (!Array.isArray(t.options) || t.options.length < 2)
         errors.push(`tasks[${i}]: нужно минимум 2 "options"`);
-      if (!Array.isArray(t.correctIndices) || t.correctIndices.length === 0)
-        errors.push(`tasks[${i}]: нужен непустой массив "correctIndices"`);
+      if (!manual && (!Array.isArray(t.correctIndices) || t.correctIndices.length === 0))
+        errors.push(`tasks[${i}]: нужен непустой массив "correctIndices" (или needsManualReview:true)`);
     }
-    if (t.type === 'open_text' && !t.needsManualReview) {
+    if (t.type === 'open_text' && !manual) {
       if (!Array.isArray(t.acceptedAnswers) || t.acceptedAnswers.length === 0)
         errors.push(`tasks[${i}]: нужен непустой массив "acceptedAnswers" (или needsManualReview:true)`);
     }
-    if (t.type === 'open_number') {
+    if (t.type === 'open_number' && !manual) {
       if (typeof t.correctValue !== 'number')
-        errors.push(`tasks[${i}]: нужно числовое "correctValue"`);
+        errors.push(`tasks[${i}]: нужно числовое "correctValue" (или needsManualReview:true)`);
     }
     if (t.type === 'matching') {
       if (!Array.isArray(t.left) || !Array.isArray(t.right))
         errors.push(`tasks[${i}]: нужны массивы "left" и "right"`);
-      if (!Array.isArray(t.correctPairs) || t.correctPairs.length === 0)
-        errors.push(`tasks[${i}]: нужен непустой массив "correctPairs"`);
+      if (!manual && (!Array.isArray(t.correctPairs) || t.correctPairs.length === 0))
+        errors.push(`tasks[${i}]: нужен непустой массив "correctPairs" (или needsManualReview:true)`);
     }
     if (t.type === 'cloze') {
       if (!t.promptTemplate) errors.push(`tasks[${i}]: нужно "promptTemplate" с ___ на месте пропусков`);
       if (!Array.isArray(t.blanks) || t.blanks.length === 0)
-        errors.push(`tasks[${i}]: нужен непустой массив "blanks"`);
+        errors.push(`tasks[${i}]: нужен непустой массив "blanks" (описывающий сами пропуски)`);
+      if (!manual && Array.isArray(t.blanks) && t.blanks.some((b) => !Array.isArray(b.acceptedAnswers) || b.acceptedAnswers.length === 0)) {
+        errors.push(`tasks[${i}]: у каждого пропуска нужен непустой "acceptedAnswers" (или needsManualReview:true на всё задание)`);
+      }
+    }
+    if (t.type === 'word_table') {
+      if (!Array.isArray(t.columns) || t.columns.length === 0) {
+        errors.push(`tasks[${i}]: нужен непустой массив "columns" (описание колонок таблицы)`);
+      } else {
+        t.columns.forEach((c, ci) => {
+          if (!c.label) errors.push(`tasks[${i}].columns[${ci}]: нужно поле "label"`);
+          if (c.type === 'select' && (!Array.isArray(c.options) || c.options.length === 0)) {
+            errors.push(`tasks[${i}].columns[${ci}]: для type:"select" нужен непустой "options"`);
+          }
+        });
+      }
     }
     // объяснение обязательно для всех автопроверяемых заданий - показывается при исчерпании попыток
-    if (!t.needsManualReview && (!t.explanation || !String(t.explanation).trim())) {
+    if (!manual && (!t.explanation || !String(t.explanation).trim())) {
       errors.push(`tasks[${i}]: нужно непустое поле "explanation" (кроме заданий с needsManualReview:true)`);
     }
   });

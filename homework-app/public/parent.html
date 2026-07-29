@@ -9,8 +9,12 @@
 <body>
   <div class="topbar">
     <h1>👨‍👩‍👧 Панель родителя</h1>
-    <div style="display:flex; gap:8px; flex-wrap:wrap">
+    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center">
+      <button id="pendingReviewBtn" onclick="switchTab('pending')" style="position:relative">
+        ⏳ Ожидают проверки<span id="pendingBadge" class="notif-badge" style="display:none">0</span>
+      </button>
       <button id="adminLink" style="display:none" onclick="window.location.href='/admin.html'">Администрирование</button>
+      <button onclick="window.location.href='/shop.html'">🛍️ Магазин</button>
       <button onclick="window.location.href='/books.html'">📚 Книги</button>
       <button onclick="window.location.href='/profile.html'">Профиль</button>
       <button onclick="logout()">Выйти</button>
@@ -28,6 +32,7 @@
 
     <div id="viewProgress"></div>
     <div id="viewAssignments" style="display:none"></div>
+    <div id="viewPending" style="display:none"></div>
 
     <div id="viewLibrary" style="display:none">
       <h3>Добавить или обновить задание</h3>
@@ -113,15 +118,64 @@ function switchTab(tab) {
   document.getElementById('viewAssignments').style.display = 'none';
   document.getElementById('viewLibrary').style.display = 'none';
   document.getElementById('viewChildren').style.display = 'none';
+  document.getElementById('viewPending').style.display = 'none';
   if (tab === 'progress') { document.getElementById('tabProgress').classList.add('active'); document.getElementById('viewProgress').style.display = 'block'; loadProgress(); }
   if (tab === 'assignments') { document.getElementById('tabAssignments').classList.add('active'); document.getElementById('viewAssignments').style.display = 'block'; loadAssignments(); }
   if (tab === 'library') { document.getElementById('tabLibrary').classList.add('active'); document.getElementById('viewLibrary').style.display = 'block'; renderImportCheckboxes(); loadLibrary(); }
   if (tab === 'children') { document.getElementById('tabChildren').classList.add('active'); document.getElementById('viewChildren').style.display = 'block'; renderChildrenList(); }
+  if (tab === 'pending') { document.getElementById('viewPending').style.display = 'block'; loadPendingReview(); }
 }
 document.getElementById('tabProgress').onclick = () => switchTab('progress');
 document.getElementById('tabAssignments').onclick = () => switchTab('assignments');
 document.getElementById('tabLibrary').onclick = () => switchTab('library');
 document.getElementById('tabChildren').onclick = () => switchTab('children');
+
+// ---------------- "Ожидают проверки" + значок-уведомление ----------------
+async function refreshPendingBadge() {
+  try {
+    const { items } = await api('/api/parent/pending-review');
+    const badge = document.getElementById('pendingBadge');
+    if (items.length > 0) {
+      badge.textContent = items.length;
+      badge.style.display = 'inline-flex';
+    } else {
+      badge.style.display = 'none';
+    }
+    return items;
+  } catch (e) { return []; }
+}
+
+async function loadPendingReview() {
+  const el = document.getElementById('viewPending');
+  el.innerHTML = loadingHtml();
+  const items = await refreshPendingBadge();
+  if (items.length === 0) {
+    el.innerHTML = '<p class="muted">Всё проверено — ничего не ждёт вашего внимания 🎉</p>';
+    return;
+  }
+  el.innerHTML = `<h3>Ожидают проверки (${items.length})</h3>` + items.map(it => `
+    <div class="assignment-card" style="cursor:default; flex-direction:column; align-items:stretch">
+      <div style="display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap">
+        <div>
+          <span class="subject-badge">${subjectLabel(it.subject)}</span>
+          ${it.awaitingType === 'flagged_by_child' ? '<span class="muted">🚩 отправил(а) на проверку</span>' : '<span class="muted">📝 задание без автопроверки</span>'}
+          <div><strong>${escapeHtml(it.childName)}</strong> · ${escapeHtml(it.assignmentTitle)}</div>
+          <div class="muted">${escapeHtml((it.prompt || '').slice(0, 100))}</div>
+          <div class="muted">Ответ: <code>${escapeHtml(JSON.stringify(it.answer))}</code></div>
+        </div>
+        <div style="display:flex; gap:8px; align-self:flex-start">
+          <button onclick="gradeFromPending(${it.taskId}, ${it.childId}, true)">✅ Верно</button>
+          <button onclick="gradeFromPending(${it.taskId}, ${it.childId}, false)">❌ Неверно</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function gradeFromPending(taskId, childId, isCorrect) {
+  await api(`/api/tasks/${taskId}/grade`, { method: 'POST', body: JSON.stringify({ childId, isCorrect }) });
+  loadPendingReview();
+}
 
 async function init() {
   const me = await api('/api/me');
@@ -131,6 +185,8 @@ async function init() {
   if (myRole === 'admin') document.getElementById('adminLink').style.display = 'inline-block';
   await reloadChildren();
   switchTab('progress');
+  refreshPendingBadge();
+  setInterval(refreshPendingBadge, 30000);
 }
 
 async function reloadChildren() {
@@ -152,37 +208,57 @@ async function reloadChildren() {
 async function loadProgress() {
   if (!currentChildId) { document.getElementById('viewProgress').innerHTML = '<p class="muted">Сначала добавьте ребёнка во вкладке «Мои дети».</p>'; return; }
   document.getElementById('viewProgress').innerHTML = loadingHtml();
-  const { bySubject, recent, attemptsByTask, completedToday } = await api(`/api/progress?childId=${currentChildId}`);
+  const { bySubject, recent, completedToday } = await api(`/api/progress?childId=${currentChildId}`);
   const view = document.getElementById('viewProgress');
   const rows = bySubject.map(s => `
     <tr><td>${subjectLabel(s.subject)}</td><td>${s.doneTasks} / ${s.totalTasks}</td>
     <td>${s.doneTasks ? Math.round(100 * (s.correctTasks || 0) / s.doneTasks) + '%' : '—'}</td></tr>`).join('');
 
-  const recentRows = recent.map(r => `
-    <tr><td>${new Date(r.submitted_at + 'Z').toLocaleString('ru-RU')}</td><td>${subjectLabel(r.subject)}</td>
-    <td>${escapeHtml(r.title)}</td><td>попытка ${r.attempt_number}</td>
-    <td>${r.is_correct === null ? '📝 на проверке' : (r.is_correct ? '✅' : '❌')}</td></tr>`).join('');
-
-  const attemptRows = attemptsByTask.map(a => `
-    <tr><td>${escapeHtml(a.title)}</td><td>задание #${a.task_id}</td><td>${a.attempts} из 3</td>
-    <td>${a.solved ? '✅ решено' : (a.attempts >= 3 ? '❌ попытки исчерпаны' : '⏳ в процессе')}</td></tr>`).join('');
+  const COMPACT_LIMIT = 8;
+  const recentRowsHtml = recent.map((r, i) => `
+    <div class="recent-row ${i >= COMPACT_LIMIT ? 'recent-row-extra' : ''}" style="${i >= COMPACT_LIMIT ? 'display:none' : ''}"
+         onclick="toggleRecentDetail(${i}, ${r.assignment_id}, ${r.task_id})">
+      <span class="recent-result">${r.is_correct === null ? '📝' : (r.is_correct ? '✅' : '❌')}</span>
+      <span class="recent-title">${escapeHtml(r.title)}</span>
+      <span class="muted recent-meta">${subjectLabel(r.subject)} · попытка ${r.attempt_number} · ${new Date(r.submitted_at + 'Z').toLocaleString('ru-RU', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' })}</span>
+      <span class="recent-expand">▾</span>
+    </div>
+    <div class="recent-detail" id="recentDetail-${i}" style="display:none"></div>
+  `).join('');
 
   view.innerHTML = `
     <div class="today-counter">
       <span class="today-counter-num">${completedToday}</span>
       <span class="today-counter-label">заданий выполнено сегодня</span>
     </div>
-    <h3>По предметам</h3>
+    <h3>Последние ответы</h3>
+    <div class="recent-list">
+      ${recentRowsHtml || '<p class="muted">Пока нет данных</p>'}
+    </div>
+    ${recent.length > COMPACT_LIMIT ? `<button id="showMoreRecent" class="wizard-btn" style="margin-top:8px">Показать ещё ${recent.length - COMPACT_LIMIT}</button>` : ''}
+
+    <h3 style="margin-top:24px">По предметам</h3>
     <table class="progress-table"><tr><th>Предмет</th><th>Выполнено</th><th>Точность</th></tr>
       ${rows || '<tr><td colspan=3 class="muted">Пока нет данных</td></tr>'}</table>
-    <h3 style="margin-top:24px">Попытки по заданиям</h3>
-    <table class="progress-table"><tr><th>Задание</th><th>№</th><th>Попытки</th><th>Статус</th></tr>
-      ${attemptRows || '<tr><td colspan=4 class="muted">Пока нет данных</td></tr>'}</table>
-    <h3 style="margin-top:24px">Последние ответы</h3>
-    <table class="progress-table"><tr><th>Когда</th><th>Предмет</th><th>Задание</th><th>Попытка</th><th>Результат</th></tr>
-      ${recentRows || '<tr><td colspan=5 class="muted">Пока нет данных</td></tr>'}</table>
-    <p class="muted" style="margin-top:16px">Чтобы посмотреть сами вопросы и ответы ребёнка (и помочь / проверить руками) — откройте вкладку «Задания ребёнка».</p>
   `;
+
+  document.getElementById('showMoreRecent')?.addEventListener('click', (e) => {
+    document.querySelectorAll('.recent-row-extra').forEach(el => el.style.display = 'flex');
+    e.target.remove();
+  });
+}
+
+async function toggleRecentDetail(i, assignmentId, taskId) {
+  const el = document.getElementById(`recentDetail-${i}`);
+  if (el.style.display === 'block') { el.style.display = 'none'; return; }
+  el.style.display = 'block';
+  if (el.dataset.loaded) return;
+  el.innerHTML = loadingHtml();
+  const { tasks } = await api(`/api/assignments/${assignmentId}?childId=${currentChildId}`);
+  const idx = tasks.findIndex(t => t.id === taskId);
+  const t = tasks[idx];
+  el.innerHTML = t ? renderTaskReview(assignmentId, t, idx) : '<p class="muted">Не удалось загрузить.</p>';
+  el.dataset.loaded = '1';
 }
 
 // ---------------- ASSIGNMENTS (per-child, с ревью ответов) ----------------
@@ -243,13 +319,18 @@ function renderTaskReview(assignmentId, t, idx) {
 }
 
 function describeCorrect(t) {
+  const manual = '(ручная проверка)';
   switch (t.type) {
-    case 'choice_single': return t.options[t.correctIndex];
-    case 'choice_multiple': return t.correctIndices.map(i => t.options[i]).join(', ');
-    case 'open_text': return (t.acceptedAnswers || []).join(' / ') || '(ручная проверка)';
-    case 'open_number': return String(t.correctValue);
-    case 'matching': return t.correctPairs.map(([l,r]) => `${t.left[l]} → ${t.right[r]}`).join('; ');
-    case 'cloze': return t.blanks.map(b => b.acceptedAnswers[0]).join(', ');
+    case 'choice_single': return typeof t.correctIndex === 'number' ? t.options[t.correctIndex] : manual;
+    case 'choice_multiple': return Array.isArray(t.correctIndices) && t.correctIndices.length ? t.correctIndices.map(i => t.options[i]).join(', ') : manual;
+    case 'open_text': return (t.acceptedAnswers || []).join(' / ') || manual;
+    case 'open_number': return typeof t.correctValue === 'number' ? String(t.correctValue) : manual;
+    case 'matching': return Array.isArray(t.correctPairs) && t.correctPairs.length ? t.correctPairs.map(([l,r]) => `${t.left[l]} → ${t.right[r]}`).join('; ') : manual;
+    case 'cloze': {
+      const parts = (t.blanks || []).map(b => (b.acceptedAnswers && b.acceptedAnswers[0]) || null);
+      return parts.every(p => p === null) ? manual : parts.map(p => p ?? '?').join(', ');
+    }
+    case 'word_table': return manual;
     default: return '';
   }
 }

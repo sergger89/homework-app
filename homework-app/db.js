@@ -77,9 +77,45 @@ CREATE TABLE IF NOT EXISTS submissions (
   answer TEXT NOT NULL,
   is_correct INTEGER, -- 0/1, или NULL если ждёт ручной проверки родителем
   manually_graded INTEGER NOT NULL DEFAULT 0,
+  flagged_for_review INTEGER NOT NULL DEFAULT 0, -- ребёнок сам попросил родителя перепроверить
   submitted_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_submissions_task_child ON submissions(task_id, child_id);
+
+-- Монеты: журнал начислений/списаний (баланс = SUM(amount)), а не отдельное поле у users -
+-- так проще не потерять историю и не словить рассинхрон при повторных операциях.
+CREATE TABLE IF NOT EXISTS coin_transactions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  child_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  amount INTEGER NOT NULL, -- положительное - начисление, отрицательное - списание (покупка)
+  reason TEXT NOT NULL, -- 'task_correct' | 'purchase' | 'admin_adjust'
+  related_type TEXT, -- 'task' | 'shop_purchase'
+  related_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- Магазин наград: видимость как у книг - от админа глобально, от родителя только его детям
+CREATE TABLE IF NOT EXISTS shop_items (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  description TEXT,
+  cost INTEGER NOT NULL,
+  icon TEXT, -- эмодзи или путь к загруженной картинке
+  active INTEGER NOT NULL DEFAULT 1,
+  created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS shop_purchases (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  item_id INTEGER REFERENCES shop_items(id) ON DELETE SET NULL,
+  child_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  item_name_snapshot TEXT NOT NULL, -- на случай если товар потом удалят/переименуют
+  cost_at_purchase INTEGER NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','fulfilled')),
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  fulfilled_at TEXT
+);
 
 -- Черновик (рисование) ребёнка по конкретному заданию - сохраняется как список "мазков"
 CREATE TABLE IF NOT EXISTS drafts (
@@ -171,6 +207,10 @@ try {
   const uCols = db.prepare("PRAGMA table_info(users)").all();
   if (uCols.length && !uCols.some((c) => c.name === 'avatar_path')) {
     db.exec(`ALTER TABLE users ADD COLUMN avatar_path TEXT;`);
+  }
+  const sCols = db.prepare("PRAGMA table_info(submissions)").all();
+  if (sCols.length && !sCols.some((c) => c.name === 'flagged_for_review')) {
+    db.exec(`ALTER TABLE submissions ADD COLUMN flagged_for_review INTEGER NOT NULL DEFAULT 0;`);
   }
 } catch (e) {
   console.error('Ошибка миграции столбцов (можно игнорировать на первом запуске):', e.message);

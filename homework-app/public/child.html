@@ -10,6 +10,8 @@
   <div class="topbar">
     <h1 id="greeting">📚 Мои задания</h1>
     <div style="display:flex; gap:8px; align-items:center">
+      <span id="coinBadge" class="coin-badge">🪙 0</span>
+      <button onclick="window.location.href='/shop.html'">🛍️ Магазин</button>
       <button onclick="window.location.href='/books.html'">📚 Книги</button>
       <button onclick="window.location.href='/profile.html'">Профиль</button>
       <button onclick="logout()">Выйти</button>
@@ -30,6 +32,10 @@ async function load() {
     avatarHtml(me.user.name, me.user.avatarPath, 32) + ` <span style="margin-left:8px">Привет, ${escapeHtml(me.user.name)}!</span>`;
   document.getElementById('greeting').style.display = 'flex';
   document.getElementById('greeting').style.alignItems = 'center';
+
+  api('/api/me/coins').then(({ balance }) => {
+    document.getElementById('coinBadge').textContent = `🪙 ${balance}`;
+  });
 
   const { assignments } = await api('/api/assignments');
   const list = document.getElementById('list');
