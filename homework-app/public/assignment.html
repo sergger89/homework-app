@@ -138,10 +138,18 @@ function openTaskListOverlay() {
   overlay.querySelector('.task-list-row.current')?.scrollIntoView({ block: 'center' });
 }
 
+const NAV_PHRASES = ['Погнали дальше!', 'Вперёд, ты справишься!', 'Ого, ты быстро!', 'Продолжаем!'];
 function goTo(i) {
+  const wasLast = currentIndex < i && i === tasks.length - 1;
   currentIndex = i;
   renderDots();
   renderTask();
+  const allDone = tasks.every(t => t.locked);
+  if (allDone) {
+    showMascotToast('Ты прошёл(-ла) всё задание целиком! 🎉', 'fun', true);
+  } else if (wasLast) {
+    showMascotToast(NAV_PHRASES[Math.floor(Math.random() * NAV_PHRASES.length)], 'admiration');
+  }
 }
 
 document.getElementById('prevBtn').onclick = () => { if (currentIndex > 0) goTo(currentIndex - 1); };
@@ -329,10 +337,36 @@ function buildTaskCard(t, idx) {
       ? `Попытки исчерпаны (${attempts.length})`
       : awaitingManual
         ? 'Ответ отправлен, ждёт проверки родителем'
-        : attempts.length >= 3
-          ? `Попытка ${attempts.length} — это была последняя перед бонусной! Есть ещё 1 попытка.`
-          : `Попытка ${attempts.length} из 3`;
+        : t.attemptsLeft <= 1
+          ? `Попытка ${attempts.length} — это была последняя перед бонусной! Есть ещё ${t.attemptsLeft} попытка.`
+          : `Попытка ${attempts.length}, осталось ещё ${t.attemptsLeft}`;
     card.appendChild(info);
+  }
+
+  // докупить +3 попытки за 1 монету - доступно, пока задание не заблокировано.
+  // важно: как только текущая попытка окажется 4-й неверной - раскроется ответ и купить будет нельзя.
+  if (t.canBuyAttempts) {
+    const buyWrap = document.createElement('div');
+    buyWrap.className = 'buy-attempts-wrap';
+    buyWrap.innerHTML = `
+      <button type="button" class="buy-attempts-btn">💰 Купить ещё 3 попытки за 1 монету</button>
+      <div class="buy-attempts-warning">Если ответишь неверно и попытки закончатся — увидишь правильный ответ, и докупить будет уже нельзя.</div>
+    `;
+    const buyBtn = buyWrap.querySelector('.buy-attempts-btn');
+    buyBtn.onclick = async () => {
+      buyBtn.disabled = true;
+      try {
+        await api(`/api/tasks/${t.id}/buy-attempts`, { method: 'POST' });
+        refreshCoinBadge();
+        load(true);
+      } catch (e) {
+        if (e.data?.error === 'insufficient_funds') {
+          buyWrap.querySelector('.buy-attempts-warning').textContent = 'Не хватает монет для покупки попыток.';
+        }
+        buyBtn.disabled = false;
+      }
+    };
+    card.appendChild(buyWrap);
   }
 
   // кнопка "отправить на ручную проверку" - если ребёнок не согласен с автооценкой.
@@ -375,7 +409,10 @@ function buildTaskCard(t, idx) {
   scratchBtn.type = 'button';
   scratchBtn.className = 'scratch-btn-open';
   scratchBtn.textContent = '✏️ Черновик';
-  scratchBtn.onclick = () => openScratchpad(t.id, t.prompt || t.promptTemplate || '');
+  scratchBtn.onclick = () => {
+    showMascotToast('Черновик — твоё личное место, пиши смело!', 'wink');
+    openScratchpad(t.id, t.prompt || t.promptTemplate || '');
+  };
   card.appendChild(scratchBtn);
 
   if (!disabled) {
@@ -425,33 +462,33 @@ function showResult(card, res) {
     badge.className = 'result-badge';
     badge.style.color = 'var(--muted)';
     badge.textContent = '📝 Ответ сохранён, ждёт проверки родителем';
-    showMascotToast('Жду, когда родитель проверит! Подожди немного 🙂', 'boredom');
+    showMascotToast('Жду, когда родитель проверит! Подожди немного 🙂', 'boredom', true);
   } else if (res.bonusAttemptGranted) {
     badge.className = 'result-badge wrong';
     badge.textContent = '❌ Неверно. Вот подсказка — и ещё один, последний шанс!';
-    showMascotToast('Вот тебе подсказка — и ещё один шанс!', 'wink');
+    showMascotToast('Вот тебе подсказка — и ещё один шанс!', 'wink', true);
   } else {
     badge.className = 'result-badge ' + (res.isCorrect ? 'correct' : 'wrong');
     badge.textContent = res.isCorrect ? '✅ Верно!' : (res.locked ? '❌ Неверно. Попытки закончились.' : '❌ Неверно, попробуй ещё раз');
     if (res.isCorrect) {
       const phrases = ['Молодец! Точно в цель!', 'Ура, верно!', 'Отлично справился(-лась)!'];
-      showMascotToast(phrases[Math.floor(Math.random() * phrases.length)], 'joy');
+      showMascotToast(phrases[Math.floor(Math.random() * phrases.length)], 'joy', true);
     } else if (res.locked) {
-      showMascotToast('Ничего страшного, в следующий раз получится!', 'sadness');
+      showMascotToast('Ничего страшного, в следующий раз получится!', 'sadness', true);
     } else {
-      showMascotToast('Ой! Попробуй ещё раз', 'surprise');
+      showMascotToast('Ой! Попробуй ещё раз', 'surprise', true);
     }
   }
   card.appendChild(badge);
   // само объяснение теперь показывает постоянный блок в buildTaskCard (переживает перезагрузку) -
   // здесь его не дублируем.
-  if (res.coinsEarned > 0) showCoinToast(res.coinsEarned, res.coinBalance);
+  if (res.coinsEarned > 0) showCoinToast(res.coinsEarned, res.coinBalance, res.silverEarned);
 }
 
-function showCoinToast(amount, balance) {
+function showCoinToast(amount, balance, silverAmount) {
   const toast = document.createElement('div');
   toast.className = 'coin-toast';
-  toast.textContent = `🪙 +${amount}`;
+  toast.textContent = silverAmount > 0 ? `🪙 +${amount}  🥈 +${silverAmount}` : `🪙 +${amount}`;
   document.body.appendChild(toast);
   setTimeout(() => toast.classList.add('show'), 10);
   setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 1800);

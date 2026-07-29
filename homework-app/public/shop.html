@@ -11,33 +11,50 @@
     <h1>🛍️ Магазин наград</h1>
     <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap">
       <span id="coinBadge" class="coin-badge" style="display:none">🪙 0</span>
+      <span id="silverBadge" class="silver-badge" style="display:none">🥈 0</span>
       <button id="backBtn">← Назад</button>
     </div>
   </div>
   <div class="container">
     <select id="childSelect" class="child-select" style="display:none"></select>
 
-    <!-- ---------- маскот (только у ребёнка) ---------- -->
+    <!-- ---------- маскот + голод (только у ребёнка) ---------- -->
     <div id="mascotWrap" class="mascot-wrap" style="display:none"></div>
+    <div id="hungerBarWrap" class="hunger-bar-wrap" style="display:none">
+      <span class="hunger-label">🍽️ Сытость маскота</span>
+      <div class="progress-bar hunger-bar"><div id="hungerBarFill" style="width:100%"></div></div>
+      <span id="hungerPercentText" class="muted">100%</span>
+    </div>
 
     <div class="tabs" id="childTabs" style="display:none">
       <button id="tabShop" class="active">🛍️ Витрина</button>
+      <button id="tabFeed">🍎 Покормить</button>
       <button id="tabHistory">📦 Мои покупки</button>
     </div>
 
     <div id="shopGrid" class="assignment-list"></div>
+    <div id="feedGrid" class="assignment-list" style="display:none"></div>
     <div id="historyList" class="assignment-list" style="display:none"></div>
 
     <!-- ---------- управление (родитель/админ) ---------- -->
     <div id="manageBox" class="task-card" style="display:none">
       <h3>Добавить товар</h3>
       <form id="addItemForm" class="field-row" style="max-width:420px">
+        <label class="muted">Тип
+          <select id="itemCurrency">
+            <option value="gold">Награда (золотые монеты, нужна выдача родителем)</option>
+            <option value="silver">Лакомство для маскота (серебряные монеты, выдаётся сразу)</option>
+          </select>
+        </label>
         <label class="muted">Иконка (эмодзи)
           <input type="text" id="itemIcon" placeholder="🎮" maxlength="4" value="🎁" />
         </label>
         <label class="muted">Название<input type="text" id="itemName" required /></label>
         <label class="muted">Описание (необязательно)<input type="text" id="itemDescription" /></label>
         <label class="muted">Цена (монет)<input type="number" id="itemCost" min="1" required /></label>
+        <label class="muted" id="restoreAmountWrap" style="display:none">Восстанавливает сытости, %
+          <input type="number" id="itemRestoreAmount" min="1" max="100" value="20" />
+        </label>
         <button type="submit" class="submit-btn">Добавить в магазин</button>
       </form>
       <p id="addItemResult" class="muted"></p>
@@ -71,14 +88,21 @@ async function init() {
     const mascotWrap = document.getElementById('mascotWrap');
     mascotWrap.style.display = 'flex';
     mascot = createMascotWidget(mascotWrap);
+    document.getElementById('hungerBarWrap').style.display = 'flex';
     document.getElementById('childTabs').style.display = 'flex';
     document.getElementById('coinBadge').style.display = 'inline-block';
+    document.getElementById('silverBadge').style.display = 'inline-block';
     document.getElementById('tabShop').onclick = () => switchShopTab('shop');
+    document.getElementById('tabFeed').onclick = () => switchShopTab('feed');
     document.getElementById('tabHistory').onclick = () => switchShopTab('history');
+    await loadHunger();
     mascotGreet();
   } else {
     document.getElementById('manageBox').style.display = 'block';
     document.getElementById('fulfillBox').style.display = 'block';
+    document.getElementById('itemCurrency').onchange = (e) => {
+      document.getElementById('restoreAmountWrap').style.display = e.target.value === 'silver' ? 'block' : 'none';
+    };
     const { children: c } = await api('/api/children');
     children = c;
     const sel = document.getElementById('childSelect');
@@ -96,10 +120,22 @@ async function init() {
 function switchShopTab(tab) {
   shopTab = tab;
   document.getElementById('tabShop').classList.toggle('active', tab === 'shop');
+  document.getElementById('tabFeed')?.classList.toggle('active', tab === 'feed');
   document.getElementById('tabHistory').classList.toggle('active', tab === 'history');
   document.getElementById('shopGrid').style.display = tab === 'shop' ? 'flex' : 'none';
+  document.getElementById('feedGrid').style.display = tab === 'feed' ? 'flex' : 'none';
   document.getElementById('historyList').style.display = tab === 'history' ? 'flex' : 'none';
   if (tab === 'history') loadHistory();
+  if (tab === 'feed') loadFeedGrid();
+}
+
+// ---------------- голод маскота ----------------
+async function loadHunger() {
+  const { hunger } = await api('/api/me/hunger');
+  const pct = Math.round(hunger);
+  document.getElementById('hungerBarFill').style.width = `${pct}%`;
+  document.getElementById('hungerPercentText').textContent = `${pct}%`;
+  return pct;
 }
 
 // ---------------- маскот ----------------
@@ -107,32 +143,36 @@ async function mascotGreet() {
   const me = await api('/api/me');
   const { balance } = await api('/api/me/coins');
   document.getElementById('coinBadge').textContent = `🪙 ${balance}`;
-  if (balance === 0) {
+  const hungerPct = await loadHunger();
+  if (hungerPct < 30) {
+    mascot.say(`Ой, я проголодался! Загляни во вкладку «Покормить» 🍎`, hungerMood(hungerPct));
+  } else if (balance === 0) {
     mascot.say(`Привет, ${me.user.name}! Выполняй задания, чтобы заработать монетки 🪙`, 'disappointment');
   } else {
     mascot.say(`Привет, ${me.user.name}! У тебя ${balance} монет — смотри, что можно взять!`, 'joy');
   }
 }
 
-// ---------------- витрина ----------------
+// ---------------- витрина (золотые награды) ----------------
 async function loadItems() {
   document.getElementById('shopGrid').innerHTML = loadingHtml();
   const url = currentChildId ? `/api/shop/items?childId=${currentChildId}` : '/api/shop/items';
   const { items } = await api(url);
   cachedItems = items;
+  const goldItems = myRole === 'child' ? items.filter(i => i.currency !== 'silver') : items;
   let balance = 0;
   if (currentChildId) {
     const b = await api(`/api/me/coins${myRole !== 'child' ? '?childId=' + currentChildId : ''}`);
     balance = b.balance;
     if (myRole === 'child') document.getElementById('coinBadge').textContent = `🪙 ${balance}`;
   }
-  renderShopGrid(items, balance);
+  renderShopGrid(goldItems, balance);
 }
 
 function renderShopGrid(items, balance) {
   const el = document.getElementById('shopGrid');
   if (items.length === 0) {
-    el.innerHTML = `<p class="muted">${myRole === 'child' ? 'Пока магазин пуст — спроси родителя, что туда добавить.' : 'Пока нет ни одного товара — добавьте первый ниже.'}</p>`;
+    el.innerHTML = `<p class="muted">${myRole === 'child' ? 'Пока магазин пуст — спроси родителя, что туда добавить.' : 'Пока нет ни одной награды — добавьте первую ниже (тип «Награда»).'}</p>`;
     return;
   }
   el.innerHTML = items.map(item => `
@@ -141,7 +181,7 @@ function renderShopGrid(items, balance) {
       <div style="flex:1">
         <strong>${escapeHtml(item.name)}</strong>
         ${item.description ? `<div class="muted">${escapeHtml(item.description)}</div>` : ''}
-        <div class="shop-item-cost">🪙 ${item.cost}</div>
+        <div class="shop-item-cost">${item.currency === 'silver' ? '🥈' : '🪙'} ${item.cost}${item.currency === 'silver' ? ` · +${item.restoreAmount}% сытости` : ''}</div>
         ${!item.active ? '<div class="muted">(скрыт из витрины)</div>' : ''}
       </div>
       ${myRole === 'child'
@@ -171,6 +211,53 @@ async function buyItem(itemId, cost) {
   }
 }
 
+// ---------------- покормить маскота (серебряные лакомства) ----------------
+async function loadFeedGrid() {
+  document.getElementById('feedGrid').innerHTML = loadingHtml();
+  const { items } = await api('/api/shop/items');
+  const treats = items.filter(i => i.currency === 'silver' && i.active);
+  const { silverBalance } = await api('/api/me/coins');
+  document.getElementById('silverBadge').textContent = `🥈 ${silverBalance}`;
+  renderFeedGrid(treats, silverBalance);
+}
+
+function renderFeedGrid(items, balance) {
+  const el = document.getElementById('feedGrid');
+  if (items.length === 0) {
+    el.innerHTML = '<p class="muted">Пока нет лакомств.</p>';
+    return;
+  }
+  el.innerHTML = items.map(item => `
+    <div class="shop-item-card">
+      <div class="shop-item-icon">${item.icon || '🍬'}</div>
+      <div style="flex:1">
+        <strong>${escapeHtml(item.name)}</strong>
+        ${item.description ? `<div class="muted">${escapeHtml(item.description)}</div>` : ''}
+        <div class="shop-item-cost">🥈 ${item.cost} · восстанавливает ${item.restoreAmount}% сытости</div>
+      </div>
+      <button class="submit-btn" onclick="feedMascotItem(${item.id})" ${balance < item.cost ? 'disabled' : ''}>Покормить</button>
+    </div>
+  `).join('');
+}
+
+async function feedMascotItem(itemId) {
+  try {
+    const res = await api('/api/shop/purchase', { method: 'POST', body: JSON.stringify({ itemId }) });
+    document.getElementById('silverBadge').textContent = `🥈 ${res.silverBalance}`;
+    const pct = Math.round(res.hunger);
+    document.getElementById('hungerBarFill').style.width = `${pct}%`;
+    document.getElementById('hungerPercentText').textContent = `${pct}%`;
+    mascot.say(pct >= 95 ? 'Ммм, объелся! Спасибо! 😋' : 'Вкуснятина, спасибо!', 'kiss');
+    loadFeedGrid();
+  } catch (e) {
+    if (e.data?.error === 'insufficient_funds') {
+      mascot.say('Маловато серебряных монеток на это лакомство — заработай ещё!', 'disappointment');
+    } else {
+      mascot.say('Что-то пошло не так...', 'sadness');
+    }
+  }
+}
+
 async function toggleItemActive(itemId, active) {
   await api(`/api/shop/items/${itemId}`, { method: 'PATCH', body: JSON.stringify({ active: !!active }) });
   loadItems();
@@ -189,12 +276,15 @@ document.getElementById('addItemForm')?.addEventListener('submit', async (e) => 
   const description = document.getElementById('itemDescription').value.trim();
   const cost = Number(document.getElementById('itemCost').value);
   const icon = document.getElementById('itemIcon').value.trim() || '🎁';
+  const currency = document.getElementById('itemCurrency').value;
+  const restoreAmount = Number(document.getElementById('itemRestoreAmount').value);
   try {
-    await api('/api/shop/items', { method: 'POST', body: JSON.stringify({ name, description, cost, icon }) });
+    await api('/api/shop/items', { method: 'POST', body: JSON.stringify({ name, description, cost, icon, currency, restoreAmount }) });
     resultEl.textContent = 'Товар добавлен!';
     resultEl.style.color = 'var(--correct)';
     document.getElementById('addItemForm').reset();
     document.getElementById('itemIcon').value = '🎁';
+    document.getElementById('restoreAmountWrap').style.display = 'none';
     loadItems();
   } catch (e) {
     resultEl.textContent = 'Не удалось добавить (укажите название и положительную цену).';

@@ -110,6 +110,15 @@ function mascotSrc(emotion) {
   return `/mascot/${MASCOT_EMOTIONS.includes(emotion) ? emotion : 'joy'}.png`;
 }
 
+// переводит % сытости маскота в подходящую эмоцию (используется везде, где показывается
+// "фоновое" настроение маскота - главная ребёнка, книги, профиль)
+function hungerMood(pct) {
+  if (pct >= 70) return 'joy';
+  if (pct >= 40) return 'boredom';
+  if (pct >= 15) return 'disappointment';
+  return 'sadness';
+}
+
 // подгружаем все картинки маскота в фоне разок, чтобы дальше эмоции переключались без задержки
 function preloadMascotImages() {
   if (window.__mascotPreloaded) return;
@@ -119,7 +128,13 @@ function preloadMascotImages() {
 
 // небольшая ненавязчивая всплывающая реакция маскота (для страниц, где не нужен постоянный виджет,
 // например задание) - появляется в углу и сама пропадает, как уведомление о монетах.
-function showMascotToast(message, emotion) {
+// force=true игнорирует cooldown (для по-настоящему важных событий вроде верного ответа).
+let __lastMascotToastAt = 0;
+const MASCOT_TOAST_COOLDOWN_MS = 4000;
+function showMascotToast(message, emotion, force) {
+  const now = Date.now();
+  if (!force && now - __lastMascotToastAt < MASCOT_TOAST_COOLDOWN_MS) return;
+  __lastMascotToastAt = now;
   preloadMascotImages();
   const toast = document.createElement('div');
   toast.className = 'mascot-toast';
@@ -150,6 +165,28 @@ function createMascotWidget(containerEl) {
       bubbleEl.classList.add('show');
     },
   };
+}
+
+// сопоставление уровня голода маскота (0-100) с базовым "настроением по умолчанию" -
+// используется как фоновое/дежурное состояние маскота на любой странице, поверх которого
+// накладываются кратковременные реакции на конкретные события.
+function mascotMoodForHunger(hunger) {
+  if (hunger >= 70) return 'joy';
+  if (hunger >= 40) return 'admiration';
+  if (hunger >= 15) return 'boredom';
+  return 'sadness';
+}
+
+// подставляет во все переданные <img> настроение маскота, соответствующее текущему голоду
+// ребёнка. Безопасно вызывать и для родителя/админа (без childId) - тогда просто ничего не делает.
+async function applyHungerMood(imgEls, childId) {
+  try {
+    const qs = childId ? `?childId=${childId}` : '';
+    const { hunger } = await api(`/api/me/hunger${qs}`);
+    const mood = mascotMoodForHunger(hunger);
+    (imgEls.length !== undefined ? [...imgEls] : [imgEls]).forEach((img) => { if (img) img.src = mascotSrc(mood); });
+    return hunger;
+  } catch (e) { return null; }
 }
 
 applyFavicon();
@@ -204,6 +241,33 @@ function showConfirmDialog(message, opts) {
 
 // Диалог задания нового пароля: маскированное поле + подтверждение + кнопка "показать".
 // Возвращает Promise<string|null> (null - если отменили).
+// общий диалог с одним текстовым полем (например, смена отображаемого имени)
+function showTextInputDialog(title, currentValue, placeholder) {
+  return new Promise((resolve) => {
+    const overlay = _buildDialogOverlay(`
+      <h3>${escapeHtml(title || 'Введите значение')}</h3>
+      <div class="field-row">
+        <input type="text" id="dlgTextInput" value="${escapeHtml(currentValue || '')}" placeholder="${escapeHtml(placeholder || '')}" />
+        <p class="dialog-error" id="dlgTextError"></p>
+      </div>
+      <div class="dialog-actions">
+        <button class="wizard-btn" id="dlgCancel">Отмена</button>
+        <button class="wizard-btn primary" id="dlgConfirm">Сохранить</button>
+      </div>
+    `);
+    const finish = (result) => { document.body.removeChild(overlay); resolve(result); };
+    overlay.querySelector('#dlgCancel').onclick = () => finish(null);
+    overlay.querySelector('#dlgConfirm').onclick = () => {
+      const val = overlay.querySelector('#dlgTextInput').value.trim();
+      if (!val) { overlay.querySelector('#dlgTextError').textContent = 'Поле не может быть пустым.'; return; }
+      finish(val);
+    };
+    overlay.addEventListener('keydown', (e) => { if (e.key === 'Escape') finish(null); if (e.key === 'Enter') overlay.querySelector('#dlgConfirm').click(); });
+    overlay.querySelector('#dlgTextInput').focus();
+    overlay.querySelector('#dlgTextInput').select();
+  });
+}
+
 function showPasswordDialog(title) {
   return new Promise((resolve) => {
     const overlay = _buildDialogOverlay(`

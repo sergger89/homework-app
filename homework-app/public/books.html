@@ -15,6 +15,10 @@
     </div>
   </div>
   <div class="container">
+    <div id="mascotMiniWrap" style="display:none; align-items:center; gap:8px; margin-bottom:14px">
+      <img id="mascotMiniImg" class="mascot-mini" alt="Маскот" />
+      <span class="muted" id="mascotMiniText"></span>
+    </div>
     <select id="childSelect" class="child-select" style="display:none"></select>
 
     <div id="uploadBox" style="display:none" class="task-card">
@@ -57,6 +61,13 @@ async function init() {
     document.getElementById('tabAllBooks').onclick = () => switchBookTab('all');
     document.getElementById('tabContinueBooks').onclick = () => switchBookTab('continue');
     document.getElementById('tabFavBooks').onclick = () => switchBookTab('fav');
+
+    document.getElementById('mascotMiniWrap').style.display = 'flex';
+    preloadMascotImages();
+    api('/api/me/hunger').then(({ hunger }) => {
+      document.getElementById('mascotMiniImg').src = mascotSrc(hungerMood(hunger));
+      document.getElementById('mascotMiniText').textContent = hunger < 30 ? 'Маскот немного проголодался 🍎' : 'Приятного чтения!';
+    });
   } else {
     document.getElementById('uploadBox').style.display = 'block';
     const { children: c } = await api('/api/children');
@@ -129,8 +140,12 @@ async function loadBooks() {
 }
 
 async function toggleFavorite(bookId, fav) {
-  if (fav) await api(`/api/books/${bookId}/favorite`, { method: 'POST' });
-  else await api(`/api/books/${bookId}/favorite`, { method: 'DELETE' });
+  if (fav) {
+    await api(`/api/books/${bookId}/favorite`, { method: 'POST' });
+    if (myRole === 'child') showMascotToast('Отличный выбор книги! 💛', 'kiss');
+  } else {
+    await api(`/api/books/${bookId}/favorite`, { method: 'DELETE' });
+  }
   loadBooks();
 }
 

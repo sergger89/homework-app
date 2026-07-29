@@ -2,6 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const express = require('express');
 const session = require('express-session');
+const SqliteSessionStore = require('better-sqlite3-session-store')(session);
 const bcrypt = require('bcryptjs');
 const multer = require('multer');
 const db = require('./db');
@@ -11,6 +12,10 @@ const { gradeTask, validateAssignment } = require('./grading');
 const REGULAR_ATTEMPTS = 3; // после стольких неверных попыток показываем объяснение и даём бонусную попытку
 const TOTAL_ATTEMPTS = 4;   // после неё, если всё ещё неверно, показываем правильный ответ и блокируем
 const COINS_PER_TASK = 10;  // фиксированная награда монетками за верно решённое задание
+const SILVER_PER_TASK = 10; // столько же серебряных монет за то же задание (на еду для маскота)
+const HUNGER_DECAY_PER_HOUR = 100 / 120; // полностью "проголодается" примерно за 5 суток без кормления
+const ATTEMPT_PACK_SIZE = 3; // сколько доп. попыток покупается за раз
+const ATTEMPT_PACK_COST = 1; // цена в золотых монетах за пачку доп. попыток
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -18,6 +23,10 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json({ limit: '15mb' }));
 app.use(
   session({
+    store: new SqliteSessionStore({
+      client: db, // та же база SQLite, что и всё приложение - отдельный файл не нужен
+      expired: { clear: true, intervalMs: 1000 * 60 * 60 * 12 }, // чистим протухшие сессии дважды в сутки
+    }),
     secret: process.env.SESSION_SECRET || 'please-change-this-secret',
     resave: false,
     saveUninitialized: false,
@@ -87,9 +96,56 @@ function awardCoinsForTaskIfNeeded(taskId, childId) {
     "INSERT INTO coin_transactions (child_id, amount, reason, related_type, related_id) VALUES (?,?,?,?,?)"
   ).run(childId, COINS_PER_TASK, 'task_correct', 'task', taskId);
 }
+
+function getSilverBalance(childId) {
+  const row = db.prepare('SELECT COALESCE(SUM(amount),0) as balance FROM silver_transactions WHERE child_id=?').get(childId);
+  return row.balance;
+}
+
+// серебро начисляется за то же самое событие (верно решённое задание), тем же способом
+function awardSilverForTaskIfNeeded(taskId, childId) {
+  const existing = db
+    .prepare("SELECT 1 FROM silver_transactions WHERE child_id=? AND related_type='task' AND related_id=?")
+    .get(childId, taskId);
+  if (existing) return;
+  db.prepare(
+    "INSERT INTO silver_transactions (child_id, amount, reason, related_type, related_id) VALUES (?,?,?,?,?)"
+  ).run(childId, SILVER_PER_TASK, 'task_correct', 'task', taskId);
+}
+
+// начисляем обе валюты сразу - используется во всех местах, где раньше начислялись только монеты
+function awardTaskCurrencies(taskId, childId) {
+  awardCoinsForTaskIfNeeded(taskId, childId);
+  awardSilverForTaskIfNeeded(taskId, childId);
+}
+
+// голод маскота "протухает" со временем - считаем на лету от последнего сохранённого значения,
+// а не фоновой задачей
+function getCurrentHunger(childId) {
+  const row = db.prepare('SELECT hunger, updated_at FROM mascot_hunger WHERE child_id=?').get(childId);
+  if (!row) return 100;
+  const hoursSince = (Date.now() - new Date(row.updated_at + 'Z').getTime()) / 3600000;
+  return Math.max(0, Math.min(100, row.hunger - HUNGER_DECAY_PER_HOUR * Math.max(0, hoursSince)));
+}
+
+function feedMascot(childId, restoreAmount) {
+  const current = getCurrentHunger(childId);
+  const next = Math.max(0, Math.min(100, current + restoreAmount));
+  db.prepare(
+    `INSERT INTO mascot_hunger (child_id, hunger, updated_at) VALUES (?,?,datetime('now'))
+     ON CONFLICT(child_id) DO UPDATE SET hunger=excluded.hunger, updated_at=excluded.updated_at`
+  ).run(childId, next);
+  return next;
+}
+
+function getExtraAttempts(taskId, childId) {
+  const row = db.prepare('SELECT extra_attempts FROM attempt_purchases WHERE task_id=? AND child_id=?').get(taskId, childId);
+  return row ? row.extra_attempts : 0;
+}
 function refreshSessionUser(req) {
   const u = db.prepare('SELECT id, role, display_name, avatar_path FROM users WHERE id=?').get(req.session.user.id);
-  if (u) req.session.user = { id: u.id, role: u.role, name: u.display_name, avatarPath: u.avatar_path };
+  if (!u) return null; // пользователя удалили - вызывающий код должен обнулить сессию
+  req.session.user = { id: u.id, role: u.role, name: u.display_name, avatarPath: u.avatar_path };
   return req.session.user;
 }
 
@@ -116,7 +172,12 @@ app.post('/api/logout', (req, res) => {
 });
 
 app.get('/api/me', (req, res) => {
-  res.json({ user: req.session.user || null });
+  if (!req.session.user) return res.json({ user: null });
+  // подтягиваем свежие данные из БД на каждый запрос - имя/роль/аватар могли поменяться
+  // (например, админ сменил имя пользователю), а сессия иначе бы хранила устаревший кэш
+  const user = refreshSessionUser(req);
+  if (!user) { req.session.destroy(() => {}); return res.json({ user: null }); }
+  res.json({ user });
 });
 
 app.post('/api/me/password', requireAuth, (req, res) => {
@@ -245,6 +306,15 @@ app.post('/api/admin/users/:id/password', requireRole('admin'), (req, res) => {
   const { newPassword } = req.body || {};
   if (!newPassword || newPassword.length < 4) return res.status(400).json({ error: 'password_too_short' });
   const info = db.prepare('UPDATE users SET password_hash=? WHERE id=?').run(bcrypt.hashSync(newPassword, 10), req.params.id);
+  if (info.changes === 0) return res.status(404).json({ error: 'not_found' });
+  res.json({ ok: true });
+});
+
+// смена отображаемого имени - только админ (по запросу пользователя, не самообслуживание)
+app.post('/api/admin/users/:id/name', requireRole('admin'), (req, res) => {
+  const { displayName } = req.body || {};
+  if (!displayName || !displayName.trim()) return res.status(400).json({ error: 'display_name_required' });
+  const info = db.prepare('UPDATE users SET display_name=? WHERE id=?').run(displayName.trim(), req.params.id);
   if (info.changes === 0) return res.status(404).json({ error: 'not_found' });
   res.json({ ok: true });
 });
@@ -476,10 +546,12 @@ app.get('/api/assignments/:id', requireAuth, (req, res) => {
       submittedAt: s.submitted_at,
     }));
     const last = subs[subs.length - 1] || null;
-    const locked = subs.length >= TOTAL_ATTEMPTS || !!(last && last.isCorrect === true);
-    const attemptsLeft = Math.max(0, TOTAL_ATTEMPTS - subs.length);
+    const effectiveTotal = TOTAL_ATTEMPTS + getExtraAttempts(t.id, childId);
+    const locked = subs.length >= effectiveTotal || !!(last && last.isCorrect === true);
+    const attemptsLeft = Math.max(0, effectiveTotal - subs.length);
     // после 3 неверных попыток показываем объяснение (но не сам ответ) и даём бонусную попытку
     const explanationRevealed = !locked && subs.length >= REGULAR_ATTEMPTS && last && last.isCorrect === false;
+    const canBuyAttempts = !locked && last && last.isCorrect === false;
 
     if (role !== 'child') {
       // родителю/админу — всегда полные данные с эталонными ответами и всей историей попыток
@@ -490,7 +562,7 @@ app.get('/api/assignments/:id', requireAuth, (req, res) => {
       return { id: t.id, type: t.type, ...data, attempts: subs, attemptsLeft, locked };
     }
     // ещё есть попытки: эталонный ответ не показываем, но объяснение — можем (после 3-й неверной)
-    return { id: t.id, type: t.type, ...stripAnswer(t.type, data, { revealExplanation: explanationRevealed }), attempts: subs, attemptsLeft, locked };
+    return { id: t.id, type: t.type, ...stripAnswer(t.type, data, { revealExplanation: explanationRevealed }), attempts: subs, attemptsLeft, locked, canBuyAttempts };
   });
 
   res.json({
@@ -512,7 +584,8 @@ app.post('/api/tasks/:id/submit', requireRole('child'), (req, res) => {
   const existing = getSubmissions(task.id, req.session.user.id);
   const lastCorrect = existing.length > 0 && existing[existing.length - 1].is_correct === 1;
   if (lastCorrect) return res.status(409).json({ error: 'already_correct' });
-  if (existing.length >= TOTAL_ATTEMPTS) return res.status(409).json({ error: 'no_attempts_left' });
+  const effectiveTotalAttempts = TOTAL_ATTEMPTS + getExtraAttempts(task.id, req.session.user.id);
+  if (existing.length >= effectiveTotalAttempts) return res.status(409).json({ error: 'no_attempts_left' });
 
   const data = JSON.parse(task.data);
   const { answer } = req.body || {};
@@ -530,15 +603,17 @@ app.post('/api/tasks/:id/submit', requireRole('child'), (req, res) => {
   ).run(task.id, req.session.user.id, attemptNumber, JSON.stringify(answer), isCorrectValue);
 
   let coinsEarned = 0;
+  let silverEarned = 0;
   if (isCorrect === true) {
-    awardCoinsForTaskIfNeeded(task.id, req.session.user.id);
+    awardTaskCurrencies(task.id, req.session.user.id);
     coinsEarned = COINS_PER_TASK;
+    silverEarned = SILVER_PER_TASK;
   }
 
-  const attemptsLeft = Math.max(0, TOTAL_ATTEMPTS - attemptNumber);
-  const locked = attemptNumber >= TOTAL_ATTEMPTS || isCorrect === true;
-  // после 3-й неверной попытки показываем объяснение и даём бонусную (4-ю) попытку,
-  // но правильный ответ пока не раскрываем
+  const attemptsLeft = Math.max(0, effectiveTotalAttempts - attemptNumber);
+  const locked = attemptNumber >= effectiveTotalAttempts || isCorrect === true;
+  // после 3-й неверной попытки показываем объяснение и даём бонусную (4-ю и далее, если докупили)
+  // попытку, но правильный ответ пока не раскрываем
   const explanationOnly = !locked && attemptNumber >= REGULAR_ATTEMPTS && isCorrect === false;
 
   let correct;
@@ -561,9 +636,48 @@ app.post('/api/tasks/:id/submit', requireRole('child'), (req, res) => {
     attemptNumber,
     attemptsLeft,
     locked,
+    canBuyAttempts: !locked && isCorrect === false,
     coinsEarned,
     coinBalance: getCoinBalance(req.session.user.id),
+    silverEarned,
+    silverBalance: getSilverBalance(req.session.user.id),
   });
+});
+
+// докупить +3 попытки на конкретное задание за 1 золотую монету - можно несколько раз подряд,
+// но только пока задание не заблокировано (правильный ответ ещё не раскрыт)
+app.post('/api/tasks/:id/buy-attempts', requireRole('child'), (req, res) => {
+  const task = db.prepare('SELECT * FROM tasks WHERE id=?').get(req.params.id);
+  if (!task) return res.status(404).json({ error: 'not_found' });
+
+  const existing = getSubmissions(task.id, req.session.user.id);
+  const lastCorrect = existing.length > 0 && existing[existing.length - 1].is_correct === 1;
+  const extraSoFar = getExtraAttempts(task.id, req.session.user.id);
+  const effectiveTotalAttempts = TOTAL_ATTEMPTS + extraSoFar;
+  const locked = lastCorrect || existing.length >= effectiveTotalAttempts;
+  if (locked) return res.status(409).json({ error: 'already_locked' });
+
+  try {
+    db.transaction(() => {
+      const balance = getCoinBalance(req.session.user.id);
+      if (balance < ATTEMPT_PACK_COST) throw new Error('insufficient_funds');
+      db.prepare(
+        "INSERT INTO coin_transactions (child_id, amount, reason, related_type, related_id) VALUES (?,?,?,?,?)"
+      ).run(req.session.user.id, -ATTEMPT_PACK_COST, 'buy_attempts', 'task', task.id);
+      db.prepare(
+        `INSERT INTO attempt_purchases (task_id, child_id, extra_attempts) VALUES (?,?,?)
+         ON CONFLICT(task_id, child_id) DO UPDATE SET extra_attempts = extra_attempts + excluded.extra_attempts`
+      ).run(task.id, req.session.user.id, ATTEMPT_PACK_SIZE);
+    })();
+    res.json({
+      ok: true,
+      coinBalance: getCoinBalance(req.session.user.id),
+      attemptsLeft: Math.max(0, TOTAL_ATTEMPTS + extraSoFar + ATTEMPT_PACK_SIZE - existing.length),
+    });
+  } catch (e) {
+    if (e.message === 'insufficient_funds') return res.status(400).json({ error: 'insufficient_funds' });
+    res.status(500).json({ error: 'purchase_failed' });
+  }
 });
 
 // ребёнок просит родителя перепроверить его последний ответ вручную (даже если тот уже
@@ -590,7 +704,7 @@ app.post('/api/tasks/:id/grade', requireRole(['admin', 'parent']), (req, res) =>
   if (subs.length === 0) return res.status(400).json({ error: 'no_submission_yet' });
   const last = subs[subs.length - 1];
   db.prepare('UPDATE submissions SET is_correct=?, manually_graded=1, flagged_for_review=0 WHERE id=?').run(isCorrect ? 1 : 0, last.id);
-  if (isCorrect) awardCoinsForTaskIfNeeded(task.id, childId);
+  if (isCorrect) awardTaskCurrencies(task.id, childId);
   res.json({ ok: true });
 });
 
@@ -1023,16 +1137,24 @@ app.get('/api/me/coins', requireAuth, (req, res) => {
   if (req.session.user.role !== 'child' && (!childId || !hasChildAccess(req.session.user, childId))) {
     return res.status(403).json({ error: 'no_access_to_child' });
   }
-  res.json({ balance: getCoinBalance(childId) });
+  res.json({ balance: getCoinBalance(childId), silverBalance: getSilverBalance(childId) });
+});
+
+app.get('/api/me/hunger', requireAuth, (req, res) => {
+  const childId = req.session.user.role === 'child' ? req.session.user.id : req.query.childId ? Number(req.query.childId) : null;
+  if (req.session.user.role !== 'child' && (!childId || !hasChildAccess(req.session.user, childId))) {
+    return res.status(403).json({ error: 'no_access_to_child' });
+  }
+  res.json({ hunger: getCurrentHunger(childId) });
 });
 
 function visibleShopFilter(user) {
   if (user.role === 'admin') return { where: '1=1', params: [] };
   if (user.role === 'parent') {
-    return { where: '(si.created_by = ? OR u.role = \'admin\')', params: [user.id] };
+    return { where: '(si.created_by IS NULL OR si.created_by = ? OR u.role = \'admin\')', params: [user.id] };
   }
   return {
-    where: `(u.role = 'admin' OR si.created_by IN (SELECT parent_id FROM parent_child WHERE child_id = ?))`,
+    where: `(si.created_by IS NULL OR u.role = 'admin' OR si.created_by IN (SELECT parent_id FROM parent_child WHERE child_id = ?))`,
     params: [user.id],
   };
 }
@@ -1051,19 +1173,22 @@ app.get('/api/shop/items', requireAuth, (req, res) => {
   res.json({
     items: items.map((i) => ({
       id: i.id, name: i.name, description: i.description, cost: i.cost, icon: i.icon, active: !!i.active,
+      currency: i.currency, restoreAmount: i.restore_amount,
       createdBy: i.creator_name, canManage: req.session.user.role === 'admin' || i.created_by === req.session.user.id,
     })),
   });
 });
 
 app.post('/api/shop/items', requireRole(['admin', 'parent']), (req, res) => {
-  const { name, description, cost, icon } = req.body || {};
+  const { name, description, cost, icon, currency, restoreAmount } = req.body || {};
   if (!name || !Number.isFinite(Number(cost)) || Number(cost) <= 0) {
     return res.status(400).json({ error: 'name_and_positive_cost_required' });
   }
+  const cur = currency === 'silver' ? 'silver' : 'gold';
   const info = db
-    .prepare('INSERT INTO shop_items (name, description, cost, icon, created_by) VALUES (?,?,?,?,?)')
-    .run(name, description || null, Math.round(Number(cost)), icon || '🎁', req.session.user.id);
+    .prepare('INSERT INTO shop_items (name, description, cost, icon, currency, restore_amount, created_by) VALUES (?,?,?,?,?,?,?)')
+    .run(name, description || null, Math.round(Number(cost)), icon || (cur === 'silver' ? '🍬' : '🎁'), cur,
+      cur === 'silver' ? Math.round(Number(restoreAmount) || 10) : null, req.session.user.id);
   res.json({ ok: true, itemId: info.lastInsertRowid });
 });
 
@@ -1100,19 +1225,39 @@ app.post('/api/shop/purchase', requireRole('child'), (req, res) => {
   const item = db.prepare('SELECT * FROM shop_items WHERE id=? AND active=1').get(itemId);
   if (!item) return res.status(404).json({ error: 'item_not_found' });
 
+  if (item.currency === 'silver') {
+    // лакомство для маскота - применяется сразу, без участия родителя
+    try {
+      const result = db.transaction(() => {
+        const balance = getSilverBalance(req.session.user.id);
+        if (balance < item.cost) throw new Error('insufficient_funds');
+        db.prepare(
+          "INSERT INTO silver_transactions (child_id, amount, reason, related_type, related_id) VALUES (?,?,?,?,?)"
+        ).run(req.session.user.id, -item.cost, 'feed_mascot', 'shop_item', item.id);
+        const newHunger = feedMascot(req.session.user.id, item.restore_amount || 10);
+        return newHunger;
+      })();
+      res.json({ ok: true, fed: true, hunger: result, silverBalance: getSilverBalance(req.session.user.id) });
+    } catch (e) {
+      if (e.message === 'insufficient_funds') return res.status(400).json({ error: 'insufficient_funds' });
+      res.status(500).json({ error: 'purchase_failed' });
+    }
+    return;
+  }
+
   try {
     const purchaseId = db.transaction(() => {
       const balance = getCoinBalance(req.session.user.id);
       if (balance < item.cost) throw new Error('insufficient_funds');
       const info = db
-        .prepare('INSERT INTO shop_purchases (item_id, child_id, item_name_snapshot, cost_at_purchase, status) VALUES (?,?,?,?,?)')
-        .run(item.id, req.session.user.id, item.name, item.cost, 'pending');
+        .prepare('INSERT INTO shop_purchases (item_id, child_id, item_name_snapshot, cost_at_purchase, currency, status) VALUES (?,?,?,?,?,?)')
+        .run(item.id, req.session.user.id, item.name, item.cost, 'gold', 'pending');
       db.prepare(
         "INSERT INTO coin_transactions (child_id, amount, reason, related_type, related_id) VALUES (?,?,?,?,?)"
       ).run(req.session.user.id, -item.cost, 'purchase', 'shop_purchase', info.lastInsertRowid);
       return info.lastInsertRowid;
     })();
-    res.json({ ok: true, purchaseId, balance: getCoinBalance(req.session.user.id) });
+    res.json({ ok: true, fed: false, purchaseId, balance: getCoinBalance(req.session.user.id) });
   } catch (e) {
     if (e.message === 'insufficient_funds') return res.status(400).json({ error: 'insufficient_funds' });
     res.status(500).json({ error: 'purchase_failed' });

@@ -88,19 +88,50 @@ CREATE TABLE IF NOT EXISTS coin_transactions (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   child_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   amount INTEGER NOT NULL, -- положительное - начисление, отрицательное - списание (покупка)
-  reason TEXT NOT NULL, -- 'task_correct' | 'purchase' | 'admin_adjust'
+  reason TEXT NOT NULL, -- 'task_correct' | 'purchase' | 'buy_attempts' | 'admin_adjust'
   related_type TEXT, -- 'task' | 'shop_purchase'
   related_id INTEGER,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
--- Магазин наград: видимость как у книг - от админа глобально, от родителя только его детям
+-- Серебряные монеты - отдельная валюта, только на еду для маскота. Та же журнальная схема.
+CREATE TABLE IF NOT EXISTS silver_transactions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  child_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  amount INTEGER NOT NULL,
+  reason TEXT NOT NULL, -- 'task_correct' | 'feed_mascot' | 'admin_adjust'
+  related_type TEXT,
+  related_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- Голод маскота: одна строка на ребёнка, значение "протухает" со временем (считается на лету
+-- при чтении, а не фоновой задачей) и обновляется при кормлении.
+CREATE TABLE IF NOT EXISTS mascot_hunger (
+  child_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  hunger REAL NOT NULL DEFAULT 100,
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- Докупленные дополнительные попытки на конкретное задание (по 3 за раз, можно несколько раз).
+CREATE TABLE IF NOT EXISTS attempt_purchases (
+  task_id INTEGER NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
+  child_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  extra_attempts INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (task_id, child_id)
+);
+
+-- Магазин наград: видимость как у книг - от админа глобально, от родителя только его детям.
+-- currency: 'gold' - обычные награды (нужна выдача родителем), 'silver' - еда для маскота
+-- (списывается и применяется сразу, без участия родителя).
 CREATE TABLE IF NOT EXISTS shop_items (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL,
   description TEXT,
   cost INTEGER NOT NULL,
   icon TEXT, -- эмодзи или путь к загруженной картинке
+  currency TEXT NOT NULL DEFAULT 'gold' CHECK(currency IN ('gold','silver')),
+  restore_amount INTEGER, -- только для currency='silver' - сколько % голода восстанавливает
   active INTEGER NOT NULL DEFAULT 1,
   created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
@@ -112,6 +143,7 @@ CREATE TABLE IF NOT EXISTS shop_purchases (
   child_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   item_name_snapshot TEXT NOT NULL, -- на случай если товар потом удалят/переименуют
   cost_at_purchase INTEGER NOT NULL,
+  currency TEXT NOT NULL DEFAULT 'gold',
   status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','fulfilled')),
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   fulfilled_at TEXT
@@ -212,6 +244,15 @@ try {
   if (sCols.length && !sCols.some((c) => c.name === 'flagged_for_review')) {
     db.exec(`ALTER TABLE submissions ADD COLUMN flagged_for_review INTEGER NOT NULL DEFAULT 0;`);
   }
+  const shopCols = db.prepare("PRAGMA table_info(shop_items)").all();
+  if (shopCols.length && !shopCols.some((c) => c.name === 'currency')) {
+    db.exec(`ALTER TABLE shop_items ADD COLUMN currency TEXT NOT NULL DEFAULT 'gold';`);
+    db.exec(`ALTER TABLE shop_items ADD COLUMN restore_amount INTEGER;`);
+  }
+  const purchaseCols = db.prepare("PRAGMA table_info(shop_purchases)").all();
+  if (purchaseCols.length && !purchaseCols.some((c) => c.name === 'currency')) {
+    db.exec(`ALTER TABLE shop_purchases ADD COLUMN currency TEXT NOT NULL DEFAULT 'gold';`);
+  }
 } catch (e) {
   console.error('Ошибка миграции столбцов (можно игнорировать на первом запуске):', e.message);
 }
@@ -245,7 +286,28 @@ function seedAdmin() {
   }
 }
 
+function seedMascotTreats() {
+  const count = db.prepare("SELECT COUNT(*) c FROM shop_items WHERE currency='silver'").get().c;
+  if (count > 0) return;
+  const treats = [
+    ['🍯', 'Медовые кристаллы', 'Маленькая сладкая закуска', 10, 15],
+    ['🍓', 'Ягодный смузи', 'Освежающий и полезный', 15, 20],
+    ['🍪', 'Звёздное печенье', 'Хрустящее и с блёстками', 20, 25],
+    ['🥨', 'Солнечные крендельки', 'Тёплые, прямо с луча', 25, 30],
+    ['🍦', 'Радужное мороженое', 'Праздник для маскота', 35, 40],
+    ['🎂', 'Праздничный пирог', 'Наедается досыта целиком!', 60, 100],
+  ];
+  const insert = db.prepare(
+    'INSERT INTO shop_items (name, description, cost, icon, currency, restore_amount, created_by) VALUES (?,?,?,?,?,?,NULL)'
+  );
+  for (const [icon, name, description, cost, restore] of treats) {
+    insert.run(name, description, cost, icon, 'silver', restore);
+  }
+  console.log('Добавлены стандартные лакомства для маскота в магазин.');
+}
+
 seedAdmin();
+seedMascotTreats();
 
 module.exports = db;
 module.exports.UPLOADS_DIR = UPLOADS_DIR;

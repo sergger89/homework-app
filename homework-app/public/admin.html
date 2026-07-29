@@ -120,6 +120,7 @@ function renderUsers() {
         <td>${escapeHtml(u.username)}</td>
         <td>${extra}</td>
         <td>
+          <button onclick="changeName(${u.id}, '${escapeHtml(u.display_name)}')">Изменить имя</button>
           <button onclick="resetPassword(${u.id}, '${escapeHtml(u.display_name)}')">Сбросить пароль</button>
           <button onclick="deleteUser(${u.id}, '${escapeHtml(u.display_name)}')" ${u.id === myId ? 'disabled' : ''}>Удалить</button>
         </td>
@@ -131,6 +132,18 @@ function renderUsers() {
       ${rows}
     </table>
   `;
+}
+
+async function changeName(id, currentName) {
+  const newName = await showTextInputDialog('Новое отображаемое имя', currentName);
+  if (!newName) return;
+  try {
+    await api(`/api/admin/users/${id}/name`, { method: 'POST', body: JSON.stringify({ displayName: newName }) });
+    await loadAll();
+    renderUsers();
+  } catch (e) {
+    await showAlertDialog('Не удалось изменить имя.');
+  }
 }
 
 async function changeRole(id, role, name) {
