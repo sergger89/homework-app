@@ -153,15 +153,24 @@ async function loadPendingReview() {
     el.innerHTML = '<p class="muted">Всё проверено — ничего не ждёт вашего внимания 🎉</p>';
     return;
   }
-  el.innerHTML = `<h3>Ожидают проверки (${items.length})</h3>` + items.map(it => `
+  el.innerHTML = `<h3>Ожидают проверки (${items.length})</h3>` + items.map(it => {
+    const correctStr = describeCorrect({ type: it.taskType, ...it.taskData });
+    return `
     <div class="assignment-card" style="cursor:default; flex-direction:column; align-items:stretch">
       <div style="display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap">
         <div>
           <span class="subject-badge">${subjectLabel(it.subject)}</span>
           ${it.awaitingType === 'flagged_by_child' ? '<span class="muted">🚩 отправил(а) на проверку</span>' : '<span class="muted">📝 задание без автопроверки</span>'}
           <div><strong>${escapeHtml(it.childName)}</strong> · ${escapeHtml(it.assignmentTitle)}</div>
-          <div class="muted">${escapeHtml((it.prompt || '').slice(0, 100))}</div>
-          <div class="muted">Ответ: <code>${escapeHtml(JSON.stringify(it.answer))}</code></div>
+          <div class="muted">${escapeHtml((it.prompt || '').slice(0, 150))}</div>
+          <div class="pending-answer-row">
+            <span class="pending-answer-label">Ответ ребёнка:</span>
+            <code>${escapeHtml(JSON.stringify(it.answer))}</code>
+          </div>
+          <div class="pending-answer-row pending-correct-row">
+            <span class="pending-answer-label">Правильный ответ:</span>
+            <span>${escapeHtml(correctStr)}</span>
+          </div>
         </div>
         <div style="display:flex; gap:8px; align-self:flex-start">
           <button onclick="gradeFromPending(${it.taskId}, ${it.childId}, true)">✅ Верно</button>
@@ -169,7 +178,8 @@ async function loadPendingReview() {
         </div>
       </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
 }
 
 async function gradeFromPending(taskId, childId, isCorrect) {

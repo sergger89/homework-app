@@ -638,6 +638,7 @@ app.get('/api/parent/pending-review', requireRole(['admin', 'parent']), (req, re
       assignmentTitle: r.assignment_title,
       subject: r.subject,
       taskType: r.task_type,
+      taskData: data, // полные данные задания (correctIndex/acceptedAnswers/blanks и т.п.) - чтобы родитель видел правильный ответ рядом с ответом ребёнка
       prompt: data.prompt || data.promptTemplate || '',
       answer: JSON.parse(r.answer),
       awaitingType: r.is_correct === null ? 'manual_review' : 'flagged_by_child',
