@@ -18,10 +18,7 @@
     <select id="childSelect" class="child-select" style="display:none"></select>
 
     <!-- ---------- маскот (только у ребёнка) ---------- -->
-    <div id="mascotWrap" class="mascot-wrap" style="display:none">
-      <div id="mascotFace" class="mascot-face">🦉</div>
-      <div id="mascotBubble" class="mascot-bubble"></div>
-    </div>
+    <div id="mascotWrap" class="mascot-wrap" style="display:none"></div>
 
     <div class="tabs" id="childTabs" style="display:none">
       <button id="tabShop" class="active">🛍️ Витрина</button>
@@ -61,6 +58,8 @@ let shopTab = 'shop';
 let cachedItems = [];
 let cachedPurchases = [];
 
+let mascot = null;
+
 async function init() {
   const me = await api('/api/me');
   myRole = me.user.role;
@@ -69,7 +68,9 @@ async function init() {
 
   if (myRole === 'child') {
     currentChildId = myId;
-    document.getElementById('mascotWrap').style.display = 'flex';
+    const mascotWrap = document.getElementById('mascotWrap');
+    mascotWrap.style.display = 'flex';
+    mascot = createMascotWidget(mascotWrap);
     document.getElementById('childTabs').style.display = 'flex';
     document.getElementById('coinBadge').style.display = 'inline-block';
     document.getElementById('tabShop').onclick = () => switchShopTab('shop');
@@ -102,28 +103,14 @@ function switchShopTab(tab) {
 }
 
 // ---------------- маскот ----------------
-function mascotSay(message, mood) {
-  const face = document.getElementById('mascotFace');
-  const bubble = document.getElementById('mascotBubble');
-  const moods = { happy: '🦉', excited: '🥳', sad: '😔', shrug: '🤷', neutral: '🦉' };
-  face.textContent = moods[mood] || '🦉';
-  bubble.textContent = message;
-  face.classList.remove('bounce', 'shake');
-  void face.offsetWidth; // перезапуск CSS-анимации
-  face.classList.add(mood === 'sad' || mood === 'shrug' ? 'shake' : 'bounce');
-  bubble.classList.remove('show');
-  void bubble.offsetWidth;
-  bubble.classList.add('show');
-}
-
 async function mascotGreet() {
   const me = await api('/api/me');
   const { balance } = await api('/api/me/coins');
   document.getElementById('coinBadge').textContent = `🪙 ${balance}`;
   if (balance === 0) {
-    mascotSay(`Привет, ${me.user.name}! Выполняй задания, чтобы заработать монетки 🪙`, 'neutral');
+    mascot.say(`Привет, ${me.user.name}! Выполняй задания, чтобы заработать монетки 🪙`, 'disappointment');
   } else {
-    mascotSay(`Привет, ${me.user.name}! У тебя ${balance} монет — смотри, что можно взять!`, 'happy');
+    mascot.say(`Привет, ${me.user.name}! У тебя ${balance} монет — смотри, что можно взять!`, 'joy');
   }
 }
 
@@ -172,14 +159,14 @@ async function buyItem(itemId, cost) {
   try {
     const res = await api('/api/shop/purchase', { method: 'POST', body: JSON.stringify({ itemId }) });
     document.getElementById('coinBadge').textContent = `🪙 ${res.balance}`;
-    mascotSay('Ура! Забирай свою награду! Родитель скоро её выдаст 🎉', 'excited');
+    mascot.say('Ура! Забирай свою награду! Родитель скоро её выдаст 🎉', 'fun');
     loadItems();
   } catch (e) {
     if (e.data?.error === 'insufficient_funds') {
       const item = cachedItems.find(i => i.id === itemId);
-      mascotSay(`Ещё маловато монеток на «${item?.name || 'это'}» — заработай ещё, выполняя задания!`, 'shrug');
+      mascot.say(`Ещё маловато монеток на «${item?.name || 'это'}» — заработай ещё, выполняя задания!`, 'disappointment');
     } else {
-      mascotSay('Что-то пошло не так, попробуй ещё раз.', 'sad');
+      mascot.say('Что-то пошло не так, попробуй ещё раз.', 'sadness');
     }
   }
 }
@@ -226,8 +213,8 @@ async function loadHistory() {
     return;
   }
   const pending = purchases.filter(p => p.status === 'pending').length;
-  if (pending > 0) mascotSay(`Жду, когда тебе выдадут ${pending === 1 ? 'заказ' : 'заказы'} (${pending})!`, 'neutral');
-  else mascotSay('Все заказы уже получены! 🎉', 'excited');
+  if (pending > 0) mascot.say(`Жду, когда тебе выдадут ${pending === 1 ? 'заказ' : 'заказы'} (${pending})!`, 'boredom');
+  else mascot.say('Все заказы уже получены! 🎉', 'fun');
 
   el.innerHTML = purchases.map(p => `
     <div class="assignment-card" style="cursor:default">

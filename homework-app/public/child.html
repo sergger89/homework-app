@@ -29,9 +29,11 @@ requireRole('child');
 async function load() {
   const me = await api('/api/me');
   document.getElementById('greeting').innerHTML =
+    `<img src="${mascotSrc('joy')}" alt="Маскот" class="mascot-mini" />` +
     avatarHtml(me.user.name, me.user.avatarPath, 32) + ` <span style="margin-left:8px">Привет, ${escapeHtml(me.user.name)}!</span>`;
   document.getElementById('greeting').style.display = 'flex';
   document.getElementById('greeting').style.alignItems = 'center';
+  preloadMascotImages();
 
   api('/api/me/coins').then(({ balance }) => {
     document.getElementById('coinBadge').textContent = `🪙 ${balance}`;

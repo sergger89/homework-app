@@ -2,8 +2,67 @@
 // task = { type, ...данные с правильными ответами }
 // answer = то, что прислал ребёнок (структура зависит от типа)
 
+// ---------- нормализация вариантов ответа (сокращения, пунктуация, брит./амер. английский) ----------
+// Идея: и ответ ребёнка, и каждый вариант из acceptedAnswers прогоняются через одну и ту же
+// функцию, поэтому "didn't" и "did not" всегда схлопываются в одну и ту же каноническую форму,
+// независимо от того, какой из вариантов был указан в задании, а какой ввёл ребёнок.
+
+const CONTRACTIONS = {
+  "don't": "do not", "doesn't": "does not", "didn't": "did not",
+  "isn't": "is not", "aren't": "are not", "wasn't": "was not", "weren't": "were not",
+  "won't": "will not", "wouldn't": "would not", "can't": "cannot", "couldn't": "could not",
+  "shouldn't": "should not", "mustn't": "must not", "haven't": "have not", "hasn't": "has not",
+  "hadn't": "had not", "i'm": "i am", "you're": "you are", "he's": "he is", "she's": "she is",
+  "it's": "it is", "we're": "we are", "they're": "they are", "i've": "i have",
+  "you've": "you have", "we've": "we have", "they've": "they have", "i'll": "i will",
+  "you'll": "you will", "he'll": "he will", "she'll": "she will", "we'll": "we will",
+  "they'll": "they will", "i'd": "i would", "you'd": "you would", "let's": "let us",
+  "that's": "that is", "there's": "there is", "what's": "what is", "who's": "who is",
+};
+
+// Частые британские написания -> американские (канонический вариант для сравнения).
+// Список не исчерпывающий, а покрывает слова, реально встречающиеся в школьных заданиях.
+const BRITISH_TO_AMERICAN = {
+  colour: 'color', colours: 'colors', favourite: 'favorite', favourites: 'favorites',
+  grey: 'gray', neighbour: 'neighbor', neighbours: 'neighbors', honour: 'honor',
+  behaviour: 'behavior', labour: 'labor', humour: 'humor', rumour: 'rumor',
+  centre: 'center', centres: 'centers', theatre: 'theater', theatres: 'theaters',
+  litre: 'liter', litres: 'liters', metre: 'meter', metres: 'meters',
+  realise: 'realize', realised: 'realized', realising: 'realizing',
+  organise: 'organize', organised: 'organized', organising: 'organizing',
+  organisation: 'organization', apologise: 'apologize', apologised: 'apologized',
+  recognise: 'recognize', recognised: 'recognized', practise: 'practice',
+  defence: 'defense', licence: 'license', programme: 'program', programmes: 'programs',
+  travelled: 'traveled', travelling: 'traveling', traveller: 'traveler',
+  cancelled: 'canceled', cancelling: 'canceling', jewellery: 'jewelry',
+  tyre: 'tire', tyres: 'tires', cheque: 'check', cheques: 'checks', mum: 'mom', mummy: 'mommy',
+};
+
+function normalizeVariants(raw) {
+  let s = String(raw ?? '')
+    .toLowerCase()
+    .replace(/[\u2018\u2019\u02BC]/g, "'") // разные виды апострофа -> обычный
+    .trim();
+
+  // "can not" (раздельно) -> "cannot", чтобы совпадало с "can't"
+  s = s.replace(/\bcan\s+not\b/g, 'cannot');
+
+  // раскрываем сокращения по границам слов (апострофы уже приведены к обычному виду выше)
+  for (const [short, full] of Object.entries(CONTRACTIONS)) {
+    s = s.replace(new RegExp(`\\b${short}\\b`, 'g'), full);
+  }
+
+  // британское -> американское написание, по целым словам
+  s = s.replace(/[a-z]+/g, (word) => BRITISH_TO_AMERICAN[word] || word);
+
+  // убираем пунктуацию по краям строки (точки, запятые, кавычки и т.п.), а не только пробелы
+  s = s.replace(/^[\s.,!?;:'"()«»…-]+|[\s.,!?;:'"()«»…-]+$/g, '');
+
+  return s.replace(/\s+/g, ' ').trim();
+}
+
 function normalizeText(s) {
-  return String(s ?? '').trim().toLowerCase().replace(/\s+/g, ' ');
+  return normalizeVariants(s);
 }
 
 // Типы, для которых у самого задания в принципе нет единственно верного ответа -

@@ -425,12 +425,22 @@ function showResult(card, res) {
     badge.className = 'result-badge';
     badge.style.color = 'var(--muted)';
     badge.textContent = '📝 Ответ сохранён, ждёт проверки родителем';
+    showMascotToast('Жду, когда родитель проверит! Подожди немного 🙂', 'boredom');
   } else if (res.bonusAttemptGranted) {
     badge.className = 'result-badge wrong';
     badge.textContent = '❌ Неверно. Вот подсказка — и ещё один, последний шанс!';
+    showMascotToast('Вот тебе подсказка — и ещё один шанс!', 'wink');
   } else {
     badge.className = 'result-badge ' + (res.isCorrect ? 'correct' : 'wrong');
     badge.textContent = res.isCorrect ? '✅ Верно!' : (res.locked ? '❌ Неверно. Попытки закончились.' : '❌ Неверно, попробуй ещё раз');
+    if (res.isCorrect) {
+      const phrases = ['Молодец! Точно в цель!', 'Ура, верно!', 'Отлично справился(-лась)!'];
+      showMascotToast(phrases[Math.floor(Math.random() * phrases.length)], 'joy');
+    } else if (res.locked) {
+      showMascotToast('Ничего страшного, в следующий раз получится!', 'sadness');
+    } else {
+      showMascotToast('Ой! Попробуй ещё раз', 'surprise');
+    }
   }
   card.appendChild(badge);
   // само объяснение теперь показывает постоянный блок в buildTaskCard (переживает перезагрузку) -

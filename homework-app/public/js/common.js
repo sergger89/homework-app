@@ -102,7 +102,58 @@ function applyFavicon() {
     link.href = faviconUrl;
   }).catch(() => {});
 }
+// ==================== Маскот приложения ====================
+const MASCOT_EMOTIONS = ['surprise','disappointment','joy','anger','sadness','kiss','wink','admiration','disgust','boredom','horror','fun'];
+const MASCOT_SAD_EMOTIONS = ['sadness','disappointment','horror','disgust','anger'];
+
+function mascotSrc(emotion) {
+  return `/mascot/${MASCOT_EMOTIONS.includes(emotion) ? emotion : 'joy'}.png`;
+}
+
+// подгружаем все картинки маскота в фоне разок, чтобы дальше эмоции переключались без задержки
+function preloadMascotImages() {
+  if (window.__mascotPreloaded) return;
+  window.__mascotPreloaded = true;
+  MASCOT_EMOTIONS.forEach((e) => { const img = new Image(); img.src = mascotSrc(e); });
+}
+
+// небольшая ненавязчивая всплывающая реакция маскота (для страниц, где не нужен постоянный виджет,
+// например задание) - появляется в углу и сама пропадает, как уведомление о монетах.
+function showMascotToast(message, emotion) {
+  preloadMascotImages();
+  const toast = document.createElement('div');
+  toast.className = 'mascot-toast';
+  toast.innerHTML = `<img src="${mascotSrc(emotion)}" alt="Маскот" /><span>${escapeHtml(message)}</span>`;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.classList.add('show'), 10);
+  setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 2600);
+}
+
+// постоянный виджет маскота (лицо + речевой пузырь) - для страниц вроде магазина, где реакция
+// должна оставаться на экране, а не мелькать всплывающим уведомлением.
+function createMascotWidget(containerEl) {
+  preloadMascotImages();
+  containerEl.classList.add('mascot-wrap');
+  containerEl.innerHTML = `<img class="mascot-face-img" src="${mascotSrc('joy')}" alt="Маскот" />
+    <div class="mascot-bubble"></div>`;
+  const faceEl = containerEl.querySelector('.mascot-face-img');
+  const bubbleEl = containerEl.querySelector('.mascot-bubble');
+  return {
+    say(message, emotion) {
+      faceEl.src = mascotSrc(emotion);
+      bubbleEl.textContent = message;
+      faceEl.classList.remove('bounce', 'shake');
+      void faceEl.offsetWidth;
+      faceEl.classList.add(MASCOT_SAD_EMOTIONS.includes(emotion) ? 'shake' : 'bounce');
+      bubbleEl.classList.remove('show');
+      void bubbleEl.offsetWidth;
+      bubbleEl.classList.add('show');
+    },
+  };
+}
+
 applyFavicon();
+
 
 // ==================== Модальные диалоги (замена alert/confirm/prompt) ====================
 // Нативные alert()/confirm()/prompt() блокируют страницу, выглядят по-разному на каждой
