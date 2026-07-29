@@ -13,7 +13,7 @@ const REGULAR_ATTEMPTS = 3; // после стольких неверных по
 const TOTAL_ATTEMPTS = 4;   // после неё, если всё ещё неверно, показываем правильный ответ и блокируем
 const COINS_PER_TASK = 10;  // фиксированная награда монетками за верно решённое задание
 const SILVER_PER_TASK = 10; // столько же серебряных монет за то же задание (на еду для маскота)
-const HUNGER_DECAY_PER_HOUR = 100 / 120; // полностью "проголодается" примерно за 5 суток без кормления
+const DEFAULT_HUNGER_DECAY_HOURS = 4; // по умолчанию: со 100% до 0% за 4 часа без кормления (родитель может менять)
 const ATTEMPT_PACK_SIZE = 3; // сколько доп. попыток покупается за раз
 const ATTEMPT_PACK_COST = 1; // цена в золотых монетах за пачку доп. попыток
 
@@ -122,10 +122,24 @@ function awardTaskCurrencies(taskId, childId) {
 // голод маскота "протухает" со временем - считаем на лету от последнего сохранённого значения,
 // а не фоновой задачей
 function getCurrentHunger(childId) {
-  const row = db.prepare('SELECT hunger, updated_at FROM mascot_hunger WHERE child_id=?').get(childId);
+  const row = db.prepare('SELECT hunger, decay_hours, updated_at FROM mascot_hunger WHERE child_id=?').get(childId);
   if (!row) return 100;
+  const decayHours = row.decay_hours || DEFAULT_HUNGER_DECAY_HOURS;
   const hoursSince = (Date.now() - new Date(row.updated_at + 'Z').getTime()) / 3600000;
-  return Math.max(0, Math.min(100, row.hunger - HUNGER_DECAY_PER_HOUR * Math.max(0, hoursSince)));
+  return Math.max(0, Math.min(100, row.hunger - (100 / decayHours) * Math.max(0, hoursSince)));
+}
+
+function getHungerDecayHours(childId) {
+  const row = db.prepare('SELECT decay_hours FROM mascot_hunger WHERE child_id=?').get(childId);
+  return row ? row.decay_hours : DEFAULT_HUNGER_DECAY_HOURS;
+}
+
+function setHungerDecayHours(childId, decayHours) {
+  const current = getCurrentHunger(childId);
+  db.prepare(
+    `INSERT INTO mascot_hunger (child_id, hunger, decay_hours, updated_at) VALUES (?,?,?,datetime('now'))
+     ON CONFLICT(child_id) DO UPDATE SET decay_hours=excluded.decay_hours, hunger=excluded.hunger, updated_at=excluded.updated_at`
+  ).run(childId, current, decayHours);
 }
 
 function feedMascot(childId, restoreAmount) {
@@ -1145,7 +1159,22 @@ app.get('/api/me/hunger', requireAuth, (req, res) => {
   if (req.session.user.role !== 'child' && (!childId || !hasChildAccess(req.session.user, childId))) {
     return res.status(403).json({ error: 'no_access_to_child' });
   }
-  res.json({ hunger: getCurrentHunger(childId) });
+  res.json({ hunger: getCurrentHunger(childId), decayHours: getHungerDecayHours(childId) });
+});
+
+// родитель/админ настраивает, за сколько часов у конкретного ребёнка голод маскота
+// падает со 100% до 0% без кормления (по умолчанию - 4 часа)
+app.patch('/api/mascot/decay-settings', requireRole(['admin', 'parent']), (req, res) => {
+  const { childId, decayHours } = req.body || {};
+  if (!childId || !hasChildAccess(req.session.user, childId)) {
+    return res.status(403).json({ error: 'no_access_to_child' });
+  }
+  const hours = Number(decayHours);
+  if (!Number.isFinite(hours) || hours <= 0) {
+    return res.status(400).json({ error: 'decay_hours_must_be_positive' });
+  }
+  setHungerDecayHours(childId, hours);
+  res.json({ ok: true, decayHours: hours });
 });
 
 function visibleShopFilter(user) {

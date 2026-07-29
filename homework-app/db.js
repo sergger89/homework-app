@@ -107,9 +107,11 @@ CREATE TABLE IF NOT EXISTS silver_transactions (
 
 -- Голод маскота: одна строка на ребёнка, значение "протухает" со временем (считается на лету
 -- при чтении, а не фоновой задачей) и обновляется при кормлении.
+-- decay_hours - за сколько часов голод падает со 100% до 0% без кормления; настраивается родителем.
 CREATE TABLE IF NOT EXISTS mascot_hunger (
   child_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
   hunger REAL NOT NULL DEFAULT 100,
+  decay_hours REAL NOT NULL DEFAULT 4,
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -252,6 +254,10 @@ try {
   const purchaseCols = db.prepare("PRAGMA table_info(shop_purchases)").all();
   if (purchaseCols.length && !purchaseCols.some((c) => c.name === 'currency')) {
     db.exec(`ALTER TABLE shop_purchases ADD COLUMN currency TEXT NOT NULL DEFAULT 'gold';`);
+  }
+  const hungerCols = db.prepare("PRAGMA table_info(mascot_hunger)").all();
+  if (hungerCols.length && !hungerCols.some((c) => c.name === 'decay_hours')) {
+    db.exec(`ALTER TABLE mascot_hunger ADD COLUMN decay_hours REAL NOT NULL DEFAULT 4;`);
   }
 } catch (e) {
   console.error('Ошибка миграции столбцов (можно игнорировать на первом запуске):', e.message);
