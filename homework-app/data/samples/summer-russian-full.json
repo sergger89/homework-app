@@ -5,32 +5,93 @@
     {
       "type": "word_composition",
       "prompt": "День 1. Разбери слово по составу: Бесшумный",
-      "word": "Бесшумный",
-      "needsManualReview": true
+      "word": "бесшумный",
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "ending",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 1. Разбери слово по составу: рассвет",
       "word": "рассвет",
-      "needsManualReview": true
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "root"
+      ],
+      "hasZeroEnding": true,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 1. Разбери слово по составу: рукописный",
       "word": "рукописный",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "interfix",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "ending",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 1. Разбери слово по составу: помидорчик",
       "word": "помидорчик",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix",
+        "suffix"
+      ],
+      "hasZeroEnding": true,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 1. Разбери слово по составу: подсвечник",
       "word": "подсвечник",
-      "needsManualReview": true
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix",
+        "suffix"
+      ],
+      "hasZeroEnding": true,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "cloze",
@@ -449,44 +510,117 @@
     {
       "type": "word_composition",
       "prompt": "День 5. Разбери слово по составу: Рассада",
-      "word": "Рассада",
-      "needsManualReview": true
+      "word": "рассада",
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 5. Разбери слово по составу: крапивушка",
       "word": "крапивушка",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix",
+        "suffix",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 5. Разбери слово по составу: подружка",
       "word": "подружка",
-      "needsManualReview": true
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 5. Разбери слово по составу: прадед",
       "word": "прадед",
-      "needsManualReview": true
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root"
+      ],
+      "hasZeroEnding": true,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 5. Разбери слово по составу: фокусник",
       "word": "фокусник",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix",
+        "suffix"
+      ],
+      "hasZeroEnding": true,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 5. Разбери слово по составу: список",
       "word": "список",
-      "needsManualReview": true
+      "correctTypes": [
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix"
+      ],
+      "hasZeroEnding": true,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 5. Разбери слово по составу: пробегу",
       "word": "пробегу",
-      "needsManualReview": true
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "cloze",
@@ -652,32 +786,89 @@
     {
       "type": "word_composition",
       "prompt": "День 6. Разбери слово по составу: Подкормить -",
-      "word": "Подкормить -",
-      "needsManualReview": true
+      "word": "подкормить",
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix",
+        "suffix"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 6. Разбери слово по составу: посадить -",
-      "word": "посадить -",
-      "needsManualReview": true
+      "word": "посадить",
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix",
+        "suffix"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 6. Разбери слово по составу: обкатать -",
-      "word": "обкатать -",
-      "needsManualReview": true
+      "word": "обкатать",
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix",
+        "suffix"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 6. Разбери слово по составу: победить -",
-      "word": "победить -",
-      "needsManualReview": true
+      "word": "победить",
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix",
+        "suffix"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 6. Разбери слово по составу: заварить -",
-      "word": "заварить -",
-      "needsManualReview": true
+      "word": "заварить",
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix",
+        "suffix"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "open_text",
@@ -694,92 +885,255 @@
     {
       "type": "word_composition",
       "prompt": "День 7. Разбери слово по составу: Подснежники",
-      "word": "Подснежники",
-      "needsManualReview": true
+      "word": "подснежники",
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix",
+        "suffix",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 7. Разбери слово по составу: приставка",
       "word": "приставка",
-      "needsManualReview": true
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 7. Разбери слово по составу: летучие",
       "word": "летучие",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix",
+        "ending",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 7. Разбери слово по составу: подсказка",
       "word": "подсказка",
-      "needsManualReview": true
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 7. Разбери слово по составу: сапожник",
       "word": "сапожник",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix",
+        "suffix"
+      ],
+      "hasZeroEnding": true,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 7. Разбери слово по составу: прохлада",
       "word": "прохлада",
-      "needsManualReview": true
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "root",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 7. Разбери слово по составу: зелёненькая",
       "word": "зелёненькая",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix",
+        "suffix",
+        "suffix",
+        "ending",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 7. Разбери слово по составу: солнце",
       "word": "солнце",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 8. Разбери слово по составу: Ширь",
-      "word": "Ширь",
-      "needsManualReview": true
+      "word": "ширь",
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 8. Разбери слово по составу: пчеловод",
       "word": "пчеловод",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "interfix",
+        "root",
+        "root",
+        "root"
+      ],
+      "hasZeroEnding": true,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 8. Разбери слово по составу: смешу",
       "word": "смешу",
-      "needsManualReview": true
+      "correctTypes": [
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 8. Разбери слово по составу: беспокойный",
       "word": "беспокойный",
-      "needsManualReview": true
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "ending",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 8. Разбери слово по составу: бутончик",
       "word": "бутончик",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix",
+        "suffix"
+      ],
+      "hasZeroEnding": true,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 8. Разбери слово по составу: долька",
       "word": "долька",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 8. Разбери слово по составу: ледокол",
       "word": "ледокол",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "interfix",
+        "root",
+        "root",
+        "root"
+      ],
+      "hasZeroEnding": true,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "cloze",
@@ -1119,44 +1473,114 @@
     {
       "type": "word_composition",
       "prompt": "День 12. Разбери слово по составу: Добрый",
-      "word": "Добрый",
-      "needsManualReview": true
+      "word": "добрый",
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "ending",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 12. Разбери слово по составу: дельфин",
       "word": "дельфин",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root"
+      ],
+      "hasZeroEnding": true,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 12. Разбери слово по составу: ясноглазый",
       "word": "ясноглазый",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "interfix",
+        "root",
+        "root",
+        "root",
+        "root",
+        "ending",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 12. Разбери слово по составу: олениха",
       "word": "олениха",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 12. Разбери слово по составу: водопад",
       "word": "водопад",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "interfix",
+        "root",
+        "root",
+        "root"
+      ],
+      "hasZeroEnding": true,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 12. Разбери слово по составу: шажок",
       "word": "шажок",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix"
+      ],
+      "hasZeroEnding": true,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 12. Разбери слово по составу: рыболов",
       "word": "рыболов",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "interfix",
+        "root",
+        "root",
+        "root"
+      ],
+      "hasZeroEnding": true,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "cloze",
@@ -1543,44 +1967,108 @@
     {
       "type": "word_composition",
       "prompt": "День 16. Разбери слово по составу: Порез",
-      "word": "Порез",
-      "needsManualReview": true
+      "word": "порез",
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root"
+      ],
+      "hasZeroEnding": true,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 16. Разбери слово по составу: кручу",
       "word": "кручу",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 16. Разбери слово по составу: ягодный",
       "word": "ягодный",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "ending",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 16. Разбери слово по составу: кашевар",
       "word": "кашевар",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "interfix",
+        "root",
+        "root",
+        "root"
+      ],
+      "hasZeroEnding": true,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 16. Разбери слово по составу: дождик",
       "word": "дождик",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix"
+      ],
+      "hasZeroEnding": true,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 16. Разбери слово по составу: лисица",
       "word": "лисица",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 16. Разбери слово по составу: красота",
       "word": "красота",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "cloze",
@@ -1907,44 +2395,119 @@
     {
       "type": "word_composition",
       "prompt": "День 20. Разбери слово по составу: Снегопад",
-      "word": "Снегопад",
-      "needsManualReview": true
+      "word": "снегопад",
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "interfix",
+        "root",
+        "root",
+        "root"
+      ],
+      "hasZeroEnding": true,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 20. Разбери слово по составу: веточка",
       "word": "веточка",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 20. Разбери слово по составу: зимушка",
       "word": "зимушка",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix",
+        "suffix",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 20. Разбери слово по составу: небесный",
       "word": "небесный",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "ending",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 20. Разбери слово по составу: полянка",
       "word": "полянка",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 20. Разбери слово по составу: постройка",
       "word": "постройка",
-      "needsManualReview": true
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 20. Разбери слово по составу: колдунья",
       "word": "колдунья",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "cloze",
@@ -2267,38 +2830,128 @@
     {
       "type": "word_composition",
       "prompt": "День 24. Разбери слово по составу: Пробка",
-      "word": "Пробка",
-      "needsManualReview": true
+      "word": "пробка",
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 24. Разбери слово по составу: трудолюбивый",
       "word": "трудолюбивый",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "interfix",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix",
+        "ending",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 24. Разбери слово по составу: травяной",
       "word": "травяной",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix",
+        "ending",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
-      "prompt": "День 24. Разбери слово по составу: островок добродушный",
-      "word": "островок добродушный",
-      "needsManualReview": true
+      "prompt": "Разбери слово по составу: островок",
+      "word": "островок",
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix"
+      ],
+      "hasZeroEnding": true,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
+    },
+    {
+      "type": "word_composition",
+      "prompt": "Разбери слово по составу: добродушный",
+      "word": "добродушный",
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "interfix",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "ending",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 24. Разбери слово по составу: надпись",
       "word": "надпись",
-      "needsManualReview": true
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 24. Разбери слово по составу: загрохотали",
       "word": "загрохотали",
-      "needsManualReview": true
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "ending",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "cloze",
@@ -2604,50 +3257,137 @@
     {
       "type": "word_composition",
       "prompt": "День 27. Разбери слово по составу: Полёт",
-      "word": "Полёт",
-      "needsManualReview": true
+      "word": "полёт",
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root"
+      ],
+      "hasZeroEnding": true,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 27. Разбери слово по составу: пробежка",
       "word": "пробежка",
-      "needsManualReview": true
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 27. Разбери слово по составу: разбитая",
       "word": "разбитая",
-      "needsManualReview": true
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "suffix",
+        "ending",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 27. Разбери слово по составу: бесполезный",
       "word": "бесполезный",
-      "needsManualReview": true
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "ending",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 27. Разбери слово по составу: выходка",
       "word": "выходка",
-      "needsManualReview": true
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 27. Разбери слово по составу: прибой",
       "word": "прибой",
-      "needsManualReview": true
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root"
+      ],
+      "hasZeroEnding": true,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 27. Разбери слово по составу: заморский",
       "word": "заморский",
-      "needsManualReview": true
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix",
+        "ending",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 27. Разбери слово по составу: постройка",
       "word": "постройка",
-      "needsManualReview": true
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "open_text",
@@ -2903,56 +3643,155 @@
     {
       "type": "word_composition",
       "prompt": "День 30. Разбери слово по составу: Хитрый",
-      "word": "Хитрый",
-      "needsManualReview": true
+      "word": "хитрый",
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "ending",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 30. Разбери слово по составу: большущий",
       "word": "большущий",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix",
+        "ending",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 30. Разбери слово по составу: классный",
       "word": "классный",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "ending",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 30. Разбери слово по составу: северный",
       "word": "северный",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "ending",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 30. Разбери слово по составу: новогодний",
       "word": "новогодний",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "interfix",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "ending",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 30. Разбери слово по составу: клубок",
       "word": "клубок",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix"
+      ],
+      "hasZeroEnding": true,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 30. Разбери слово по составу: глубинка",
       "word": "глубинка",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 30. Разбери слово по составу: городские",
       "word": "городские",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix",
+        "ending",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 30. Разбери слово по составу: каменный",
       "word": "каменный",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "ending",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "open_text",
@@ -3172,56 +4011,154 @@
     {
       "type": "word_composition",
       "prompt": "День 33. Разбери слово по составу: Агентство",
-      "word": "Агентство",
-      "needsManualReview": true
+      "word": "агентство",
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix",
+        "suffix",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 33. Разбери слово по составу: братский",
       "word": "братский",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix",
+        "ending",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 33. Разбери слово по составу: папуля",
       "word": "папуля",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 33. Разбери слово по составу: избушка",
       "word": "избушка",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 33. Разбери слово по составу: подарок",
       "word": "подарок",
-      "needsManualReview": true
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix"
+      ],
+      "hasZeroEnding": true,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 33. Разбери слово по составу: подорожник",
       "word": "подорожник",
-      "needsManualReview": true
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix",
+        "suffix"
+      ],
+      "hasZeroEnding": true,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 33. Разбери слово по составу: трусливый",
       "word": "трусливый",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix",
+        "suffix",
+        "ending",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 33. Разбери слово по составу: летучий",
       "word": "летучий",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix",
+        "ending",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 33. Разбери слово по составу: караулим",
       "word": "караулим",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "cloze",
@@ -3525,50 +4462,140 @@
     {
       "type": "word_composition",
       "prompt": "День 36. Разбери слово по составу: Подорожают",
-      "word": "Подорожают",
-      "needsManualReview": true
+      "word": "подорожают",
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "ending",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 36. Разбери слово по составу: зеркальце",
       "word": "зеркальце",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 36. Разбери слово по составу: свистулька",
       "word": "свистулька",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix",
+        "suffix",
+        "suffix",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 36. Разбери слово по составу: крепыш",
       "word": "крепыш",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix"
+      ],
+      "hasZeroEnding": true,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 36. Разбери слово по составу: храбрость",
       "word": "храбрость",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix",
+        "suffix",
+        "suffix"
+      ],
+      "hasZeroEnding": true,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 36. Разбери слово по составу: частица",
       "word": "частица",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 36. Разбери слово по составу: горлышко",
       "word": "горлышко",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix",
+        "suffix",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 36. Разбери слово по составу: задумка",
       "word": "задумка",
-      "needsManualReview": true
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "cloze",
@@ -3767,56 +4794,154 @@
     {
       "type": "word_composition",
       "prompt": "День 38. Разбери слово по составу: Выдумка",
-      "word": "Выдумка",
-      "needsManualReview": true
+      "word": "выдумка",
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 38. Разбери слово по составу: кофточка",
       "word": "кофточка",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 38. Разбери слово по составу: игрушка",
       "word": "игрушка",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 38. Разбери слово по составу: договор",
       "word": "договор",
-      "needsManualReview": true
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root"
+      ],
+      "hasZeroEnding": true,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 38. Разбери слово по составу: ранняя",
       "word": "ранняя",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "ending",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 38. Разбери слово по составу: подсвечник",
       "word": "подсвечник",
-      "needsManualReview": true
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix",
+        "suffix"
+      ],
+      "hasZeroEnding": true,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 38. Разбери слово по составу: пробежка",
       "word": "пробежка",
-      "needsManualReview": true
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 38. Разбери слово по составу: перегородка",
       "word": "перегородка",
-      "needsManualReview": true
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 38. Разбери слово по составу: вырубка",
       "word": "вырубка",
-      "needsManualReview": true
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "open_text",
@@ -3839,50 +4964,142 @@
     {
       "type": "word_composition",
       "prompt": "День 40. Разбери слово по составу: Подоконник",
-      "word": "Подоконник",
-      "needsManualReview": true
+      "word": "подоконник",
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix",
+        "suffix"
+      ],
+      "hasZeroEnding": true,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 40. Разбери слово по составу: цветник",
       "word": "цветник",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix",
+        "suffix"
+      ],
+      "hasZeroEnding": true,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 40. Разбери слово по составу: позеленел",
       "word": "позеленел",
-      "needsManualReview": true
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 40. Разбери слово по составу: постройка",
       "word": "постройка",
-      "needsManualReview": true
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 40. Разбери слово по составу: выкройка",
       "word": "выкройка",
-      "needsManualReview": true
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 40. Разбери слово по составу: позёмка",
       "word": "позёмка",
-      "needsManualReview": true
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 40. Разбери слово по составу: сахарница",
       "word": "сахарница",
-      "needsManualReview": true
+      "correctTypes": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix",
+        "suffix",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 40. Разбери слово по составу: переправа",
       "word": "переправа",
-      "needsManualReview": true
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "root",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "open_text",
@@ -4086,26 +5303,65 @@
     {
       "type": "word_composition",
       "prompt": "День 43. Разбери слово по составу: Поход",
-      "word": "Поход",
-      "needsManualReview": true
+      "word": "поход",
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root"
+      ],
+      "hasZeroEnding": true,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 43. Разбери слово по составу: повар",
       "word": "повар",
-      "needsManualReview": true
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root"
+      ],
+      "hasZeroEnding": true,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 43. Разбери слово по составу: поставка",
       "word": "поставка",
-      "needsManualReview": true
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "ending"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "word_composition",
       "prompt": "День 43. Разбери слово по составу: покормить",
       "word": "покормить",
-      "needsManualReview": true
+      "correctTypes": [
+        "prefix",
+        "prefix",
+        "root",
+        "root",
+        "root",
+        "root",
+        "suffix",
+        "suffix",
+        "suffix"
+      ],
+      "hasZeroEnding": false,
+      "explanation": "Определи приставку, корень(-и), суффикс(-ы) и окончание по смыслу и родственным словам."
     },
     {
       "type": "cloze",
