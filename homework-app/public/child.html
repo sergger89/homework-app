@@ -11,6 +11,7 @@
     <h1 id="greeting">📚 Мои задания</h1>
     <div style="display:flex; gap:8px; align-items:center">
       <span id="coinBadge" class="coin-badge">🪙 0</span>
+      <span id="silverBadge" class="silver-badge">🥈 0</span>
       <button onclick="window.location.href='/shop.html'">🛍️ Магазин</button>
       <button onclick="window.location.href='/books.html'">📚 Книги</button>
       <button onclick="window.location.href='/profile.html'">Профиль</button>
@@ -44,8 +45,9 @@ async function load() {
     mascotEl.title = hunger < 30 ? 'Маскот проголодался — загляни в магазин покормить его' : '';
   });
 
-  api('/api/me/coins').then(({ balance }) => {
+  api('/api/me/coins').then(({ balance, silverBalance }) => {
     document.getElementById('coinBadge').textContent = `🪙 ${balance}`;
+    document.getElementById('silverBadge').textContent = `🥈 ${silverBalance}`;
   });
 
   const { assignments } = await api('/api/assignments');

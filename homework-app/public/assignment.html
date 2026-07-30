@@ -10,6 +10,7 @@
   <div class="topbar">
     <h1 id="title">Задание</h1>
     <span id="coinBadge" class="coin-badge" style="display:none">🪙 0</span>
+    <span id="silverBadge" class="silver-badge" style="display:none">🥈 0</span>
     <button onclick="window.location.href='/child.html'">← К списку</button>
   </div>
   <div class="container">
@@ -59,8 +60,13 @@ function refreshCoinBadge() {
   api('/api/me').then(({ user }) => {
     if (user.role !== 'child') return;
     const badge = document.getElementById('coinBadge');
+    const silverBadge = document.getElementById('silverBadge');
     badge.style.display = 'inline-block';
-    api('/api/me/coins').then(({ balance }) => { badge.textContent = `🪙 ${balance}`; });
+    silverBadge.style.display = 'inline-block';
+    api('/api/me/coins').then(({ balance, silverBalance }) => {
+      badge.textContent = `🪙 ${balance}`;
+      silverBadge.textContent = `🥈 ${silverBalance}`;
+    });
   });
 }
 
@@ -482,10 +488,10 @@ function showResult(card, res) {
   card.appendChild(badge);
   // само объяснение теперь показывает постоянный блок в buildTaskCard (переживает перезагрузку) -
   // здесь его не дублируем.
-  if (res.coinsEarned > 0) showCoinToast(res.coinsEarned, res.coinBalance, res.silverEarned);
+  if (res.coinsEarned > 0) showCoinToast(res.coinsEarned, res.coinBalance, res.silverEarned, res.silverBalance);
 }
 
-function showCoinToast(amount, balance, silverAmount) {
+function showCoinToast(amount, balance, silverAmount, silverBalance) {
   const toast = document.createElement('div');
   toast.className = 'coin-toast';
   toast.textContent = silverAmount > 0 ? `🪙 +${amount}  🥈 +${silverAmount}` : `🪙 +${amount}`;
@@ -494,6 +500,8 @@ function showCoinToast(amount, balance, silverAmount) {
   setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 1800);
   const badge = document.getElementById('coinBadge');
   if (badge && balance !== undefined) badge.textContent = `🪙 ${balance}`;
+  const silverBadge = document.getElementById('silverBadge');
+  if (silverBadge && silverBalance !== undefined) silverBadge.textContent = `🥈 ${silverBalance}`;
 }
 
 load();
