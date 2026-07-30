@@ -341,6 +341,24 @@ function describeCorrect(t) {
       return parts.every(p => p === null) ? manual : parts.map(p => p ?? '?').join(', ');
     }
     case 'word_table': return manual;
+    case 'sentence_parse': {
+      if (!Array.isArray(t.correctRoles)) return manual;
+      const ROLE_LABELS = { subject: 'подл.', predicate: 'сказ.', attribute: 'определ.', object: 'дополн.', adverbial: 'обст.', none: '—' };
+      return t.tokens.map((tok, i) => `${tok}(${ROLE_LABELS[t.correctRoles[i] || 'none']})`).join(' ');
+    }
+    case 'word_composition': {
+      if (!Array.isArray(t.correctTypes)) return manual;
+      const MORPH_LABELS = { prefix: 'приставка', root: 'корень', interfix: 'соед.гл.', suffix: 'суффикс', ending: 'окончание', postfix: 'постфикс', none: '?' };
+      // группируем соседние буквы одного типа для читаемости
+      const groups = [];
+      t.correctTypes.forEach((type, i) => {
+        const last = groups[groups.length - 1];
+        if (last && last.type === type) last.text += t.word[i];
+        else groups.push({ type, text: t.word[i] });
+      });
+      const result = groups.map(g => `${g.text}(${MORPH_LABELS[g.type || 'none']})`).join('-');
+      return result + (t.hasZeroEnding ? ' + нулевое окончание' : '');
+    }
     default: return '';
   }
 }

@@ -65,6 +65,14 @@ function normalizeText(s) {
   return normalizeVariants(s);
 }
 
+// ---------- разбор предложения по членам ----------
+// подлежащее (1 черта), сказуемое (2 черты), определение (волнистая), дополнение (пунктир),
+// обстоятельство (точки, как приближение традиционного пунктир-тире - подробнее см. README)
+const SENTENCE_ROLES = ['subject', 'predicate', 'attribute', 'object', 'adverbial'];
+
+// ---------- разбор слова по составу ----------
+const MORPHEME_TYPES = ['prefix', 'root', 'interfix', 'suffix', 'ending', 'postfix'];
+
 // Типы, для которых у самого задания в принципе нет единственно верного ответа -
 // они ВСЕГДА идут на ручную проверку родителем, независимо от флага needsManualReview.
 const ALWAYS_MANUAL_TYPES = ['word_table'];
@@ -113,8 +121,10 @@ function gradeTask(task, answer) {
       return { isCorrect };
     }
     case 'cloze': {
-      // answer: массив строк, по одной на каждый пропуск, в порядке task.blanks
-      const given = Array.isArray(answer) ? answer : [];
+      // answer: либо старый формат (просто массив строк-букв), либо новый { letters, checkWords } -
+      // проверочные слова никогда не сверяются автоматически (это на усмотрение родителя),
+      // они просто едут вместе с ответом, чтобы родитель их увидел при ручной проверке.
+      const given = Array.isArray(answer) ? answer : (answer && Array.isArray(answer.letters) ? answer.letters : []);
       const blanks = task.blanks || [];
       if (given.length !== blanks.length) return { isCorrect: false };
       const allCorrect = blanks.every((b, i) => {
@@ -122,6 +132,26 @@ function gradeTask(task, answer) {
         return accepted.includes(normalizeText(given[i]));
       });
       return { isCorrect: allCorrect };
+    }
+    case 'sentence_parse': {
+      // answer: массив ролей по одной на каждый токен предложения, в том же порядке, что task.tokens
+      const given = Array.isArray(answer) ? answer : [];
+      const correct = task.correctRoles || [];
+      if (given.length !== correct.length) return { isCorrect: false };
+      const norm = (r) => r || 'none';
+      const isCorrect = correct.every((r, i) => norm(r) === norm(given[i]));
+      return { isCorrect };
+    }
+    case 'word_composition': {
+      // answer: { types: [...по одной на каждую букву слова...], zeroEnding: bool }
+      const givenTypes = answer && Array.isArray(answer.types) ? answer.types : [];
+      const givenZeroEnding = !!(answer && answer.zeroEnding);
+      const correctTypes = task.correctTypes || [];
+      if (givenTypes.length !== correctTypes.length) return { isCorrect: false };
+      const norm = (t) => t || 'none';
+      const typesMatch = correctTypes.every((t, i) => norm(t) === norm(givenTypes[i]));
+      const zeroEndingMatch = !!task.hasZeroEnding === givenZeroEnding;
+      return { isCorrect: typesMatch && zeroEndingMatch };
     }
     case 'word_table':
       // сюда не должны попадать - word_table всегда обрабатывается веткой needsManualReview выше.
@@ -131,7 +161,7 @@ function gradeTask(task, answer) {
   }
 }
 
-const VALID_TYPES = ['choice_single', 'choice_multiple', 'open_text', 'open_number', 'matching', 'cloze', 'word_table'];
+const VALID_TYPES = ['choice_single', 'choice_multiple', 'open_text', 'open_number', 'matching', 'cloze', 'word_table', 'sentence_parse', 'word_composition'];
 
 // Базовая валидация структуры присланного assignment JSON перед вставкой в БД.
 function validateAssignment(assignment) {
@@ -196,6 +226,30 @@ function validateAssignment(assignment) {
         errors.push(`tasks[${i}]: у каждого пропуска нужен непустой "acceptedAnswers" (или needsManualReview:true на всё задание)`);
       }
     }
+    if (t.type === 'sentence_parse') {
+      if (!Array.isArray(t.tokens) || t.tokens.length === 0) {
+        errors.push(`tasks[${i}]: нужен непустой массив "tokens" (предложение, разбитое на слова/знаки препинания)`);
+      }
+      if (!manual) {
+        if (!Array.isArray(t.correctRoles) || t.correctRoles.length !== (t.tokens || []).length) {
+          errors.push(`tasks[${i}]: "correctRoles" должен быть массивом той же длины, что "tokens" (или needsManualReview:true)`);
+        } else if (t.correctRoles.some((r) => r !== null && r !== 'none' && !SENTENCE_ROLES.includes(r))) {
+          errors.push(`tasks[${i}]: "correctRoles" может содержать только ${SENTENCE_ROLES.join(', ')}, "none" или null`);
+        }
+      }
+    }
+    if (t.type === 'word_composition') {
+      if (!t.word || typeof t.word !== 'string') {
+        errors.push(`tasks[${i}]: нужно строковое поле "word" (само слово)`);
+      }
+      if (!manual) {
+        if (!Array.isArray(t.correctTypes) || t.correctTypes.length !== (t.word || '').length) {
+          errors.push(`tasks[${i}]: "correctTypes" должен быть массивом длиной ровно в число букв "word" (или needsManualReview:true)`);
+        } else if (t.correctTypes.some((m) => m !== null && m !== 'none' && !MORPHEME_TYPES.includes(m))) {
+          errors.push(`tasks[${i}]: "correctTypes" может содержать только ${MORPHEME_TYPES.join(', ')}, "none" или null`);
+        }
+      }
+    }
     if (t.type === 'word_table') {
       if (!Array.isArray(t.columns) || t.columns.length === 0) {
         errors.push(`tasks[${i}]: нужен непустой массив "columns" (описание колонок таблицы)`);
@@ -216,4 +270,4 @@ function validateAssignment(assignment) {
   return errors;
 }
 
-module.exports = { gradeTask, validateAssignment, VALID_TYPES };
+module.exports = { gradeTask, validateAssignment, VALID_TYPES, SENTENCE_ROLES, MORPHEME_TYPES };

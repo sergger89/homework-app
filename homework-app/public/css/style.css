@@ -185,6 +185,10 @@ input[type=text].answer-input, input[type=number].answer-input {
   text-align: center;
   margin: 0 4px;
 }
+.cloze-text .cloze-checkword-input {
+  width: 130px; font-size: 13px; border-style: dashed; border-color: #c9b98a; background: #fffdf6;
+  color: var(--muted); font-weight: normal;
+}
 
 /* ---------- parent dashboard ---------- */
 .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
@@ -406,6 +410,61 @@ table.progress-table th, table.progress-table td {
   background: #e7f8f0; border-radius: 8px; padding: 6px 10px; margin-top: 4px;
 }
 .pending-correct-row .pending-answer-label { color: var(--correct); font-weight: 600; }
+
+/* ---------- разбор предложения по членам (sentence_parse) ---------- */
+.sentence-parse-wrap { margin-top: 6px; }
+.sp-tokens { display: flex; flex-wrap: wrap; gap: 10px 4px; margin-bottom: 14px; }
+.sp-token {
+  font-size: 17px; padding: 4px 3px; cursor: pointer; border-radius: 4px;
+  text-decoration-line: underline; text-decoration-thickness: 2px; text-underline-offset: 4px;
+}
+.sp-token.role-none { text-decoration: none; }
+.sp-token.role-subject { text-decoration-style: solid; }
+.sp-token.role-predicate { text-decoration-style: double; }
+.sp-token.role-attribute { text-decoration-style: wavy; }
+.sp-token.role-object { text-decoration-style: dashed; }
+.sp-token.role-adverbial { text-decoration-style: dotted; text-decoration-thickness: 3px; }
+.sp-token.sp-selected { background: #eef1ff; box-shadow: 0 0 0 2px var(--primary); }
+.sp-toolbar { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+.sp-role-btn {
+  border: 1px solid #dfe3ec; background: white; border-radius: 8px; padding: 6px 10px;
+  font-size: 13px; cursor: pointer;
+}
+.sp-role-btn-subject { text-decoration: underline; text-decoration-style: solid; text-decoration-thickness: 2px; }
+.sp-role-btn-predicate { text-decoration: underline; text-decoration-style: double; text-decoration-thickness: 2px; }
+.sp-role-btn-attribute { text-decoration: underline; text-decoration-style: wavy; text-decoration-thickness: 2px; }
+.sp-role-btn-object { text-decoration: underline; text-decoration-style: dashed; text-decoration-thickness: 2px; }
+.sp-role-btn-adverbial { text-decoration: underline; text-decoration-style: dotted; text-decoration-thickness: 3px; }
+.sp-hint { font-size: 12px; }
+.sp-reveal { margin-top: 10px; padding: 10px; background: #f4f6fb; border-radius: 8px; }
+
+/* ---------- разбор слова по составу (word_composition) ---------- */
+.word-comp-wrap { margin-top: 6px; }
+.wc-letters { display: flex; gap: 2px; margin-bottom: 10px; flex-wrap: wrap; }
+.wc-letter {
+  font-size: 20px; font-weight: 600; width: 30px; height: 36px; display: flex; align-items: center;
+  justify-content: center; cursor: pointer; border-radius: 4px; border-bottom: 3px solid transparent;
+}
+.wc-letter.morph-none { background: #f4f6fb; }
+.wc-letter.morph-prefix { background: #d6e8ff; border-bottom-color: #4a90e2; }
+.wc-letter.morph-root { background: #dcf3df; border-bottom-color: #3aa757; }
+.wc-letter.morph-interfix { background: #eee0ff; border-bottom-color: #9b59d0; }
+.wc-letter.morph-suffix { background: #ffe8cc; border-bottom-color: #e2954a; }
+.wc-letter.morph-ending { background: #ffd9e6; border-bottom-color: #e2508a; }
+.wc-letter.morph-postfix { background: #d0f5f0; border-bottom-color: #2ba99b; }
+.wc-letter.wc-selected { box-shadow: 0 0 0 2px var(--primary); }
+.wc-zero-btn {
+  display: block; margin-bottom: 10px; border: 1px solid #dfe3ec; background: white; border-radius: 8px;
+  padding: 6px 10px; font-size: 13px; cursor: pointer;
+}
+.wc-zero-btn.active { background: #ffd9e6; border-color: #e2508a; font-weight: 600; }
+.wc-type-btn { border: 1px solid #dfe3ec; background: white; border-radius: 8px; padding: 6px 10px; font-size: 13px; cursor: pointer; }
+.wc-type-btn-prefix { background: #d6e8ff; }
+.wc-type-btn-root { background: #dcf3df; }
+.wc-type-btn-interfix { background: #eee0ff; }
+.wc-type-btn-suffix { background: #ffe8cc; }
+.wc-type-btn-ending { background: #ffd9e6; }
+.wc-type-btn-postfix { background: #d0f5f0; }
 
 /* ---------- модальные диалоги (alert/confirm/password) ---------- */
 .dialog-overlay {

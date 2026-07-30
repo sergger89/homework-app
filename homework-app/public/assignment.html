@@ -261,14 +261,29 @@ function buildTaskCard(t, idx) {
   }
 
   else if (t.type === 'cloze') {
+    const savedAnswer = lastAttempt ? lastAttempt.answer : null;
+    const savedLetters = Array.isArray(savedAnswer) ? savedAnswer : (savedAnswer && savedAnswer.letters) || [];
+    const savedCheckWords = (savedAnswer && !Array.isArray(savedAnswer) && savedAnswer.checkWords) || [];
     let i = 0;
     const html = t.promptTemplate.replace(/___/g, () => {
       const bi = i++;
-      const val = lastAttempt ? (lastAttempt.answer[bi] ?? '') : '';
-      return `<input type="text" data-b="${bi}" value="${escapeHtml(val)}" ${disabled ? 'disabled' : ''}/>`;
+      const val = savedLetters[bi] ?? '';
+      const needsCheckWord = t.blanks && t.blanks[bi] && t.blanks[bi].needsCheckWord;
+      let out = `<input type="text" class="cloze-letter-input" data-b="${bi}" value="${escapeHtml(val)}" ${disabled ? 'disabled' : ''}/>`;
+      if (needsCheckWord) {
+        const cw = savedCheckWords[bi] ?? '';
+        out += `<input type="text" class="cloze-checkword-input" data-cw="${bi}" placeholder="провер. слово" value="${escapeHtml(cw)}" ${disabled ? 'disabled' : ''}/>`;
+      }
+      return out;
     });
     body.innerHTML = `<div class="cloze-text">${html}</div>`;
-    getAnswer = () => [...body.querySelectorAll('input')].map(inp => inp.value);
+    getAnswer = () => ({
+      letters: [...body.querySelectorAll('.cloze-letter-input')].map(inp => inp.value),
+      checkWords: (t.blanks || []).map((b, bi) => {
+        const cwInput = body.querySelector(`.cloze-checkword-input[data-cw="${bi}"]`);
+        return cwInput ? cwInput.value : '';
+      }),
+    });
   }
 
   else if (t.type === 'word_table') {
@@ -335,7 +350,154 @@ function buildTaskCard(t, idx) {
     ).filter(r => r.some(v => v.trim() !== ''));
   }
 
-  // история попыток
+  else if (t.type === 'sentence_parse') {
+    const roles = lastAttempt ? [...lastAttempt.answer] : t.tokens.map(() => 'none');
+    const selected = new Set();
+    const wrap = document.createElement('div');
+    wrap.className = 'sentence-parse-wrap';
+
+    const tokensEl = document.createElement('div');
+    tokensEl.className = 'sp-tokens';
+    const tokenSpans = t.tokens.map((tok, i) => {
+      const span = document.createElement('span');
+      span.className = 'sp-token role-' + (roles[i] || 'none');
+      span.textContent = tok;
+      if (!disabled) {
+        span.onclick = () => {
+          if (selected.has(i)) { selected.delete(i); span.classList.remove('sp-selected'); }
+          else { selected.add(i); span.classList.add('sp-selected'); }
+        };
+      }
+      tokensEl.appendChild(span);
+      return span;
+    });
+    wrap.appendChild(tokensEl);
+
+    if (!disabled) {
+      const toolbar = document.createElement('div');
+      toolbar.className = 'sp-toolbar';
+      [['subject', 'Подлежащее ⎯'], ['predicate', 'Сказуемое ═'], ['attribute', 'Определение ∿'],
+       ['object', 'Дополнение ┄'], ['adverbial', 'Обстоятельство ⋯'], ['none', 'Убрать разметку']].forEach(([role, label]) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'sp-role-btn sp-role-btn-' + role;
+        btn.textContent = label;
+        btn.onclick = () => {
+          if (selected.size === 0) return;
+          selected.forEach(i => {
+            roles[i] = role;
+            tokenSpans[i].className = 'sp-token role-' + role;
+          });
+          selected.clear();
+        };
+        toolbar.appendChild(btn);
+      });
+      wrap.appendChild(toolbar);
+      const hint = document.createElement('div');
+      hint.className = 'muted sp-hint';
+      hint.textContent = 'Выдели слово(-а) (можно несколько), затем нажми нужный член предложения.';
+      wrap.appendChild(hint);
+    } else if (locked && t.correctRoles) {
+      const revealWrap = document.createElement('div');
+      revealWrap.className = 'sp-reveal';
+      revealWrap.innerHTML = '<div class="muted" style="margin-bottom:6px">Правильный разбор:</div>';
+      const revealTokens = document.createElement('div');
+      revealTokens.className = 'sp-tokens';
+      t.tokens.forEach((tok, i) => {
+        const span = document.createElement('span');
+        span.className = 'sp-token role-' + (t.correctRoles[i] || 'none');
+        span.textContent = tok;
+        revealTokens.appendChild(span);
+      });
+      revealWrap.appendChild(revealTokens);
+      wrap.appendChild(revealWrap);
+    }
+
+    body.appendChild(wrap);
+    getAnswer = () => roles;
+  }
+
+  else if (t.type === 'word_composition') {
+    const letters = t.word.split('');
+    const savedAnswer = lastAttempt ? lastAttempt.answer : null;
+    const types = savedAnswer ? [...savedAnswer.types] : letters.map(() => 'none');
+    let zeroEnding = savedAnswer ? !!savedAnswer.zeroEnding : false;
+    const selected = new Set();
+    const wrap = document.createElement('div');
+    wrap.className = 'word-comp-wrap';
+
+    const lettersEl = document.createElement('div');
+    lettersEl.className = 'wc-letters';
+    const letterSpans = letters.map((ch, i) => {
+      const span = document.createElement('span');
+      span.className = 'wc-letter morph-' + (types[i] || 'none');
+      span.textContent = ch;
+      if (!disabled) {
+        span.onclick = () => {
+          if (selected.has(i)) { selected.delete(i); span.classList.remove('wc-selected'); }
+          else { selected.add(i); span.classList.add('wc-selected'); }
+        };
+      }
+      lettersEl.appendChild(span);
+      return span;
+    });
+    wrap.appendChild(lettersEl);
+
+    const zeroBtn = document.createElement('button');
+    zeroBtn.type = 'button';
+    zeroBtn.className = 'wc-zero-btn' + (zeroEnding ? ' active' : '');
+    zeroBtn.textContent = '□ Нулевое окончание';
+    if (!disabled) {
+      zeroBtn.onclick = () => { zeroEnding = !zeroEnding; zeroBtn.classList.toggle('active', zeroEnding); };
+    } else {
+      zeroBtn.disabled = true;
+    }
+    wrap.appendChild(zeroBtn);
+
+    if (!disabled) {
+      const toolbar = document.createElement('div');
+      toolbar.className = 'sp-toolbar';
+      [['prefix', 'Приставка'], ['root', 'Корень'], ['interfix', 'Соед. гласная'],
+       ['suffix', 'Суффикс'], ['ending', 'Окончание'], ['postfix', 'Постфикс'], ['none', 'Убрать разметку']].forEach(([type, label]) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'wc-type-btn wc-type-btn-' + type;
+        btn.textContent = label;
+        btn.onclick = () => {
+          if (selected.size === 0) return;
+          selected.forEach(i => {
+            types[i] = type;
+            letterSpans[i].className = 'wc-letter morph-' + type;
+          });
+          selected.clear();
+        };
+        toolbar.appendChild(btn);
+      });
+      wrap.appendChild(toolbar);
+      const hint = document.createElement('div');
+      hint.className = 'muted sp-hint';
+      hint.textContent = 'Выдели буквы (можно несколько), затем нажми нужную часть слова.';
+      wrap.appendChild(hint);
+    } else if (locked && t.correctTypes) {
+      const revealWrap = document.createElement('div');
+      revealWrap.className = 'sp-reveal';
+      revealWrap.innerHTML = '<div class="muted" style="margin-bottom:6px">Правильный разбор:' +
+        (t.hasZeroEnding ? ' (и нулевое окончание)' : '') + '</div>';
+      const revealLetters = document.createElement('div');
+      revealLetters.className = 'wc-letters';
+      letters.forEach((ch, i) => {
+        const span = document.createElement('span');
+        span.className = 'wc-letter morph-' + (t.correctTypes[i] || 'none');
+        span.textContent = ch;
+        revealLetters.appendChild(span);
+      });
+      revealWrap.appendChild(revealLetters);
+      wrap.appendChild(revealWrap);
+    }
+
+    body.appendChild(wrap);
+    getAnswer = () => ({ types, zeroEnding });
+  }
   if (attempts.length > 0) {
     const info = document.createElement('div');
     info.className = 'attempts-badge';
