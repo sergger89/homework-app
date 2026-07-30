@@ -222,6 +222,7 @@ function renderShopGrid(items, balance) {
         ? `<button class="submit-btn" onclick="buyItem(${item.id}, ${item.cost})" ${balance < item.cost ? 'disabled' : ''}>Купить</button>`
         : item.canManage ? `
           <div style="display:flex; flex-direction:column; gap:6px">
+            <button onclick="openEditItemDialog(${item.id})">✏️ Изменить</button>
             <button onclick="toggleItemActive(${item.id}, ${item.active ? 0 : 1})">${item.active ? 'Скрыть' : 'Показать'}</button>
             <button onclick="deleteItem(${item.id})">Удалить</button>
           </div>` : ''}
@@ -301,6 +302,70 @@ async function deleteItem(itemId) {
   if (!ok) return;
   await api(`/api/shop/items/${itemId}`, { method: 'DELETE' });
   loadItems();
+}
+
+function openEditItemDialog(itemId) {
+  const item = cachedItems.find(i => i.id === itemId);
+  if (!item) return;
+  const overlay = document.createElement('div');
+  overlay.className = 'dialog-overlay';
+  overlay.innerHTML = `
+    <div class="dialog-card" role="dialog" aria-modal="true">
+      <h3>Изменить товар</h3>
+      <div class="field-row">
+        <label class="muted">Тип
+          <select id="editCurrency">
+            <option value="gold" ${item.currency !== 'silver' ? 'selected' : ''}>Награда (золотые монеты)</option>
+            <option value="silver" ${item.currency === 'silver' ? 'selected' : ''}>Лакомство для маскота (серебряные монеты)</option>
+          </select>
+        </label>
+        <label class="muted">Иконка (эмодзи)<input type="text" id="editIcon" maxlength="4" value="${escapeHtml(item.icon || '')}" /></label>
+        <label class="muted">Название<input type="text" id="editName" value="${escapeHtml(item.name)}" required /></label>
+        <label class="muted">Описание<input type="text" id="editDescription" value="${escapeHtml(item.description || '')}" /></label>
+        <label class="muted">Цена (монет)<input type="number" id="editCost" min="1" value="${item.cost}" required /></label>
+        <label class="muted" id="editRestoreWrap" style="display:${item.currency === 'silver' ? 'block' : 'none'}">
+          Восстанавливает сытости, %
+          <input type="number" id="editRestoreAmount" min="1" max="100" value="${item.restoreAmount || 20}" />
+        </label>
+        <p class="dialog-error" id="editItemError"></p>
+      </div>
+      <div class="dialog-actions">
+        <button class="wizard-btn" id="editCancelBtn">Отмена</button>
+        <button class="wizard-btn primary" id="editSaveBtn">Сохранить</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  const close = () => document.body.removeChild(overlay);
+  overlay.querySelector('#editCancelBtn').onclick = close;
+  overlay.querySelector('#editCurrency').onchange = (e) => {
+    overlay.querySelector('#editRestoreWrap').style.display = e.target.value === 'silver' ? 'block' : 'none';
+  };
+  overlay.querySelector('#editSaveBtn').onclick = async () => {
+    const errEl = overlay.querySelector('#editItemError');
+    const name = overlay.querySelector('#editName').value.trim();
+    const description = overlay.querySelector('#editDescription').value.trim();
+    const cost = Number(overlay.querySelector('#editCost').value);
+    const icon = overlay.querySelector('#editIcon').value.trim() || '🎁';
+    const currency = overlay.querySelector('#editCurrency').value;
+    const restoreAmount = Number(overlay.querySelector('#editRestoreAmount').value);
+    if (!name) { errEl.textContent = 'Название не может быть пустым.'; return; }
+    if (!cost || cost <= 0) { errEl.textContent = 'Цена должна быть положительным числом.'; return; }
+    if (currency === 'silver' && (!restoreAmount || restoreAmount <= 0)) {
+      errEl.textContent = 'Укажите, сколько % сытости восстанавливает лакомство.'; return;
+    }
+    try {
+      await api(`/api/shop/items/${itemId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ name, description, cost, icon, currency, restoreAmount }),
+      });
+      close();
+      loadItems();
+    } catch (e) {
+      errEl.textContent = 'Не удалось сохранить изменения.';
+    }
+  };
+  overlay.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
 }
 
 document.getElementById('addItemForm')?.addEventListener('submit', async (e) => {

@@ -1227,13 +1227,25 @@ app.patch('/api/shop/items/:id', requireRole(['admin', 'parent']), (req, res) =>
   if (req.session.user.role !== 'admin' && item.created_by !== req.session.user.id) {
     return res.status(403).json({ error: 'not_owner' });
   }
-  const { name, description, cost, icon, active } = req.body || {};
-  db.prepare('UPDATE shop_items SET name=?, description=?, cost=?, icon=?, active=? WHERE id=?').run(
+  const { name, description, cost, icon, active, currency, restoreAmount } = req.body || {};
+  if (currency !== undefined && !['gold', 'silver'].includes(currency)) {
+    return res.status(400).json({ error: 'invalid_currency' });
+  }
+  const nextCurrency = currency || item.currency;
+  if (nextCurrency === 'silver') {
+    const nextRestore = restoreAmount !== undefined ? Number(restoreAmount) : item.restore_amount;
+    if (!Number.isFinite(nextRestore) || nextRestore <= 0) {
+      return res.status(400).json({ error: 'restore_amount_required_for_silver' });
+    }
+  }
+  db.prepare('UPDATE shop_items SET name=?, description=?, cost=?, icon=?, active=?, currency=?, restore_amount=? WHERE id=?').run(
     name ?? item.name,
     description !== undefined ? description : item.description,
     cost !== undefined ? Math.round(Number(cost)) : item.cost,
     icon || item.icon,
     active !== undefined ? (active ? 1 : 0) : item.active,
+    nextCurrency,
+    nextCurrency === 'silver' ? (restoreAmount !== undefined ? Math.round(Number(restoreAmount)) : item.restore_amount) : item.restore_amount,
     item.id
   );
   res.json({ ok: true });
