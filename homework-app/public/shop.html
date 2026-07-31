@@ -18,6 +18,13 @@
   <div class="container">
     <select id="childSelect" class="child-select" style="display:none"></select>
 
+    <!-- ---------- ожидающие выдачи (родитель/админ) - специально в самом начале страницы,
+         чтобы не листать вниз мимо витрины/формы добавления товара ---------- -->
+    <div id="fulfillBox" style="display:none">
+      <h3>📦 Ожидают выдачи</h3>
+      <div id="fulfillList" class="assignment-list"></div>
+    </div>
+
     <!-- ---------- маскот + голод (только у ребёнка) ---------- -->
     <div id="mascotWrap" class="mascot-wrap" style="display:none"></div>
     <div id="hungerBarWrap" class="hunger-bar-wrap" style="display:none">
@@ -68,11 +75,6 @@
         <button id="saveDecayBtn" class="submit-btn">Сохранить</button>
       </div>
       <p id="decayResult" class="muted"></p>
-    </div>
-
-    <div id="fulfillBox" style="display:none">
-      <h3 style="margin-top:24px">Ожидают выдачи</h3>
-      <div id="fulfillList" class="assignment-list"></div>
     </div>
   </div>
 <script src="/js/mascot-render.js"></script>
@@ -179,7 +181,9 @@ async function mascotGreet() {
   document.getElementById('coinBadge').textContent = `🪙 ${balance}`;
   document.getElementById('silverBadge').textContent = `🥈 ${silverBalance}`;
   const hungerPct = await loadHunger();
-  if (hungerPct < 30) {
+  if (hungerPct < 8) {
+    mascot.say(`Урчит в животе так, что аж злюсь! Скорее покорми меня 😤`, hungerMood(hungerPct));
+  } else if (hungerPct < 30) {
     mascot.say(`Ой, я проголодался! Загляни во вкладку «Покормить» 🍎`, hungerMood(hungerPct));
   } else if (balance === 0) {
     mascot.say(`Привет, ${me.user.name}! Выполняй задания, чтобы заработать монетки 🪙`, 'disappointment');

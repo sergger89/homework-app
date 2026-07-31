@@ -19,6 +19,11 @@ const MASCOT_POSE_ANCHORS = {
   pose_waving:      { canvasW: 392, canvasH: 393, cx: 53.6, faceTop: 33.8, faceBottom: 64.1, faceW: 58.2 },
   pose_shy_hopeful: { canvasW: 353, canvasH: 393, cx: 47.7, faceTop: 35.6, faceBottom: 67.4, faceW: 62.0 },
   pose_celebrating: { canvasW: 460, canvasH: 425, cx: 49.9, faceTop: 35.0, faceBottom: 65.0, faceW: 51.0 },
+  // позы покоя - для случайной смены, когда ничего не происходит
+  pose_idle_looking:    { canvasW: 402, canvasH: 531, cx: 48.4, faceTop: 29.0, faceBottom: 61.6, faceW: 65.9 },
+  pose_idle_thinking:   { canvasW: 409, canvasH: 533, cx: 47.8, faceTop: 29.3, faceBottom: 62.3, faceW: 66.3 },
+  pose_idle_swaying:    { canvasW: 392, canvasH: 512, cx: 48.6, faceTop: 28.5, faceBottom: 62.1, faceW: 64.5 },
+  pose_bored_impatient: { canvasW: 382, canvasH: 518, cx: 48.2, faceTop: 30.3, faceBottom: 62.5, faceW: 65.4 },
 };
 
 // доля от ширины КАНВАСА ПОЗЫ (не лица) и вертикальная позиция для каждого эффекта
@@ -44,7 +49,15 @@ const MASCOT_EMOTION_MAP = {
   disgust:       { pose: 'pose_neutral',      eyes: 'eyes_angry',     mouth: 'mouth_sad',         blush: null,           effect: null },
   kiss:          { pose: 'pose_shy_hopeful',  eyes: 'eyes_blink',     mouth: 'mouth_light_smile', blush: 'blush_strong', effect: 'effect_heart' },
   wink:          { pose: 'pose_neutral',      eyes: 'eyes_blink',     mouth: 'mouth_light_smile', blush: 'blush_soft',   effect: null },
-  boredom:       { pose: 'pose_neutral',      eyes: 'eyes_blink',     mouth: 'mouth_neutral',     blush: null,           effect: null },
+  boredom:       { pose: 'pose_bored_impatient', eyes: 'eyes_blink',     mouth: 'mouth_neutral',     blush: null,           effect: null },
+  // позы покоя - для ненавязчивой случайной смены, когда ничего не происходит
+  idle_looking:  { pose: 'pose_idle_looking',    eyes: 'eyes_neutral',   mouth: 'mouth_neutral',     blush: null,           effect: null },
+  idle_thinking: { pose: 'pose_idle_thinking',   eyes: 'eyes_neutral',   mouth: 'mouth_light_smile', blush: null,           effect: null },
+  idle_swaying:  { pose: 'pose_idle_swaying',    eyes: 'eyes_neutral',   mouth: 'mouth_light_smile', blush: null,           effect: null },
+  // "нейтральный" - отдельно от старых 12 эмоций: глаза ОТКРЫТЫ (eyes_neutral), в отличие
+  // от boredom (там глаза закрыты) - нужен как состояние покоя для плавающего виджета,
+  // чтобы маскот не выглядел спящим, пока ничего не происходит.
+  neutral:       { pose: 'pose_neutral',      eyes: 'eyes_neutral',   mouth: 'mouth_neutral',     blush: null,           effect: null },
 };
 // глаза, которые считаются "открытыми" - только для них имеет смысл случайное моргание
 const MASCOT_OPEN_EYES = new Set(['eyes_neutral', 'eyes_surprised', 'eyes_sad', 'eyes_angry']);
@@ -144,6 +157,7 @@ function preloadMascotLayerImages() {
   if (window.__mascotLayersPreloaded) return;
   window.__mascotLayersPreloaded = true;
   ['pose_neutral', 'pose_celebrating', 'pose_waving', 'pose_shy_hopeful',
+   'pose_idle_looking', 'pose_idle_thinking', 'pose_idle_swaying', 'pose_bored_impatient',
    'eyes_neutral', 'eyes_blink', 'eyes_happy', 'eyes_surprised', 'eyes_sad', 'eyes_angry',
    'mouth_neutral', 'mouth_talking', 'mouth_smile', 'mouth_sad', 'mouth_surprised', 'mouth_light_smile',
    'blush_soft', 'blush_strong',

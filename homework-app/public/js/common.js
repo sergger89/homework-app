@@ -116,7 +116,8 @@ function hungerMood(pct) {
   if (pct >= 70) return 'joy';
   if (pct >= 40) return 'boredom';
   if (pct >= 15) return 'disappointment';
-  return 'sadness';
+  if (pct >= 8) return 'sadness';
+  return 'anger'; // совсем "hangry" - голодный и раздражённый
 }
 
 // подгружаем все картинки маскота в фоне разок, чтобы дальше эмоции переключались без задержки
@@ -149,17 +150,63 @@ function initFloatingMascot() {
       <div class="mascot-bubble floating-mascot-bubble" id="floatingMascotBubble"></div>
       <div class="mascot-anim-stage" id="floatingMascotStage"></div>
     </div>
-    <button class="floating-mascot-toggle" id="floatingMascotToggle" aria-label="Скрыть/показать маскота" title="Скрыть/показать маскота">🦉</button>
+    <button class="floating-mascot-toggle" id="floatingMascotToggle" aria-label="Скрыть маскота" title="Скрыть маскота">
+      <span class="floating-mascot-toggle-close">✕</span>
+      <div class="mascot-anim-stage floating-mascot-toggle-face" id="floatingMascotToggleFace"></div>
+    </button>
   `;
   document.body.appendChild(wrap);
   __floatingMascotStage = document.getElementById('floatingMascotStage');
   __floatingMascotBubble = document.getElementById('floatingMascotBubble');
-  updateMascotAnimated(__floatingMascotStage, 'boredom');
+  updateMascotAnimated(__floatingMascotStage, 'neutral');
 
   document.getElementById('floatingMascotToggle').onclick = () => {
     setFloatingMascotHidden(!__floatingMascotHidden);
   };
   setFloatingMascotHidden(localStorage.getItem('mascotHidden') === '1');
+  scheduleMascotBlink();
+  scheduleMascotIdleCycle();
+}
+
+// моргать имеет смысл только там, где текущие глаза реально ОТКРЫТЫ (eyes_happy и
+// eyes_blink - уже закрытые/особые состояния сами по себе, подмена на eyes_blink там
+// не выглядит морганием, а даёт заметный скачок - см. MASCOT_OPEN_EYES в mascot-render.js)
+function scheduleMascotBlink() {
+  setTimeout(() => {
+    if (__floatingMascotStage && !__floatingMascotHidden) {
+      const expr = mascotExpressionFor(__floatingMascotStage.dataset.mascotEmotion);
+      if (MASCOT_OPEN_EYES.has(expr.eyes)) {
+        const eyesEl = __floatingMascotStage.querySelector('.mascot-l-eyes');
+        if (eyesEl) {
+          const prevSrc = eyesEl.src;
+          eyesEl.src = mascotLayerUrl('eyes_blink');
+          setTimeout(() => { eyesEl.src = prevSrc; }, 180);
+        }
+      }
+    }
+    scheduleMascotBlink();
+  }, 3000 + Math.random() * 3000);
+}
+
+// состояния, между которыми можно ненавязчиво переключаться, когда ничего не происходит -
+// не трогаем, если сейчас показана осознанная реакция (радость/грусть/злость и т.п.)
+const MASCOT_IDLE_STATES = ['neutral', 'idle_looking', 'idle_thinking', 'idle_swaying'];
+const MASCOT_RESTING_KEYS = new Set([...MASCOT_IDLE_STATES, 'boredom']);
+const MASCOT_BORED_AFTER_MS = 45000; // если совсем ничего не происходит так долго - переходим в "скуку"
+let __lastMascotActivityAt = Date.now();
+
+function scheduleMascotIdleCycle() {
+  setTimeout(() => {
+    if (__floatingMascotStage && !__floatingMascotHidden) {
+      const current = __floatingMascotStage.dataset.mascotEmotion;
+      if (MASCOT_RESTING_KEYS.has(current)) {
+        const bored = Date.now() - __lastMascotActivityAt > MASCOT_BORED_AFTER_MS;
+        const next = bored ? 'boredom' : MASCOT_IDLE_STATES[Math.floor(Math.random() * MASCOT_IDLE_STATES.length)];
+        if (next !== current) updateMascotAnimated(__floatingMascotStage, next);
+      }
+    }
+    scheduleMascotIdleCycle();
+  }, 9000 + Math.random() * 6000);
 }
 
 function setFloatingMascotHidden(hidden) {
@@ -168,15 +215,34 @@ function setFloatingMascotHidden(hidden) {
   const card = document.getElementById('floatingMascotCard');
   const toggle = document.getElementById('floatingMascotToggle');
   if (card) card.style.display = hidden ? 'none' : 'flex';
-  if (toggle) toggle.classList.toggle('hidden-state', hidden);
+  if (toggle) {
+    toggle.classList.toggle('hidden-state', hidden);
+    toggle.title = hidden ? 'Показать маскота' : 'Скрыть маскота';
+    toggle.setAttribute('aria-label', hidden ? 'Показать маскота' : 'Скрыть маскота');
+    // рендерим мини-лицо кнопки только когда оно реально становится видимым (display:block) -
+    // если рендерить раньше (пока display:none), clientWidth/clientHeight равны 0 и вся
+    // раскладка слоёв внутри съезжает.
+    if (hidden) {
+      const faceEl = document.getElementById('floatingMascotToggleFace');
+      if (faceEl) updateMascotAnimated(faceEl, 'neutral');
+    }
+  }
 }
 
+let __floatingMascotRestTimer = null;
 function showMascotToast(message, emotion, force) {
   if (!__floatingMascotStage) return; // маскота нет на этой странице (например, читалка)
   const now = Date.now();
   if (!force && now - __lastMascotToastAt < MASCOT_TOAST_COOLDOWN_MS) return;
   __lastMascotToastAt = now;
+  __lastMascotActivityAt = now;
   updateMascotAnimated(__floatingMascotStage, emotion);
+  // через некоторое время после реакции лицо само возвращается в состояние покоя
+  // (раньше оставалось в реакции навсегда, пока не случится следующая)
+  clearTimeout(__floatingMascotRestTimer);
+  __floatingMascotRestTimer = setTimeout(() => {
+    if (__floatingMascotStage) updateMascotAnimated(__floatingMascotStage, 'neutral');
+  }, 6000);
   if (__floatingMascotHidden) return; // маскот скрыт - реагирует "про себя", без пузыря
   __floatingMascotBubble.textContent = message;
   __floatingMascotBubble.classList.remove('show');
@@ -195,7 +261,7 @@ function createMascotWidget(containerEl) {
     <div class="mascot-bubble"></div>`;
   const stageEl = containerEl.querySelector('.mascot-anim-stage');
   const bubbleEl = containerEl.querySelector('.mascot-bubble');
-  updateMascotAnimated(stageEl, 'boredom');
+  updateMascotAnimated(stageEl, 'neutral');
   return {
     say(message, emotion) {
       updateMascotAnimated(stageEl, emotion);
