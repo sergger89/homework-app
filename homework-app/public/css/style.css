@@ -344,6 +344,27 @@ table.progress-table th, table.progress-table td {
 }
 .mascot-bubble.show { opacity: 1; transform: translateY(0); }
 
+/* ---------- анимированный слоистый маскот (поза+глаза+рот+румянец+эффект) ---------- */
+.mascot-anim-stage { position: relative; width: 76px; height: 92px; flex-shrink: 0; }
+.mascot-anim-stage img { position: absolute; transform: translate(-50%, -50%); pointer-events: none; }
+.mascot-anim-stage img.mascot-l-pose { top: 0; left: 50%; height: 100%; width: auto; transform: translateX(-50%); }
+.mascot-anim-stage img.mascot-l-effect,
+.mascot-anim-stage img.mascot-l-tear-left,
+.mascot-anim-stage img.mascot-l-tear-right { pointer-events: none; }
+.mascot-anim-stage img.mascot-pop { animation: mascotLayerPop 0.35s ease; }
+@keyframes mascotLayerPop {
+  0% { transform: translate(-50%, -50%) scale(0.7); opacity: 0.4; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+.mascot-anim-stage img.mascot-l-pose.mascot-pop { animation: mascotPosePop 0.35s ease; }
+@keyframes mascotPosePop {
+  0% { transform: translateX(-50%) scale(0.92); opacity: 0.4; }
+  100% { transform: translateX(-50%) scale(1); opacity: 1; }
+}
+/* меньший размер - для всплывающих уведомлений */
+.mascot-toast .mascot-anim-stage { width: 52px; height: 62px; }
+
+
 .mascot-toast {
   position: fixed; left: 14px; bottom: 14px; z-index: 1900; display: flex; align-items: center; gap: 10px;
   background: white; border-radius: 14px; padding: 8px 14px 8px 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.18);

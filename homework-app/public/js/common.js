@@ -135,31 +135,30 @@ function showMascotToast(message, emotion, force) {
   const now = Date.now();
   if (!force && now - __lastMascotToastAt < MASCOT_TOAST_COOLDOWN_MS) return;
   __lastMascotToastAt = now;
-  preloadMascotImages();
+  preloadMascotLayerImages();
   const toast = document.createElement('div');
   toast.className = 'mascot-toast';
-  toast.innerHTML = `<img src="${mascotSrc(emotion)}" alt="Маскот" /><span>${escapeHtml(message)}</span>`;
+  toast.innerHTML = `<div class="mascot-anim-stage"></div><span>${escapeHtml(message)}</span>`;
   document.body.appendChild(toast);
+  updateMascotAnimated(toast.querySelector('.mascot-anim-stage'), emotion);
   setTimeout(() => toast.classList.add('show'), 10);
   setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 2600);
 }
 
-// постоянный виджет маскота (лицо + речевой пузырь) - для страниц вроде магазина, где реакция
-// должна оставаться на экране, а не мелькать всплывающим уведомлением.
+// постоянный виджет маскота (поза+глаза+рот+румянец+эффект, + речевой пузырь) - для страниц
+// вроде магазина, где реакция должна оставаться на экране, а не мелькать всплывающим уведомлением.
 function createMascotWidget(containerEl) {
-  preloadMascotImages();
+  preloadMascotLayerImages();
   containerEl.classList.add('mascot-wrap');
-  containerEl.innerHTML = `<img class="mascot-face-img" src="${mascotSrc('joy')}" alt="Маскот" />
+  containerEl.innerHTML = `<div class="mascot-anim-stage"></div>
     <div class="mascot-bubble"></div>`;
-  const faceEl = containerEl.querySelector('.mascot-face-img');
+  const stageEl = containerEl.querySelector('.mascot-anim-stage');
   const bubbleEl = containerEl.querySelector('.mascot-bubble');
+  updateMascotAnimated(stageEl, 'boredom');
   return {
     say(message, emotion) {
-      faceEl.src = mascotSrc(emotion);
+      updateMascotAnimated(stageEl, emotion);
       bubbleEl.textContent = message;
-      faceEl.classList.remove('bounce', 'shake');
-      void faceEl.offsetWidth;
-      faceEl.classList.add(MASCOT_SAD_EMOTIONS.includes(emotion) ? 'shake' : 'bounce');
       bubbleEl.classList.remove('show');
       void bubbleEl.offsetWidth;
       bubbleEl.classList.add('show');
