@@ -131,18 +131,59 @@ function preloadMascotImages() {
 // force=true игнорирует cooldown (для по-настоящему важных событий вроде верного ответа).
 let __lastMascotToastAt = 0;
 const MASCOT_TOAST_COOLDOWN_MS = 4000;
+let __floatingMascotStage = null;
+let __floatingMascotBubble = null;
+let __floatingMascotHidden = false;
+
+// постоянный плавающий маскот в углу экрана - создаётся один раз на страницу (только для
+// роли "ребёнок", не на читалке - см. вызов в конце файла), реагирует на действия через
+// showMascotToast(), и может быть скрыт/возвращён пользователем (запоминается в localStorage).
+function initFloatingMascot() {
+  if (document.getElementById('floatingMascotWrap')) return;
+  preloadMascotLayerImages();
+  const wrap = document.createElement('div');
+  wrap.id = 'floatingMascotWrap';
+  wrap.className = 'floating-mascot-wrap';
+  wrap.innerHTML = `
+    <div class="floating-mascot-card" id="floatingMascotCard">
+      <div class="mascot-bubble floating-mascot-bubble" id="floatingMascotBubble"></div>
+      <div class="mascot-anim-stage" id="floatingMascotStage"></div>
+    </div>
+    <button class="floating-mascot-toggle" id="floatingMascotToggle" aria-label="Скрыть/показать маскота" title="Скрыть/показать маскота">🦉</button>
+  `;
+  document.body.appendChild(wrap);
+  __floatingMascotStage = document.getElementById('floatingMascotStage');
+  __floatingMascotBubble = document.getElementById('floatingMascotBubble');
+  updateMascotAnimated(__floatingMascotStage, 'boredom');
+
+  document.getElementById('floatingMascotToggle').onclick = () => {
+    setFloatingMascotHidden(!__floatingMascotHidden);
+  };
+  setFloatingMascotHidden(localStorage.getItem('mascotHidden') === '1');
+}
+
+function setFloatingMascotHidden(hidden) {
+  __floatingMascotHidden = hidden;
+  try { localStorage.setItem('mascotHidden', hidden ? '1' : '0'); } catch (e) {}
+  const card = document.getElementById('floatingMascotCard');
+  const toggle = document.getElementById('floatingMascotToggle');
+  if (card) card.style.display = hidden ? 'none' : 'flex';
+  if (toggle) toggle.classList.toggle('hidden-state', hidden);
+}
+
 function showMascotToast(message, emotion, force) {
+  if (!__floatingMascotStage) return; // маскота нет на этой странице (например, читалка)
   const now = Date.now();
   if (!force && now - __lastMascotToastAt < MASCOT_TOAST_COOLDOWN_MS) return;
   __lastMascotToastAt = now;
-  preloadMascotLayerImages();
-  const toast = document.createElement('div');
-  toast.className = 'mascot-toast';
-  toast.innerHTML = `<div class="mascot-anim-stage"></div><span>${escapeHtml(message)}</span>`;
-  document.body.appendChild(toast);
-  updateMascotAnimated(toast.querySelector('.mascot-anim-stage'), emotion);
-  setTimeout(() => toast.classList.add('show'), 10);
-  setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 2600);
+  updateMascotAnimated(__floatingMascotStage, emotion);
+  if (__floatingMascotHidden) return; // маскот скрыт - реагирует "про себя", без пузыря
+  __floatingMascotBubble.textContent = message;
+  __floatingMascotBubble.classList.remove('show');
+  void __floatingMascotBubble.offsetWidth;
+  __floatingMascotBubble.classList.add('show');
+  clearTimeout(__floatingMascotBubble._hideTimer);
+  __floatingMascotBubble._hideTimer = setTimeout(() => __floatingMascotBubble.classList.remove('show'), 3200);
 }
 
 // постоянный виджет маскота (поза+глаза+рот+румянец+эффект, + речевой пузырь) - для страниц
@@ -340,3 +381,15 @@ function avatarHtml(name, avatarPath, size) {
     color:white;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;
     font-size:${Math.round(size * 0.45)}px">${letter}</div>`;
 }
+
+// автоматически показываем постоянного плавающего маскота на всех страницах ребёнка,
+// кроме читалки (там он мешал бы чтению) - роль проверяем через /api/me, раз мы это
+// делаем один раз на загрузку страницы, а не на каждый вызов showMascotToast.
+(function () {
+  if (window.location.pathname === '/reader.html') return;
+  if (window.location.pathname === '/shop.html') return; // там уже есть свой постоянный виджет в контенте
+  if (typeof api !== 'function') return;
+  api('/api/me').then(({ user }) => {
+    if (user && user.role === 'child') initFloatingMascot();
+  }).catch(() => {});
+})();
