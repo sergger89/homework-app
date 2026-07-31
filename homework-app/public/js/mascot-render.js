@@ -12,7 +12,6 @@ const MASCOT_EYES_CONTENT_RATIO = 0.343;   // видимая ширина гла
 const MASCOT_MOUTH_CONTENT_RATIO = 0.482;  // видимая ширина рта / ширина канваса mouth_*.png
 const MASCOT_EYES_TO_FACE_RATIO = 0.60;
 const MASCOT_MOUTH_TO_FACE_RATIO = 0.40;
-const MASCOT_EYE_LEFT_PCT = 40.6, MASCOT_EYE_RIGHT_PCT = 59.6; // положение глаз внутри eyes_*.png
 
 // границы лицевого овала и соотношение сторон канваса для каждой позы (измерено)
 const MASCOT_POSE_ANCHORS = {
@@ -39,7 +38,7 @@ const MASCOT_EMOTION_MAP = {
   admiration:    { pose: 'pose_celebrating',  eyes: 'eyes_surprised', mouth: 'mouth_smile',       blush: 'blush_soft',   effect: 'effect_sparkles' },
   surprise:      { pose: 'pose_waving',       eyes: 'eyes_surprised', mouth: 'mouth_surprised',   blush: null,           effect: null },
   horror:        { pose: 'pose_shy_hopeful',  eyes: 'eyes_surprised', mouth: 'mouth_surprised',   blush: null,           effect: null },
-  sadness:       { pose: 'pose_shy_hopeful',  eyes: 'eyes_sad',       mouth: 'mouth_sad',         blush: null,           effect: 'effect_tears' },
+  sadness:       { pose: 'pose_shy_hopeful',  eyes: 'eyes_sad',       mouth: 'mouth_sad',         blush: null,           effect: null },
   disappointment:{ pose: 'pose_neutral',      eyes: 'eyes_sad',       mouth: 'mouth_sad',         blush: null,           effect: null },
   anger:         { pose: 'pose_neutral',      eyes: 'eyes_angry',     mouth: 'mouth_sad',         blush: null,           effect: 'effect_anger' },
   disgust:       { pose: 'pose_neutral',      eyes: 'eyes_angry',     mouth: 'mouth_sad',         blush: null,           effect: null },
@@ -69,8 +68,6 @@ function renderMascotAnimated(containerEl, emotionKey) {
     <img class="mascot-l-eyes" alt="" />
     <img class="mascot-l-mouth" alt="" />
     <img class="mascot-l-effect" alt="" style="display:none" />
-    <img class="mascot-l-tear-left" alt="" style="display:none" />
-    <img class="mascot-l-tear-right" alt="" style="display:none" />
   `;
   const els = {
     pose: containerEl.querySelector('.mascot-l-pose'),
@@ -78,8 +75,6 @@ function renderMascotAnimated(containerEl, emotionKey) {
     eyes: containerEl.querySelector('.mascot-l-eyes'),
     mouth: containerEl.querySelector('.mascot-l-mouth'),
     effect: containerEl.querySelector('.mascot-l-effect'),
-    tearLeft: containerEl.querySelector('.mascot-l-tear-left'),
-    tearRight: containerEl.querySelector('.mascot-l-tear-right'),
   };
   els.pose.src = mascotLayerUrl(expr.pose);
   els.eyes.src = mascotLayerUrl(expr.eyes);
@@ -121,21 +116,7 @@ function renderMascotAnimated(containerEl, emotionKey) {
     els.blush.style.width = widthPercentInStage(a.faceW / 100 * 0.55) + '%';
   }
 
-  if (expr.effect === 'effect_tears') {
-    const eyesLeftEdgeStagePx = poseLeftPx + ((a.cx - eyesVisibleWidthFrac * 100 / 2) / 100) * renderedPoseWidthPx;
-    const eyesRenderedWidthPx = eyesVisibleWidthFrac * renderedPoseWidthPx;
-    const tearY = a.faceTop + 0.648 * faceH;
-    const tearWidthPct = (eyesVisibleWidthFrac * 0.20 * renderedPoseWidthPx / stageW) * 100;
-    els.tearLeft.src = mascotLayerUrl('effect_tear_left');
-    els.tearRight.src = mascotLayerUrl('effect_tear_right');
-    [els.tearLeft, els.tearRight].forEach((el, i) => {
-      const xPct = i === 0 ? MASCOT_EYE_LEFT_PCT : MASCOT_EYE_RIGHT_PCT;
-      el.style.display = 'block';
-      el.style.left = ((eyesLeftEdgeStagePx + (xPct / 100) * eyesRenderedWidthPx) / stageW * 100) + '%';
-      el.style.top = tearY + '%';
-      el.style.width = tearWidthPct + '%';
-    });
-  } else if (expr.effect) {
+  if (expr.effect) {
     const s = MASCOT_EFFECT_SETTINGS[expr.effect];
     if (s) {
       els.effect.src = mascotLayerUrl(expr.effect);
@@ -166,6 +147,6 @@ function preloadMascotLayerImages() {
    'eyes_neutral', 'eyes_blink', 'eyes_happy', 'eyes_surprised', 'eyes_sad', 'eyes_angry',
    'mouth_neutral', 'mouth_talking', 'mouth_smile', 'mouth_sad', 'mouth_surprised', 'mouth_light_smile',
    'blush_soft', 'blush_strong',
-   'effect_sparkles', 'effect_heart', 'effect_anger', 'effect_tear_left', 'effect_tear_right',
+   'effect_sparkles', 'effect_heart', 'effect_anger',
   ].forEach((k) => { const img = new Image(); img.src = mascotLayerUrl(k); });
 }
