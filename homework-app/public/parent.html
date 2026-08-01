@@ -9,15 +9,9 @@
 <body>
   <div class="topbar">
     <h1>👨‍👩‍👧 Панель родителя</h1>
-    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center">
-      <button id="pendingReviewBtn" onclick="switchTab('pending')" style="position:relative">
-        ⏳ Ожидают проверки<span id="pendingBadge" class="notif-badge" style="display:none">0</span>
-      </button>
-      <button id="adminLink" style="display:none" onclick="window.location.href='/admin.html'">Администрирование</button>
-      <button onclick="window.location.href='/shop.html'">🛍️ Магазин</button>
-      <button onclick="window.location.href='/books.html'">📚 Книги</button>
-      <button onclick="window.location.href='/profile.html'">Профиль</button>
-      <button onclick="logout()">Выйти</button>
+    <div style="display:flex; gap:8px; align-items:center">
+      <div id="topbarNotif"></div>
+      <div id="topbarMenu"></div>
     </div>
   </div>
   <div class="container">
@@ -135,13 +129,7 @@ document.getElementById('tabChildren').onclick = () => switchTab('children');
 async function refreshPendingBadge() {
   try {
     const { items } = await api('/api/parent/pending-review');
-    const badge = document.getElementById('pendingBadge');
-    if (items.length > 0) {
-      badge.textContent = items.length;
-      badge.style.display = 'inline-flex';
-    } else {
-      badge.style.display = 'none';
-    }
+    if (pendingNotif) pendingNotif.setCount(items.length);
     return items;
   } catch (e) { return []; }
 }
@@ -188,12 +176,27 @@ async function gradeFromPending(taskId, childId, isCorrect) {
   loadPendingReview();
 }
 
+let pendingNotif = null;
+
 async function init() {
   const me = await api('/api/me');
   myRole = me.user.role;
   myId = me.user.id;
   wirePasswordToggles(document);
-  if (myRole === 'admin') document.getElementById('adminLink').style.display = 'inline-block';
+
+  const menuItems = [];
+  if (myRole === 'admin') menuItems.push({ label: 'Администрирование', icon: '⚙️', onClick: () => window.location.href = '/admin.html' });
+  menuItems.push(
+    { label: 'Магазин', icon: '🛍️', onClick: () => window.location.href = '/shop.html' },
+    { label: 'Книги', icon: '📚', onClick: () => window.location.href = '/books.html' },
+    { label: 'Профиль', icon: '👤', onClick: () => window.location.href = '/profile.html' },
+    { label: 'Выйти', icon: '🚪', onClick: () => logout(), danger: true },
+  );
+  buildTopbarMenu(document.getElementById('topbarMenu'), menuItems);
+  pendingNotif = buildTopbarNotification(document.getElementById('topbarNotif'), {
+    icon: '⏳', label: 'Ожидают проверки', onClick: () => switchTab('pending'),
+  });
+
   await reloadChildren();
   switchTab('progress');
   refreshPendingBadge();

@@ -448,6 +448,62 @@ function avatarHtml(name, avatarPath, size) {
     font-size:${Math.round(size * 0.45)}px">${letter}</div>`;
 }
 
+// ==================== Меню шапки страницы ====================
+// Собирает кнопки-переходы (Магазин/Книги/Профиль/Выйти и т.п.) в один значок ☰
+// с выпадающим списком, вместо длинного ряда отдельных кнопок в шапке.
+// items: [{ label, icon, onClick, danger }]
+function buildTopbarMenu(containerEl, items) {
+  containerEl.classList.add('topbar-menu-wrap');
+  const btn = document.createElement('button');
+  btn.className = 'topbar-menu-btn';
+  btn.setAttribute('aria-label', 'Меню');
+  btn.setAttribute('aria-haspopup', 'true');
+  btn.textContent = '☰';
+  const dropdown = document.createElement('div');
+  dropdown.className = 'topbar-menu-dropdown';
+  dropdown.hidden = true;
+  items.forEach((item) => {
+    const link = document.createElement('button');
+    link.className = 'topbar-menu-item' + (item.danger ? ' danger' : '');
+    link.textContent = (item.icon ? item.icon + ' ' : '') + item.label;
+    link.onclick = () => { dropdown.hidden = true; item.onClick(); };
+    dropdown.appendChild(link);
+  });
+  containerEl.appendChild(btn);
+  containerEl.appendChild(dropdown);
+
+  btn.onclick = (e) => {
+    e.stopPropagation();
+    dropdown.hidden = !dropdown.hidden;
+  };
+  document.addEventListener('click', (e) => {
+    if (!containerEl.contains(e.target)) dropdown.hidden = true;
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') dropdown.hidden = true;
+  });
+}
+
+// значок-уведомление (например "ожидают проверки") - отдельно от меню переходов,
+// чтобы важный счётчик был виден сразу, а не спрятан внутри выпадающего списка.
+function buildTopbarNotification(containerEl, { icon, label, onClick }) {
+  containerEl.classList.add('topbar-notif-wrap');
+  containerEl.innerHTML = `
+    <button class="topbar-notif-btn" title="${escapeHtml(label)}" aria-label="${escapeHtml(label)}">
+      ${icon}<span class="notif-badge topbar-notif-badge" style="display:none">0</span>
+    </button>
+  `;
+  const btn = containerEl.querySelector('.topbar-notif-btn');
+  const badge = containerEl.querySelector('.topbar-notif-badge');
+  btn.onclick = onClick;
+  return {
+    setCount(n) {
+      if (n > 0) { badge.textContent = n; badge.style.display = 'inline-flex'; }
+      else badge.style.display = 'none';
+    },
+  };
+}
+
 // автоматически показываем постоянного плавающего маскота на всех страницах ребёнка,
 // кроме читалки (там он мешал бы чтению) - роль проверяем через /api/me, раз мы это
 // делаем один раз на загрузку страницы, а не на каждый вызов showMascotToast.

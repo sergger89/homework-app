@@ -443,6 +443,38 @@ table.progress-table th, table.progress-table td {
   display: inline-flex; align-items: center; justify-content: center; padding: 0 4px;
 }
 
+/* ---------- выпадающее меню шапки (объединяет кнопки-переходы) ---------- */
+.topbar-menu-wrap { position: relative; }
+.topbar-menu-btn {
+  width: 40px; height: 40px; border-radius: 10px; border: 1px solid #e2e6ee; background: white;
+  font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.topbar-menu-btn:hover { background: #f4f6fb; }
+.topbar-menu-dropdown {
+  position: absolute; top: calc(100% + 8px); right: 0; background: white; border-radius: 12px;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.18); padding: 6px; min-width: 190px; z-index: 500;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.topbar-menu-item {
+  border: none; background: none; text-align: left; padding: 10px 12px; border-radius: 8px;
+  font-size: 14px; cursor: pointer; color: var(--text, #222); white-space: nowrap;
+}
+.topbar-menu-item:hover { background: #f0f2f8; }
+.topbar-menu-item.danger { color: var(--wrong); }
+
+/* ---------- значок-уведомление в шапке (например "ожидают проверки") ---------- */
+.topbar-notif-wrap { position: relative; }
+.topbar-notif-btn {
+  width: 40px; height: 40px; border-radius: 10px; border: 1px solid #e2e6ee; background: white;
+  font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  position: relative;
+}
+.topbar-notif-btn:hover { background: #f4f6fb; }
+.topbar-notif-badge { position: absolute; top: -6px; right: -6px; }
+@media (max-width: 480px) {
+  .topbar-menu-dropdown { min-width: 170px; }
+}
+
 /* ---------- компактный список последних ответов ---------- */
 .recent-list { display: flex; flex-direction: column; gap: 2px; }
 .recent-row {

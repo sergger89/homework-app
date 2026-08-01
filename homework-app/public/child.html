@@ -12,10 +12,7 @@
     <div style="display:flex; gap:8px; align-items:center">
       <span id="coinBadge" class="coin-badge">🪙 0</span>
       <span id="silverBadge" class="silver-badge">🥈 0</span>
-      <button onclick="window.location.href='/shop.html'">🛍️ Магазин</button>
-      <button onclick="window.location.href='/books.html'">📚 Книги</button>
-      <button onclick="window.location.href='/profile.html'">Профиль</button>
-      <button onclick="logout()">Выйти</button>
+      <div id="topbarMenu"></div>
     </div>
   </div>
   <div class="container">
@@ -27,6 +24,13 @@
 <script src="/js/common.js"></script>
 <script>
 requireRole('child');
+
+buildTopbarMenu(document.getElementById('topbarMenu'), [
+  { label: 'Магазин', icon: '🛍️', onClick: () => window.location.href = '/shop.html' },
+  { label: 'Книги', icon: '📚', onClick: () => window.location.href = '/books.html' },
+  { label: 'Профиль', icon: '👤', onClick: () => window.location.href = '/profile.html' },
+  { label: 'Выйти', icon: '🚪', onClick: () => logout(), danger: true },
+]);
 
 async function load() {
   const me = await api('/api/me');
