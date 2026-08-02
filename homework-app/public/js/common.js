@@ -51,7 +51,7 @@ async function requireRole(roles) {
 }
 
 function roleHome(role) {
-  if (role === 'admin') return '/admin.html';
+  if (role === 'admin') return '/parent.html'; // объединённая панель - у админа там просто больше вкладок
   if (role === 'parent') return '/parent.html';
   return '/child.html';
 }
@@ -452,36 +452,83 @@ function avatarHtml(name, avatarPath, size) {
 // Собирает кнопки-переходы (Магазин/Книги/Профиль/Выйти и т.п.) в один значок ☰
 // с выпадающим списком, вместо длинного ряда отдельных кнопок в шапке.
 // items: [{ label, icon, onClick, danger }]
+// Выезжающая панель навигации (off-canvas drawer) - мобильно-дружелюбная замена прежнему
+// маленькому выпадающему меню. Скрыта по умолчанию, выезжает по нажатию ☰ поверх контента
+// с затемнением фона - стандартный паттерн для админ-панелей/настроек с вложенной иерархией,
+// который к тому же хорошо работает на маленьких экранах (в отличие от постоянно видимого
+// сайдбара, который просто съел бы половину экрана телефона).
+// items: [{ label, icon, onClick, danger, children: [...такие же...] }, { divider: true }, ...]
 function buildTopbarMenu(containerEl, items) {
   containerEl.classList.add('topbar-menu-wrap');
   const btn = document.createElement('button');
   btn.className = 'topbar-menu-btn';
   btn.setAttribute('aria-label', 'Меню');
-  btn.setAttribute('aria-haspopup', 'true');
   btn.textContent = '☰';
-  const dropdown = document.createElement('div');
-  dropdown.className = 'topbar-menu-dropdown';
-  dropdown.hidden = true;
-  items.forEach((item) => {
-    const link = document.createElement('button');
-    link.className = 'topbar-menu-item' + (item.danger ? ' danger' : '');
-    link.textContent = (item.icon ? item.icon + ' ' : '') + item.label;
-    link.onclick = () => { dropdown.hidden = true; item.onClick(); };
-    dropdown.appendChild(link);
-  });
   containerEl.appendChild(btn);
-  containerEl.appendChild(dropdown);
 
-  btn.onclick = (e) => {
-    e.stopPropagation();
-    dropdown.hidden = !dropdown.hidden;
-  };
-  document.addEventListener('click', (e) => {
-    if (!containerEl.contains(e.target)) dropdown.hidden = true;
-  });
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') dropdown.hidden = true;
-  });
+  const overlay = document.createElement('div');
+  overlay.className = 'sidebar-overlay';
+  overlay.hidden = true;
+  const drawer = document.createElement('div');
+  drawer.className = 'sidebar-drawer';
+  drawer.hidden = true;
+  drawer.innerHTML = `
+    <div class="sidebar-drawer-header">
+      <span>Меню</span>
+      <button class="sidebar-drawer-close" aria-label="Закрыть меню">✕</button>
+    </div>
+    <nav class="sidebar-drawer-nav"></nav>
+  `;
+  document.body.appendChild(overlay);
+  document.body.appendChild(drawer);
+  const nav = drawer.querySelector('.sidebar-drawer-nav');
+
+  function openDrawer() {
+    overlay.hidden = false; drawer.hidden = false;
+    requestAnimationFrame(() => { overlay.classList.add('show'); drawer.classList.add('show'); });
+  }
+  function closeDrawer() {
+    overlay.classList.remove('show'); drawer.classList.remove('show');
+    setTimeout(() => { overlay.hidden = true; drawer.hidden = true; }, 250);
+  }
+
+  function renderItem(item) {
+    if (item.divider) {
+      const hr = document.createElement('div');
+      hr.className = 'sidebar-divider';
+      return hr;
+    }
+    if (item.children) {
+      const group = document.createElement('div');
+      group.className = 'sidebar-group';
+      const groupBtn = document.createElement('button');
+      groupBtn.className = 'sidebar-menu-item sidebar-group-toggle';
+      groupBtn.innerHTML = `<span>${item.icon ? item.icon + ' ' : ''}${escapeHtml(item.label)}</span><span class="sidebar-group-arrow">▾</span>`;
+      const childrenWrap = document.createElement('div');
+      childrenWrap.className = 'sidebar-group-children';
+      childrenWrap.hidden = true;
+      item.children.forEach((child) => childrenWrap.appendChild(renderItem(child)));
+      groupBtn.onclick = () => {
+        childrenWrap.hidden = !childrenWrap.hidden;
+        groupBtn.classList.toggle('expanded', !childrenWrap.hidden);
+      };
+      group.appendChild(groupBtn);
+      group.appendChild(childrenWrap);
+      return group;
+    }
+    const el = document.createElement('button');
+    el.className = 'sidebar-menu-item' + (item.danger ? ' danger' : '');
+    el.textContent = (item.icon ? item.icon + ' ' : '') + item.label;
+    el.onclick = () => { closeDrawer(); item.onClick(); };
+    return el;
+  }
+
+  items.forEach((item) => nav.appendChild(renderItem(item)));
+
+  btn.onclick = () => openDrawer();
+  overlay.onclick = () => closeDrawer();
+  drawer.querySelector('.sidebar-drawer-close').onclick = () => closeDrawer();
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
 }
 
 // значок-уведомление (например "ожидают проверки") - отдельно от меню переходов,

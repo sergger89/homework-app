@@ -29,6 +29,7 @@ buildTopbarMenu(document.getElementById('topbarMenu'), [
   { label: 'Магазин', icon: '🛍️', onClick: () => window.location.href = '/shop.html' },
   { label: 'Книги', icon: '📚', onClick: () => window.location.href = '/books.html' },
   { label: 'Профиль', icon: '👤', onClick: () => window.location.href = '/profile.html' },
+  { divider: true },
   { label: 'Выйти', icon: '🚪', onClick: () => logout(), danger: true },
 ]);
 

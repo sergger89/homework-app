@@ -41,7 +41,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
       return;
     }
     const role = data.user.role;
-    window.location.href = role === 'admin' ? '/admin.html' : role === 'parent' ? '/parent.html' : '/child.html';
+    window.location.href = role === 'child' ? '/child.html' : '/parent.html';
   } catch (err) {
     errorEl.textContent = 'Ошибка соединения с сервером';
   }
@@ -49,7 +49,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 
 // если уже залогинен - сразу перенаправить
 fetch('/api/me').then(r => r.json()).then(({user}) => {
-  if (user) window.location.href = user.role === 'admin' ? '/admin.html' : user.role === 'parent' ? '/parent.html' : '/child.html';
+  if (user) window.location.href = user.role === 'child' ? '/child.html' : '/parent.html';
 });
 </script>
 </body>

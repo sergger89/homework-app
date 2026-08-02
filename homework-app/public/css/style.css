@@ -191,7 +191,7 @@ input[type=text].answer-input, input[type=number].answer-input {
 }
 
 /* ---------- parent dashboard ---------- */
-.tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+.tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
 .tabs button {
   padding: 8px 16px;
   border-radius: 8px;
@@ -443,24 +443,53 @@ table.progress-table th, table.progress-table td {
   display: inline-flex; align-items: center; justify-content: center; padding: 0 4px;
 }
 
-/* ---------- выпадающее меню шапки (объединяет кнопки-переходы) ---------- */
+/* ---------- ☰ кнопка запуска панели ---------- */
 .topbar-menu-wrap { position: relative; }
 .topbar-menu-btn {
   width: 40px; height: 40px; border-radius: 10px; border: 1px solid #e2e6ee; background: white;
   font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
 }
 .topbar-menu-btn:hover { background: #f4f6fb; }
-.topbar-menu-dropdown {
-  position: absolute; top: calc(100% + 8px); right: 0; background: white; border-radius: 12px;
-  box-shadow: 0 8px 28px rgba(0,0,0,0.18); padding: 6px; min-width: 190px; z-index: 500;
-  display: flex; flex-direction: column; gap: 2px;
+
+/* ---------- выезжающая панель навигации (off-canvas drawer) ---------- */
+.sidebar-overlay {
+  position: fixed; inset: 0; background: rgba(20,20,30,0.4); z-index: 1900;
+  opacity: 0; transition: opacity 0.25s ease;
 }
-.topbar-menu-item {
-  border: none; background: none; text-align: left; padding: 10px 12px; border-radius: 8px;
-  font-size: 14px; cursor: pointer; color: var(--text, #222); white-space: nowrap;
+.sidebar-overlay.show { opacity: 1; }
+.sidebar-drawer {
+  position: fixed; top: 0; right: 0; height: 100%; height: 100dvh; width: 300px; max-width: 85vw;
+  background: white; z-index: 1901; box-shadow: -6px 0 28px rgba(0,0,0,0.22);
+  transform: translateX(100%); transition: transform 0.28s ease;
+  display: flex; flex-direction: column; overflow-y: auto;
 }
-.topbar-menu-item:hover { background: #f0f2f8; }
-.topbar-menu-item.danger { color: var(--wrong); }
+.sidebar-drawer[hidden] { display: none; }
+.sidebar-drawer.show { transform: translateX(0); }
+.sidebar-drawer-header {
+  display: flex; justify-content: space-between; align-items: center; padding: 16px 18px;
+  border-bottom: 1px solid #eef0f4; font-weight: 700; flex-shrink: 0;
+}
+.sidebar-drawer-close {
+  border: none; background: #f4f6fb; width: 32px; height: 32px; border-radius: 50%;
+  font-size: 16px; cursor: pointer;
+}
+.sidebar-drawer-nav { display: flex; flex-direction: column; padding: 8px; gap: 2px; }
+.sidebar-menu-item {
+  border: none; background: none; text-align: left; padding: 13px 14px; border-radius: 10px;
+  font-size: 15px; cursor: pointer; color: var(--text, #222); width: 100%;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.sidebar-menu-item:hover { background: #f0f2f8; }
+.sidebar-menu-item.danger { color: var(--wrong); }
+.sidebar-group-arrow { font-size: 11px; color: var(--muted); transition: transform 0.2s ease; }
+.sidebar-group-toggle.expanded .sidebar-group-arrow { transform: rotate(180deg); }
+.sidebar-group-children {
+  display: flex; flex-direction: column; gap: 2px; padding-left: 16px;
+  border-left: 2px solid #f0f2f8; margin-left: 14px;
+}
+.sidebar-group-children[hidden] { display: none; }
+.sidebar-group-children .sidebar-menu-item { font-size: 14px; }
+.sidebar-divider { height: 1px; background: #eef0f4; margin: 8px 8px; }
 
 /* ---------- значок-уведомление в шапке (например "ожидают проверки") ---------- */
 .topbar-notif-wrap { position: relative; }
@@ -472,7 +501,7 @@ table.progress-table th, table.progress-table td {
 .topbar-notif-btn:hover { background: #f4f6fb; }
 .topbar-notif-badge { position: absolute; top: -6px; right: -6px; }
 @media (max-width: 480px) {
-  .topbar-menu-dropdown { min-width: 170px; }
+  .sidebar-drawer { width: 100%; max-width: 100vw; }
 }
 
 /* ---------- компактный список последних ответов ---------- */

@@ -776,6 +776,40 @@ app.get('/api/parent/pending-review', requireRole(['admin', 'parent']), (req, re
   res.json({ items });
 });
 
+// ---------- покупки, ожидающие выдачи, по всем детям родителя/админа (для значка-уведомления) ----------
+app.get('/api/parent/pending-fulfillment', requireRole(['admin', 'parent']), (req, res) => {
+  const childrenRows =
+    req.session.user.role === 'admin'
+      ? db.prepare("SELECT id, display_name FROM users WHERE role='child'").all()
+      : db
+          .prepare(
+            `SELECT u.id, u.display_name FROM users u
+             JOIN parent_child pc ON pc.child_id = u.id WHERE pc.parent_id = ?`
+          )
+          .all(req.session.user.id);
+  const childIds = childrenRows.map((c) => c.id);
+  if (childIds.length === 0) return res.json({ items: [] });
+
+  const placeholders = childIds.map(() => '?').join(',');
+  const rows = db
+    .prepare(
+      `SELECT id, child_id, item_name_snapshot, cost_at_purchase, created_at FROM shop_purchases
+       WHERE status='pending' AND child_id IN (${placeholders})
+       ORDER BY created_at DESC`
+    )
+    .all(...childIds);
+  const childNameById = Object.fromEntries(childrenRows.map((c) => [c.id, c.display_name]));
+  const items = rows.map((r) => ({
+    purchaseId: r.id,
+    childId: r.child_id,
+    childName: childNameById[r.child_id],
+    itemName: r.item_name_snapshot,
+    cost: r.cost_at_purchase,
+    createdAt: r.created_at,
+  }));
+  res.json({ items });
+});
+
 
 // ---------- import assignment (в библиотеку; можно сразу назначить detям через childIds) ----------
 function importAssignmentHandler(req, res, assignmentBody) {
