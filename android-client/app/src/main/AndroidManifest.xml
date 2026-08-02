@@ -1,11 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!-- Камера нужна только для выбора "Сделать фото" при загрузке аватарки/обложки книги -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <!-- Явно указываем, что ARCore/AR-камера НЕ требуется - это не AR-приложение.
+         Флаг android.hardware.camera.ar иногда попадает в итоговый манифест автоматически
+         при слиянии манифестов из зависимостей (даже если сам проект его не объявляет), и
+         из-за этого приложение может показывать требование ARCore и не устанавливаться на
+         устройства без его поддержки. tools:node="replace" гарантированно перекрывает любое
+         значение, которое могло бы прийти из библиотек. -->
+    <uses-feature android:name="android.hardware.camera.ar" android:required="false" tools:node="replace" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
 
     <application
         android:allowBackup="true"

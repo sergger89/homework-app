@@ -8,8 +8,6 @@ import android.net.Uri
 import android.net.http.SslError
 import android.os.Bundle
 import android.provider.MediaStore
-import android.view.Menu
-import android.view.MenuItem
 import android.webkit.CookieManager
 import android.webkit.JavascriptInterface
 import android.webkit.SslErrorHandler
@@ -23,7 +21,6 @@ import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -76,9 +73,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        setSupportActionBar(toolbar)
-
         webView = findViewById(R.id.webView)
         swipeRefresh = findViewById(R.id.swipeRefresh)
         errorView = findViewById(R.id.errorView)
@@ -89,6 +83,14 @@ class MainActivity : AppCompatActivity() {
         setupWebView()
 
         swipeRefresh.setOnRefreshListener { webView.reload() }
+
+        // Панель инструментов убрали, чтобы не отнимать место у самой страницы (там уже есть
+        // собственная шапка с меню). Настройки сервера теперь открываются долгим нажатием на
+        // экран - редкое действие, не нужен постоянно видимый элемент интерфейса под него.
+        webView.setOnLongClickListener {
+            openSettings()
+            true
+        }
 
         // Мост, чтобы веб-страница сама могла временно отключать нативный "потяни вниз,
         // чтобы обновить" во время рисования в черновике/пролистывания книги - иначе
@@ -255,19 +257,6 @@ class MainActivity : AppCompatActivity() {
             webView.goBack()
         } else {
             super.onBackPressed()
-        }
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.main_menu, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.action_settings -> { openSettings(); true }
-            R.id.action_reload -> { webView.reload(); true }
-            else -> super.onOptionsItemSelected(item)
         }
     }
 

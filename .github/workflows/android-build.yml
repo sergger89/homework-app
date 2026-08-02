@@ -8,6 +8,10 @@ on:
       - ".github/workflows/android-build.yml"
   workflow_dispatch: {}
 
+# нужно для создания/обновления Release (GITHUB_TOKEN по умолчанию имеет только read на contents)
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -33,12 +37,33 @@ jobs:
           gradle-version: "8.9"
 
       # Debug-сборка не требует ключа подписи - подходит для установки вручную (sideload).
+      # Подписывается фиксированным debug.keystore (см. app/build.gradle.kts) - одна и та же
+      # подпись во всех сборках, чтобы новые версии ставились поверх старых без переустановки.
       - name: Build debug APK
         run: gradle assembleDebug --no-daemon
 
-      - name: Upload APK artifact
+      - name: Upload APK artifact (резервно, на случай если нужен именно этот конкретный запуск)
         uses: actions/upload-artifact@v4
         with:
           name: homework-app-client-debug
           path: android-client/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 30
+
+      # Публикуем APK в Releases репозитория - постоянная ссылка без срока годности, видна
+      # прямо на главной странице проекта справа, в отличие от Actions-артефактов (те доступны
+      # только через вкладку Actions конкретного запуска и стираются через 30 дней).
+      # Тег фиксированный ("android-latest") - каждая новая сборка ОБНОВЛЯЕТ один и тот же
+      # релиз (и заменяет файл apk), а не создаёт новый - чтобы всегда была одна понятная
+      # ссылка на актуальную версию, без накопления списка старых сборок.
+      - name: Publish to GitHub Releases (постоянная ссылка на актуальный APK)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: android-latest
+          name: "Android-клиент (последняя сборка)"
+          body: |
+            Автоматически собранный debug-APK для установки вручную (sideload).
+            Собрано из коммита ${{ github.sha }} — ${{ github.event.head_commit.message || 'ручной запуск' }}
+
+            Обновления ставятся поверх предыдущей версии без удаления (фиксированная подпись).
+          files: android-client/app/build/outputs/apk/debug/app-debug.apk
+          prerelease: true

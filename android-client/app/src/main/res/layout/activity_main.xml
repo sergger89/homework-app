@@ -4,25 +4,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/primary"
-            app:titleTextColor="@color/white"
-            app:title="@string/app_name" />
-    </com.google.android.material.appbar.AppBarLayout>
-
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeRefresh"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        android:layout_height="match_parent">
 
         <WebView
             android:id="@+id/webView"
@@ -39,8 +24,7 @@
         android:gravity="center"
         android:padding="32dp"
         android:background="@color/background"
-        android:visibility="gone"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        android:visibility="gone">
 
         <TextView
             android:layout_width="wrap_content"

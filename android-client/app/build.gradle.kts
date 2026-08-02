@@ -15,7 +15,25 @@ android {
         versionName = "1.0"
     }
 
+    // Фиксированный debug-keystore (файл debug.keystore рядом, в корне android-client/) -
+    // без него каждый CI-запуск (GitHub Actions) генерировал бы СВОЙ случайный debug-сертификат,
+    // и при попытке поставить новую сборку поверх старой (с другой подписью) Android тихо
+    // отказывает с общей ошибкой "Приложение не установлено" - помогает только полное удаление
+    // старой версии перед каждой новой установкой. С фиксированным ключом подпись всегда одна
+    // и та же, обновления ставятся поверх старых версий как обычно.
+    signingConfigs {
+        getByName("debug") {
+            storeFile = file("../debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     buildTypes {
+        debug {
+            signingConfig = signingConfigs.getByName("debug")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")

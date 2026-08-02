@@ -6,8 +6,6 @@
     <string name="settings_save">Сохранить и подключиться</string>
     <string name="settings_error_empty">Введите адрес сервера</string>
     <string name="settings_error_https">Адрес должен начинаться с https://</string>
-    <string name="menu_settings">Настройки подключения</string>
-    <string name="menu_reload">Обновить</string>
     <string name="error_title">Не удалось подключиться к серверу</string>
     <string name="error_retry">Повторить</string>
     <string name="error_open_settings">Изменить адрес сервера</string>
