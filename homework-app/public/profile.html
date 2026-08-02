@@ -29,7 +29,7 @@
       <form id="passForm" class="field-row">
         <label class="muted">Новый пароль
           <div class="password-field">
-            <input type="password" id="newPassword" required minlength="4" autocomplete="new-password" />
+            <input type="password" id="newPassword" required minlength="6" autocomplete="new-password" />
             <button type="button" class="password-toggle" data-target="newPassword" aria-label="Показать пароль">👁️</button>
           </div>
         </label>
@@ -70,8 +70,7 @@ document.getElementById('avatarInput').addEventListener('change', async (e) => {
   }
 });
 
-document.getElementById('passForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
+guardFormSubmit(document.getElementById('passForm'), async (e) => {
   const newPassword = document.getElementById('newPassword').value;
   const resultEl = document.getElementById('passResult');
   try {
@@ -81,7 +80,7 @@ document.getElementById('passForm').addEventListener('submit', async (e) => {
     if (window.__isChild) showMascotToast('Готово! Теперь это секрет 🤫', 'joy', true);
     document.getElementById('passForm').reset();
   } catch (err) {
-    resultEl.textContent = 'Не удалось сменить пароль (минимум 4 символа).';
+    resultEl.textContent = 'Не удалось сменить пароль (минимум 6 символов).';
     resultEl.style.color = 'var(--wrong)';
   }
 });

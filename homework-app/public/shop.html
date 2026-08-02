@@ -140,7 +140,7 @@ async function loadDecaySettings() {
   document.getElementById('decayResult').textContent = '';
 }
 
-async function saveDecaySettings() {
+const saveDecaySettings = guardClick(async function () {
   const resultEl = document.getElementById('decayResult');
   const decayHours = Number(document.getElementById('decayHoursInput').value);
   try {
@@ -151,7 +151,7 @@ async function saveDecaySettings() {
     resultEl.textContent = 'Не удалось сохранить (укажите положительное число часов).';
     resultEl.style.color = 'var(--wrong)';
   }
-}
+});
 
 function switchShopTab(tab) {
   shopTab = tab;
@@ -235,7 +235,7 @@ function renderShopGrid(items, balance) {
   `).join('');
 }
 
-async function buyItem(itemId, cost) {
+const buyItem = guardClick(async function (itemId, cost) {
   try {
     const res = await api('/api/shop/purchase', { method: 'POST', body: JSON.stringify({ itemId }) });
     document.getElementById('coinBadge').textContent = `🪙 ${res.balance}`;
@@ -249,7 +249,7 @@ async function buyItem(itemId, cost) {
       mascot.say('Что-то пошло не так, попробуй ещё раз.', 'sadness');
     }
   }
-}
+});
 
 // ---------------- покормить маскота (серебряные лакомства) ----------------
 async function loadFeedGrid() {
@@ -280,7 +280,7 @@ function renderFeedGrid(items, balance) {
   `).join('');
 }
 
-async function feedMascotItem(itemId) {
+const feedMascotItem = guardClick(async function (itemId) {
   try {
     const res = await api('/api/shop/purchase', { method: 'POST', body: JSON.stringify({ itemId }) });
     document.getElementById('silverBadge').textContent = `🥈 ${res.silverBalance}`;
@@ -296,18 +296,18 @@ async function feedMascotItem(itemId) {
       mascot.say('Что-то пошло не так...', 'sadness');
     }
   }
-}
+});
 
-async function toggleItemActive(itemId, active) {
+const toggleItemActive = guardClick(async function (itemId, active) {
   await api(`/api/shop/items/${itemId}`, { method: 'PATCH', body: JSON.stringify({ active: !!active }) });
   loadItems();
-}
-async function deleteItem(itemId) {
+});
+const deleteItem = guardClick(async function (itemId) {
   const ok = await showConfirmDialog('Товар пропадёт из витрины у всех детей.', { title: 'Удалить этот товар?', danger: true, confirmText: 'Удалить' });
   if (!ok) return;
   await api(`/api/shop/items/${itemId}`, { method: 'DELETE' });
   loadItems();
-}
+});
 
 function openEditItemDialog(itemId) {
   const item = cachedItems.find(i => i.id === itemId);
@@ -346,7 +346,7 @@ function openEditItemDialog(itemId) {
   overlay.querySelector('#editCurrency').onchange = (e) => {
     overlay.querySelector('#editRestoreWrap').style.display = e.target.value === 'silver' ? 'block' : 'none';
   };
-  overlay.querySelector('#editSaveBtn').onclick = async () => {
+  overlay.querySelector('#editSaveBtn').onclick = guardClick(async () => {
     const errEl = overlay.querySelector('#editItemError');
     const name = overlay.querySelector('#editName').value.trim();
     const description = overlay.querySelector('#editDescription').value.trim();
@@ -369,12 +369,11 @@ function openEditItemDialog(itemId) {
     } catch (e) {
       errEl.textContent = 'Не удалось сохранить изменения.';
     }
-  };
+  });
   overlay.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
 }
 
-document.getElementById('addItemForm')?.addEventListener('submit', async (e) => {
-  e.preventDefault();
+guardFormSubmit(document.getElementById('addItemForm'), async (e) => {
   const resultEl = document.getElementById('addItemResult');
   const name = document.getElementById('itemName').value.trim();
   const description = document.getElementById('itemDescription').value.trim();
@@ -440,10 +439,10 @@ async function loadFulfillList() {
   `).join('');
 }
 
-async function fulfillPurchase(purchaseId) {
+const fulfillPurchase = guardClick(async function (purchaseId) {
   await api(`/api/shop/purchases/${purchaseId}/fulfill`, { method: 'POST' });
   loadFulfillList();
-}
+});
 
 init();
 </script>

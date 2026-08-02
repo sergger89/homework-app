@@ -1,8 +1,17 @@
 async function api(url, opts) {
-  const res = await fetch(url, {
-    headers: opts && opts.isForm ? undefined : { 'Content-Type': 'application/json' },
-    ...opts,
-  });
+  let res;
+  try {
+    res = await fetch(url, {
+      headers: opts && opts.isForm ? undefined : { 'Content-Type': 'application/json' },
+      ...opts,
+    });
+  } catch (networkErr) {
+    // сеть оборвалась / сервер недоступен - fetch() бросает исключение ДО того, как появится
+    // какой-либо HTTP-ответ, поэтому это нужно ловить отдельно от res.ok ниже
+    const err = new Error('network_error');
+    err.data = { error: 'network_error', status: 0 };
+    throw err;
+  }
   if (res.status === 401) {
     window.location.href = '/index.html';
     throw new Error('not_authenticated');
@@ -70,6 +79,51 @@ const SUBJECT_LABELS = {
 };
 function subjectLabel(s) {
   return SUBJECT_LABELS[s] || (s ? s[0].toUpperCase() + s.slice(1) : 'Предмет');
+}
+
+// ==================== защита от двойной отправки ====================
+// Раньше это было сделано только в assignment.html вручную - кнопку можно было тапнуть
+// дважды подряд (обычное дело на touchscreen) и отправить одно и то же действие дважды
+// (например, купить товар в магазине два раза). Теперь через общие хелперы, без ручного
+// дублирования кода на каждой странице.
+
+// оборачивает submit формы - блокирует кнопку отправки на время запроса, включает обратно
+// в любом случае (успех/ошибка) через finally
+function guardFormSubmit(form, handler) {
+  if (!form) return; // форма может отсутствовать в разметке для текущей роли - молча выходим
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = form.querySelector('button[type="submit"], .submit-btn');
+    if (btn && btn.disabled) return; // запрос уже выполняется - игнорируем повторный клик
+    if (btn) btn.disabled = true;
+    try {
+      await handler(e);
+    } finally {
+      if (btn) btn.disabled = false;
+    }
+  });
+}
+
+// оборачивает обработчик отдельной кнопки (не в форме) вида onclick="doSomething(id)" -
+// использует window.event, поэтому подходит именно для инлайновых onclick-атрибутов
+// (там event доступен неявно в момент вызова), а не для addEventListener-обработчиков.
+function guardClick(asyncFn) {
+  return async function (...args) {
+    // событие приходит по-разному в зависимости от способа подключения обработчика:
+    // для inline onclick="fn()" браузер кладёт его в window.event, а для
+    // onclick = someFunction браузер передаёт его первым аргументом
+    const evt = args[0] instanceof Event ? args[0] : window.event;
+    const btn = evt?.currentTarget;
+    if (btn) {
+      if (btn.disabled) return;
+      btn.disabled = true;
+    }
+    try {
+      await asyncFn.apply(this, args);
+    } finally {
+      if (btn) btn.disabled = false;
+    }
+  };
 }
 
 function escapeHtml(str) {

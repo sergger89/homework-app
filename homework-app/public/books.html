@@ -157,8 +157,7 @@ async function deleteBook(bookId) {
   catch (e) { await showAlertDialog('Не удалось удалить (возможно, книгу загрузили не вы).'); }
 }
 
-document.getElementById('uploadForm')?.addEventListener('submit', async (e) => {
-  e.preventDefault();
+guardFormSubmit(document.getElementById('uploadForm'), async (e) => {
   const resultEl = document.getElementById('uploadResult');
   const fd = new FormData();
   fd.append('title', document.getElementById('bookTitle').value.trim());

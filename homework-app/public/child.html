@@ -56,8 +56,9 @@ async function load() {
     document.getElementById('silverBadge').textContent = `🥈 ${silverBalance}`;
   });
 
-  const { assignments } = await api('/api/assignments');
   const list = document.getElementById('list');
+  list.innerHTML = loadingHtml();
+  const { assignments } = await api('/api/assignments');
   list.innerHTML = '';
   if (assignments.length === 0) {
     list.innerHTML = '<p class="muted">Пока нет заданий. Загляни позже 🙂</p>';

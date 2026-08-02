@@ -83,7 +83,7 @@
         <label class="muted">Логин<input type="text" id="newChildUsername" required /></label>
         <label class="muted">Пароль
           <div class="password-field">
-            <input type="password" id="newChildPassword" required autocomplete="new-password" />
+            <input type="password" id="newChildPassword" required minlength="6" autocomplete="new-password" />
             <button type="button" class="password-toggle" data-target="newChildPassword" aria-label="Показать пароль">👁️</button>
           </div>
         </label>
@@ -112,7 +112,7 @@
         <label class="muted">Логин<input type="text" id="newUsername" required /></label>
         <label class="muted">Пароль
           <div class="password-field">
-            <input type="password" id="newPassword" required autocomplete="new-password" />
+            <input type="password" id="newPassword" required minlength="6" autocomplete="new-password" />
             <button type="button" class="password-toggle" data-target="newPassword" aria-label="Показать пароль">👁️</button>
           </div>
         </label>
@@ -764,8 +764,7 @@ function renderChildrenList() {
     </div>`).join('') || '<p class="muted">Пока нет ни одного ребёнка.</p>';
 }
 
-document.getElementById('addChildForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
+guardFormSubmit(document.getElementById('addChildForm'), async (e) => {
   const name = document.getElementById('newChildName').value.trim();
   const username = document.getElementById('newChildUsername').value.trim();
   const password = document.getElementById('newChildPassword').value;
@@ -778,7 +777,9 @@ document.getElementById('addChildForm').addEventListener('submit', async (e) => 
     await reloadChildren();
     renderChildrenList();
   } catch (e) {
-    resultEl.textContent = e.data?.error === 'username_taken' ? 'Такой логин уже занят.' : 'Не удалось создать аккаунт.';
+    resultEl.textContent = e.data?.error === 'username_taken' ? 'Такой логин уже занят.'
+      : e.data?.error === 'password_too_short' ? 'Пароль слишком короткий (минимум 6 символов).'
+      : 'Не удалось создать аккаунт.';
     resultEl.style.color = 'var(--wrong)';
   }
 });
@@ -825,7 +826,7 @@ function renderUsers() {
   `;
 }
 
-async function changeName(id, currentName) {
+const changeName = guardClick(async function (id, currentName) {
   const newName = await showTextInputDialog('Новое отображаемое имя', currentName);
   if (!newName) return;
   try {
@@ -835,9 +836,9 @@ async function changeName(id, currentName) {
   } catch (e) {
     await showAlertDialog('Не удалось изменить имя.');
   }
-}
+});
 
-async function changeRole(id, role, name) {
+const changeRole = guardClick(async function (id, role, name) {
   const ok = await showConfirmDialog(`Сменить роль пользователя «${name}» на «${ROLE_LABELS[role]}»?`, { title: 'Смена роли' });
   if (!ok) { await loadAllUsers(); renderUsers(); return; }
   try {
@@ -848,25 +849,25 @@ async function changeRole(id, role, name) {
     await showAlertDialog(e.data?.error === 'cannot_demote_last_admin' ? 'Нельзя разжаловать последнего администратора.' : 'Не удалось сменить роль.');
     await loadAllUsers(); renderUsers();
   }
-}
+});
 
-async function resetUserPassword(id, name) {
+const resetUserPassword = guardClick(async function (id, name) {
   const newPassword = await showPasswordDialog(`Новый пароль для «${name}»`);
   if (!newPassword) return;
   try {
     await api(`/api/admin/users/${id}/password`, { method: 'POST', body: JSON.stringify({ newPassword }) });
     await showAlertDialog('Пароль изменён.');
   } catch (e) {
-    await showAlertDialog('Не удалось сменить пароль (минимум 4 символа).');
+    await showAlertDialog('Не удалось сменить пароль (минимум 6 символов).');
   }
-}
+});
 
-async function deleteUser(id, name) {
+const deleteUser = guardClick(async function (id, name) {
   const ok = await showConfirmDialog(`Удалить аккаунт «${name}»? Это действие необратимо.`, { danger: true, confirmText: 'Удалить' });
   if (!ok) return;
   try { await api(`/api/admin/users/${id}`, { method: 'DELETE' }); await loadAllUsers(); renderUsers(); }
   catch (e) { await showAlertDialog(e.data?.error === 'cannot_delete_last_admin' ? 'Нельзя удалить последнего администратора.' : 'Не удалось удалить.'); }
-}
+});
 
 function fillParentPicker() {
   const roleSel = document.getElementById('newRole');
@@ -878,8 +879,7 @@ function fillParentPicker() {
   roleSel.onchange = upd; upd();
 }
 
-document.getElementById('createUserForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
+guardFormSubmit(document.getElementById('createUserForm'), async (e) => {
   const role = document.getElementById('newRole').value;
   const displayName = document.getElementById('newDisplayName').value.trim();
   const username = document.getElementById('newUsername').value.trim();
@@ -893,7 +893,9 @@ document.getElementById('createUserForm').addEventListener('submit', async (e) =
     document.getElementById('createUserForm').reset();
     await loadAllUsers();
   } catch (e) {
-    resultEl.textContent = e.data?.error === 'username_taken' ? 'Такой логин уже занят.' : 'Не удалось создать аккаунт.';
+    resultEl.textContent = e.data?.error === 'username_taken' ? 'Такой логин уже занят.'
+      : e.data?.error === 'password_too_short' ? 'Пароль слишком короткий (минимум 6 символов).'
+      : 'Не удалось создать аккаунт.';
     resultEl.style.color = 'var(--wrong)';
   }
 });
@@ -916,13 +918,13 @@ function renderAccessMatrix() {
   el.innerHTML = html + '</table>';
 }
 
-async function toggleAccess(parentId, childId, granted) {
+const toggleAccess = guardClick(async function (parentId, childId, granted) {
   try {
     if (granted) await api('/api/admin/links', { method: 'POST', body: JSON.stringify({ parentId, childId }) });
     else await api('/api/admin/links', { method: 'DELETE', body: JSON.stringify({ parentId, childId }) });
     await loadAllUsers();
   } catch (e) { await showAlertDialog('Не удалось изменить доступ.'); await loadAllUsers(); renderAccessMatrix(); }
-}
+});
 
 async function loadFavicon() {
   const { faviconUrl } = await api('/api/settings');

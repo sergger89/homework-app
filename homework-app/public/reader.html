@@ -18,6 +18,8 @@
   }
   .reader-tab-btn.active { background: var(--primary); color: white; }
   #viewer { position: absolute; top: 56px; bottom: 56px; left: 0; right: 0; }
+  #viewerLoading { background: white; z-index: 4; }
+  body.reader-dark #viewerLoading { background: #14141f; color: #e4e6eb; }
   .reader-footer {
     position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #eef1f8;
     display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; gap: 10px;
@@ -129,6 +131,9 @@
   </div>
 
   <div id="viewer"></div>
+  <div id="viewerLoading" class="loading-state" style="position:absolute; top:56px; bottom:56px; left:0; right:0; display:flex; align-items:center; justify-content:center">
+    <span class="spinner" aria-hidden="true"></span>Открываем книгу...
+  </div>
   <div id="notesPanel" style="display:none"></div>
 
   <div id="selectionBar">
@@ -191,7 +196,9 @@ async function init() {
 
   const startCfi = book.progress?.location || undefined;
   lastRealCfi = startCfi;
-  rendition.display(startCfi);
+  rendition.display(startCfi).then(() => {
+    document.getElementById('viewerLoading').style.display = 'none';
+  });
 
   bookObj.ready.then(() => bookObj.locations.generate(1000)).then(async () => {
     rendition.on('relocated', (location) => {
@@ -291,7 +298,7 @@ document.querySelectorAll('.sel-color-btn').forEach(btn => {
 document.getElementById('cancelSelectionBtn').onclick = () => {
   document.getElementById('selectionBar').style.display = 'none';
 };
-document.getElementById('saveNoteBtn').onclick = async () => {
+document.getElementById('saveNoteBtn').onclick = guardClick(async () => {
   if (!currentCfiRange) return;
   const comment = document.getElementById('noteCommentInput').value.trim();
   try {
@@ -305,7 +312,7 @@ document.getElementById('saveNoteBtn').onclick = async () => {
   } catch (e) {
     await showAlertDialog('Не удалось сохранить заметку.');
   }
-};
+});
 
 function applyHighlight(cfiRange, color, noteId) {
   try {
@@ -405,6 +412,11 @@ function applyReaderPrefs() {
 document.getElementById('readerSettingsBtn').onclick = () => {
   const panel = document.getElementById('readerSettingsPanel');
   panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+  // оба закреплены в верхней части экрана и перекрывали бы друг друга, если открыть
+  // настройки, пока ещё виден баннер "продолжить чтение" - баннер своё дело уже сделал
+  if (panel.style.display === 'block') {
+    document.getElementById('returnBanner').style.display = 'none';
+  }
 };
 document.querySelectorAll('.reader-theme-btn').forEach(btn => {
   btn.onclick = () => {

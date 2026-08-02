@@ -23,8 +23,7 @@
 <script src="/js/mascot-render.js"></script>
 <script src="/js/common.js"></script>
 <script>
-document.getElementById('loginForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
+guardFormSubmit(document.getElementById('loginForm'), async (e) => {
   const username = document.getElementById('username').value.trim();
   const password = document.getElementById('password').value;
   const errorEl = document.getElementById('error');
