@@ -122,14 +122,22 @@ function openScratchpad(taskId, promptText) {
 
     canvas.style.touchAction = 'none';
     canvas.addEventListener('pointerdown', (e) => {
+      // Palm rejection: пока идёт штрих пером (Apple Pencil и т.п., pointerType === 'pen'),
+      // игнорируем любые новые touch-касания - иначе ладонь, естественно лежащая на экране
+      // во время письма стилусом, либо обрывала бы текущий штрих (через pointerup/leave
+      // от касания ладонью), либо сбивала бы его собственными точками. Если сейчас пером
+      // никто не рисует - палец работает как обычно (например, на устройстве без стилуса).
+      if (drawing && drawing.pointerType === 'pen' && e.pointerType !== 'pen') return;
       e.preventDefault();
       setNativeDrawingActive(true);
       canvas.setPointerCapture(e.pointerId);
-      drawing = { tool: currentTool, color: currentColor, points: [pointerPos(e)] };
+      drawing = { tool: currentTool, color: currentColor, points: [pointerPos(e)], pointerId: e.pointerId, pointerType: e.pointerType };
       redoStack = [];
     });
     canvas.addEventListener('pointermove', (e) => {
-      if (!drawing) return;
+      // события от "чужого" указателя (например, ладонь во время письма пером) не должны
+      // влиять на текущий штрих - сверяем именно тот pointerId, что начал штрих
+      if (!drawing || e.pointerId !== drawing.pointerId) return;
       e.preventDefault();
       drawing.points.push(pointerPos(e));
       redraw();
@@ -141,7 +149,10 @@ function openScratchpad(taskId, promptText) {
     // Chrome/Android) всё равно триггерят "потяни вниз, чтобы обновить" на резком
     // вертикальном движении - гасим нативный touchmove на холсте явно.
     canvas.addEventListener('touchmove', (e) => { if (drawing) e.preventDefault(); }, { passive: false });
-    function endStroke() {
+    function endStroke(e) {
+      // так же, как и в pointermove - "чужое" касание (например, ладонь) не должно
+      // преждевременно завершать штрих, который реально ведёт перо
+      if (drawing && e && e.pointerId !== undefined && e.pointerId !== drawing.pointerId) return;
       setNativeDrawingActive(false);
       if (!drawing) return;
       if (drawing.points.length > 1) strokes.push(drawing);
